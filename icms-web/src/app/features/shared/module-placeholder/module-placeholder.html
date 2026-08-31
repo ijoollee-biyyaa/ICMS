@@ -1,0 +1,13 @@
+<div class="mx-auto max-w-lg rounded-2xl border border-neutral-200 bg-white p-10 text-center shadow-sm">
+  <mat-icon class="mb-4 text-5xl text-brand">{{ icon() }}</mat-icon>
+  <h1 class="mb-2 text-2xl font-bold text-neutral-800">{{ title() }}</h1>
+  <p class="mb-6 text-neutral-500">{{ description() }}</p>
+  @if (backLink()) {
+    <a
+      [routerLink]="backLink()"
+      class="inline-block rounded-full bg-brand px-6 py-2 font-semibold text-white transition hover:bg-brand-strong"
+    >
+      Back to Dashboard
+    </a>
+  }
+</div>

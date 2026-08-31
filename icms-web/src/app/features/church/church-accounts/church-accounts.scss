@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+mat-table,
+.mat-mdc-table {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-header-row,
+:host ::ng-deep .mat-mdc-row {
+  display: flex;
+  width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-header-cell.mat-column-name,
+:host ::ng-deep .mat-mdc-cell.mat-column-name {
+  flex: 2.2 1 0;
+  min-width: 0;
+}
+
+:host ::ng-deep .mat-mdc-header-cell.mat-column-email,
+:host ::ng-deep .mat-mdc-cell.mat-column-email {
+  flex: 1.6 1 0;
+  min-width: 0;
+}
+
+:host ::ng-deep .mat-mdc-header-cell.mat-column-position,
+:host ::ng-deep .mat-mdc-cell.mat-column-position {
+  flex: 1.2 1 0;
+  min-width: 0;
+}
+
+:host ::ng-deep .mat-mdc-header-cell.mat-column-status,
+:host ::ng-deep .mat-mdc-cell.mat-column-status {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+:host ::ng-deep .mat-mdc-header-cell.mat-column-actions,
+:host ::ng-deep .mat-mdc-cell.mat-column-actions {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-end;
+  text-align: right;
+}

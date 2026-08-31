@@ -1,0 +1,52 @@
+<div class="flex h-screen">
+  <aside class="flex w-64 flex-col border-r border-neutral-200 bg-white">
+    <a routerLink="/member" class="flex items-center gap-3 border-b border-neutral-100 px-5 py-4">
+      <img src="/brand/efgbc.webp" alt="EFGBC logo" class="h-10 w-10 rounded-full" />
+      <div class="leading-tight">
+        <p class="text-sm font-bold text-brand">Member Area</p>
+        <p class="text-[11px] text-brand-blue">EFGBC</p>
+      </div>
+    </a>
+
+    <nav class="flex-1 overflow-y-auto py-3">
+      @for (item of nav(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-brand text-white"
+          class="mx-2 mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+        >
+          <mat-icon class="text-lg">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="flex items-center justify-between border-t border-neutral-100 px-5 py-4">
+      <div>
+        <p class="text-xs font-medium text-neutral-600">
+          {{ currentUser()?.displayName ?? 'Member' }}
+        </p>
+        <p class="text-[11px] text-neutral-400">{{ currentUser()?.role ?? 'Guest' }}</p>
+      </div>
+      <button
+        type="button"
+        mat-icon-button
+        aria-label="Sign out"
+        title="Sign out"
+        (click)="signOut()"
+      >
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </aside>
+
+  <div class="flex flex-1 flex-col overflow-hidden">
+    <header class="flex items-center justify-between border-b border-neutral-200 bg-white px-6 py-3">
+      <h1 class="text-lg font-semibold text-neutral-800">My Membership</h1>
+    </header>
+
+    <main class="flex-1 overflow-y-auto bg-neutral-50 p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>

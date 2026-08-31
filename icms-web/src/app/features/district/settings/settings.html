@@ -1,0 +1,156 @@
+<div class="mb-8">
+  <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue">District Office</p>
+  <h1 class="mt-1 text-2xl font-extrabold text-neutral-800">Settings</h1>
+  <p class="mt-1 text-sm text-neutral-500">
+    Configure how the district office behaves, notifies and protects its data.
+  </p>
+</div>
+
+<div class="flex flex-col gap-6 lg:flex-row">
+  <nav class="flex shrink-0 gap-2 overflow-x-auto lg:w-56 lg:flex-col">
+    @for (item of sections; track item.id) {
+      <button
+        (click)="setSection(item.id)"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition"
+        [class.bg-gradient-to-r]="active() === item.id"
+        [class.from-brand]="active() === item.id"
+        [class.to-brand-strong]="active() === item.id"
+        [class.text-white]="active() === item.id"
+        [class.text-neutral-600]="active() !== item.id"
+        [class.hover:bg-neutral-100]="active() !== item.id"
+      >
+        <mat-icon class="text-lg">{{ item.icon }}</mat-icon>
+        {{ item.label }}
+      </button>
+    }
+  </nav>
+
+  <div class="flex-1 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+    @switch (active()) {
+      @case ('general') {
+        <h2 class="text-lg font-bold text-neutral-800">General</h2>
+        <p class="mt-1 text-sm text-neutral-500">Core details of the district record.</p>
+
+        @if (store.error()) {
+          <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+            {{ store.error() }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="save()" class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="block">
+            <span class="mb-1 block text-xs font-semibold uppercase tracking-wider text-neutral-400">District name</span>
+            <input
+              formControlName="name"
+              class="w-full rounded-xl border border-neutral-200 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <span class="mt-1 block text-xs text-red-600">Name is required.</span>
+            }
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-semibold uppercase tracking-wider text-neutral-400">Code</span>
+            <input
+              formControlName="code"
+              class="w-full rounded-xl border border-neutral-200 px-4 py-2.5 font-mono text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+            />
+            @if (form.controls.code.touched && form.controls.code.invalid) {
+              <span class="mt-1 block text-xs text-red-600">Code is required.</span>
+            }
+          </label>
+          <label class="block md:col-span-2">
+            <span class="mb-1 block text-xs font-semibold uppercase tracking-wider text-neutral-400">Address</span>
+            <textarea
+              formControlName="address"
+              rows="2"
+              class="w-full rounded-xl border border-neutral-200 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+            ></textarea>
+          </label>
+
+          <div class="mt-2 flex justify-end gap-3 md:col-span-2">
+            <button
+              type="submit"
+              [disabled]="form.invalid || store.isSaving()"
+              class="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong disabled:opacity-60"
+            >
+              {{ store.isSaving() ? 'Saving…' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      @case ('notifications') {
+        <h2 class="text-lg font-bold text-neutral-800">Notifications</h2>
+        <p class="mt-1 text-sm text-neutral-500">Choose what the district office emails and alerts about.</p>
+
+        <div class="mt-6 divide-y divide-neutral-100">
+          <div class="flex items-center justify-between py-4">
+            <div>
+              <p class="font-semibold text-neutral-800">Payroll changes</p>
+              <p class="text-sm text-neutral-500">Alert me when salaries or paid-from badges change.</p>
+            </div>
+            <mat-slide-toggle
+              [ngModel]="notifyPayroll()"
+              (ngModelChange)="notifyPayroll.set($event)"
+            />
+          </div>
+          <div class="flex items-center justify-between py-4">
+            <div>
+              <p class="font-semibold text-neutral-800">Monthly reports</p>
+              <p class="text-sm text-neutral-500">Email the district report on the first of every month.</p>
+            </div>
+            <mat-slide-toggle
+              [ngModel]="notifyReports()"
+              (ngModelChange)="notifyReports.set($event)"
+            />
+          </div>
+          <div class="flex items-center justify-between py-4">
+            <div>
+              <p class="font-semibold text-neutral-800">New member joins</p>
+              <p class="text-sm text-neutral-500">Notify when a member registers in any church.</p>
+            </div>
+            <mat-slide-toggle
+              [ngModel]="notifyMemberJoin()"
+              (ngModelChange)="notifyMemberJoin.set($event)"
+            />
+          </div>
+        </div>
+      }
+
+      @case ('security') {
+        <h2 class="text-lg font-bold text-neutral-800">Security</h2>
+        <p class="mt-1 text-sm text-neutral-500">Protect the district office and its people.</p>
+
+        <div class="mt-6 divide-y divide-neutral-100">
+          <div class="flex items-center justify-between py-4">
+            <div>
+              <p class="font-semibold text-neutral-800">Two-factor authentication</p>
+              <p class="text-sm text-neutral-500">Require a second factor for all district staff.</p>
+            </div>
+            <mat-slide-toggle
+              [ngModel]="twoFactor()"
+              (ngModelChange)="twoFactor.set($event)"
+            />
+          </div>
+          <div class="flex items-center justify-between py-4">
+            <div>
+              <p class="font-semibold text-neutral-800">Idle session timeout</p>
+              <p class="text-sm text-neutral-500">Sign staff out after 15 minutes of inactivity.</p>
+            </div>
+            <mat-slide-toggle
+              [ngModel]="sessionTimeout()"
+              (ngModelChange)="sessionTimeout.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
+          <p class="text-sm font-semibold text-red-700">Danger zone</p>
+          <p class="mt-1 text-xs text-red-600">
+            Account and identity features are pending the backend identity module.
+          </p>
+        </div>
+      }
+    }
+  </div>
+</div>

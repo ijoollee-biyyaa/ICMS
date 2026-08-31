@@ -1,0 +1,440 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue">
+        My Church · Office
+      </p>
+      <h2 class="text-xl font-semibold text-neutral-800">
+        Departments
+        <span
+          class="ml-2 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-bold text-brand"
+        >
+          {{ counts().total }}
+        </span>
+      </h2>
+      <p class="mt-1 text-sm text-neutral-500">
+        Structured office units — heads must be employees of this church.
+      </p>
+    </div>
+    <button
+      (click)="openCreate()"
+      class="flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 hover:shadow-lg"
+    >
+      <mat-icon class="!h-4 !w-4 !text-[16px]">add</mat-icon>
+      Add Department
+    </button>
+  </header>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
+          <mat-icon>account_tree</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Departments</p>
+          <p class="text-2xl font-bold text-neutral-800">{{ counts().total }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+          <mat-icon>local_church</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Spiritual</p>
+          <p class="text-2xl font-bold text-indigo-600">{{ counts().spiritual }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+          <mat-icon>account_box</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Administrative</p>
+          <p class="text-2xl font-bold text-slate-600">{{ counts().administrative }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Assignments</p>
+          <p class="text-2xl font-bold text-teal-600">{{ counts().staff }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+          <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
+        </div>
+        <p class="text-sm text-red-700">{{ error() }}</p>
+      </div>
+      <button mat-icon-button (click)="error.set('')" aria-label="Dismiss error">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Search -->
+  <div class="relative">
+    <mat-icon class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">search</mat-icon>
+    <input
+      type="search"
+      [value]="query()"
+      (input)="onSearch($event)"
+      placeholder="Search departments…"
+      class="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-12 pr-4 text-sm shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+        <div class="h-36 animate-pulse rounded-2xl bg-neutral-200/60"></div>
+      }
+    </div>
+  } @else if (visible().length === 0) {
+    <div
+      class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white/50 px-6 py-16 text-center"
+    >
+      <mat-icon class="text-5xl text-neutral-300">account_tree</mat-icon>
+      <h3 class="mt-4 font-semibold text-neutral-700">
+        {{ query() ? 'No departments match your search' : 'No departments yet' }}
+      </h3>
+      <p class="mt-1 max-w-sm text-sm text-neutral-500">
+        Create the first office unit, e.g. Finance or Media, and assign its head.
+      </p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      @for (department of visible(); track department.id) {
+        <div
+          class="flex cursor-pointer flex-col rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:border-brand/40 hover:shadow-md"
+          (click)="openManage(department)"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue text-white">
+              <mat-icon>account_tree</mat-icon>
+            </div>
+            <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold" [class]="typeChip(department.type)">
+              {{ department.type }}
+            </span>
+          </div>
+          <h3 class="mt-3 font-semibold text-neutral-800">{{ department.name }}</h3>
+          <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+            <span class="flex items-center gap-1">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">group</mat-icon>
+              {{ department.employeeCount }}
+              {{ department.employeeCount === 1 ? 'member' : 'members' }}
+            </span>
+            @if (department.headEmployeeName) {
+              <span class="text-neutral-400">·</span>
+              <span class="flex items-center gap-1">
+                <mat-icon class="!h-3.5 !w-3.5 !text-[14px] text-brand">star</mat-icon>
+                {{ department.headEmployeeName }}
+              </span>
+            }
+          </div>
+          <div class="mt-auto flex items-center justify-between pt-4 opacity-0 transition group-hover:opacity-100">
+            <span class="text-xs font-medium text-brand">Manage members →</span>
+            <div class="flex items-center gap-0" (click)="$event.stopPropagation()">
+              <button mat-icon-button (click)="openEdit(department)" class="text-neutral-500 hover:text-brand" aria-label="Edit department">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="askDelete(department)" class="text-neutral-500 hover:text-red-600" aria-label="Delete department">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create / edit modal -->
+@if (showForm()) {
+  <div
+    class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-sm sm:py-10"
+    (click)="!saving() && closeForm()"
+  >
+    <div
+      class="my-auto w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="relative overflow-hidden bg-gradient-to-br from-brand via-brand-strong to-brand-blue px-6 py-5 text-white"
+      >
+        <div class="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="relative flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold">
+              {{ editing() ? 'Edit department' : 'Add a department' }}
+            </h2>
+            <p class="mt-0.5 text-sm text-white/80">
+              The head must be an employee of this church.
+            </p>
+          </div>
+          <button mat-icon-button class="!text-white" (click)="closeForm()" [disabled]="saving()" aria-label="Close">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-brand/5 via-white to-brand-blue/5 p-6">
+        @if (error()) {
+          <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <mat-icon class="text-red-500">error_outline</mat-icon>
+            <p class="text-sm text-red-700">{{ error() }}</p>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Department name</mat-label>
+            <input matInput formControlName="name" placeholder="Finance" maxlength="100" autocomplete="off" />
+            @if (form.controls.name.hasError('required')) {
+              <mat-error>Name is required.</mat-error>
+            } @else if (form.controls.name.hasError('server')) {
+              <mat-error>{{ form.controls.name.getError('server') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              @for (type of TYPES; track type) {
+                <mat-option [value]="type">{{ type }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.type.hasError('server')) {
+              <mat-error>{{ form.controls.type.getError('server') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Head (employee)</mat-label>
+            <mat-select formControlName="headEmployeeId">
+              <mat-option [value]="''">— No head —</mat-option>
+              @for (employee of employees(); track employee.id) {
+                <mat-option [value]="employee.id">{{ employee.memberName }} ({{ employee.position }})</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Optional — you can also appoint a head from the member list.</mat-hint>
+            @if (form.controls.headEmployeeId.hasError('server')) {
+              <mat-error>{{ form.controls.headEmployeeId.getError('server') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              class="rounded-full border border-neutral-200 px-6 py-2.5 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-50"
+              (click)="closeForm()"
+              [disabled]="saving()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              [disabled]="form.invalid || saving()"
+              class="rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
+            >
+              {{ saving() ? 'Saving…' : editing() ? 'Save changes' : 'Create department' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Manage members modal -->
+@if (managing(); as department) {
+  <div
+    class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-sm sm:py-10"
+    (click)="!assigning() && closeManage(true)"
+  >
+    <div
+      class="my-auto w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="relative overflow-hidden bg-gradient-to-br from-brand via-brand-strong to-brand-blue px-6 py-5 text-white"
+      >
+        <div class="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="relative flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold">{{ department.name }}</h2>
+            <p class="mt-0.5 text-sm text-white/80">
+              {{ department.type }} · {{ members().length }} assigned
+              @if (department.headEmployeeName) {
+                · Head: {{ department.headEmployeeName }}
+              }
+            </p>
+          </div>
+          <button mat-icon-button class="!text-white" (click)="closeManage(true)" [disabled]="assigning()" aria-label="Close">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-brand/5 via-white to-brand-blue/5 p-6">
+        @if (error()) {
+          <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <mat-icon class="text-red-500">error_outline</mat-icon>
+            <p class="text-sm text-red-700">{{ error() }}</p>
+          </div>
+        }
+
+        <!-- Assign form -->
+        <form [formGroup]="assignForm" (ngSubmit)="submitAssign()" class="mb-5 rounded-2xl border border-neutral-200 bg-white/70 p-4">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto]">
+            <mat-form-field appearance="outline">
+              <mat-label>Employee</mat-label>
+              <mat-select formControlName="employeeId">
+                @for (employee of unassigned(); track employee.id) {
+                  <mat-option [value]="employee.id">{{ employee.memberName }} ({{ employee.position }})</mat-option>
+                }
+              </mat-select>
+              @if (assignForm.controls.employeeId.hasError('required')) {
+                <mat-error>Choose an employee.</mat-error>
+              } @else if (assignForm.controls.employeeId.hasError('server')) {
+                <mat-error>{{ assignForm.controls.employeeId.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Role</mat-label>
+              <mat-select formControlName="role">
+                @for (role of ROLES; track role) {
+                  <mat-option [value]="role">{{ role }}</mat-option>
+                }
+              </mat-select>
+              @if (assignForm.controls.role.hasError('server')) {
+                <mat-error>{{ assignForm.controls.role.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <button
+              type="submit"
+              [disabled]="assignForm.invalid || assigning() || unassigned().length === 0"
+              class="self-center rounded-full bg-gradient-to-r from-brand to-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
+            >
+              {{ assigning() ? 'Adding…' : 'Add' }}
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-neutral-400">
+            Assigning as <strong class="font-semibold">Head</strong> also makes them the department head.
+          </p>
+        </form>
+
+        @if (membersLoading()) {
+          <div class="space-y-2">
+            @for (i of [0, 1, 2]; track i) {
+              <div class="h-14 animate-pulse rounded-xl bg-neutral-200/60"></div>
+            }
+          </div>
+        } @else if (members().length === 0) {
+          <div
+            class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white/50 px-6 py-10 text-center"
+          >
+            <mat-icon class="text-4xl text-neutral-300">group_add</mat-icon>
+            <p class="mt-2 text-sm text-neutral-500">
+              No employees assigned yet. Add one above.
+            </p>
+          </div>
+        } @else {
+          <div class="space-y-2">
+            @for (member of members(); track member.id) {
+              <div
+                class="group flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-3"
+                [class.opacity-60]="removingId() === member.id"
+              >
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-strong text-sm font-bold text-white">
+                  {{ (member.employeeName ?? '?').charAt(0) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <p class="truncate font-semibold text-neutral-800">
+                      {{ member.employeeName }}
+                    </p>
+                    <span class="rounded-full px-2 py-0.5 text-[11px] font-bold" [class]="roleChip(member.role)">
+                      {{ member.role }}
+                    </span>
+                  </div>
+                  <p class="mt-0.5 text-xs text-neutral-500">{{ member.employeePosition }}</p>
+                </div>
+                <button
+                  mat-icon-button
+                  (click)="removeMember(member)"
+                  [disabled]="removingId() !== null"
+                  class="text-neutral-400 hover:text-red-600"
+                  aria-label="Remove from department"
+                >
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete confirmation -->
+@if (toDelete(); as department) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm"
+    (click)="!saving() && cancelDelete()"
+  >
+    <div
+      class="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="bg-gradient-to-br from-red-500 to-red-600 px-6 py-5 text-white">
+        <h2 class="text-lg font-bold">Delete department</h2>
+        <p class="mt-0.5 text-sm text-white/80">Removes the department and its assignments.</p>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-neutral-600">
+          Delete
+          <strong class="font-semibold text-neutral-800">{{ department.name }}</strong>
+          ({{ department.type }})?
+        </p>
+        <div class="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            class="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-50"
+            (click)="cancelDelete()"
+            [disabled]="saving()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-red-700 disabled:opacity-60"
+            (click)="confirmDelete()"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Deleting…' : 'Delete' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

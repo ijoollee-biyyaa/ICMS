@@ -1,0 +1,73 @@
+<header class="flex items-center justify-between px-6 py-4">
+  <div class="flex items-center gap-3">
+    <img src="/brand/efgbc.webp" alt="EFGBC logo" class="h-12 w-12 rounded-full" />
+    <div class="leading-tight">
+      <p class="text-lg font-bold text-brand">EFGBC</p>
+      <p class="text-xs text-brand-blue">Ethiopian Full Gospel Believers Church</p>
+    </div>
+  </div>
+  <nav class="hidden items-center gap-6 text-sm font-medium text-neutral-600 md:flex">
+    <a href="#" class="hover:text-brand">Home</a>
+    <a href="#" class="hover:text-brand">About</a>
+    <a href="#" class="hover:text-brand">Our Churches</a>
+    <a href="#" class="hover:text-brand">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <section class="flex flex-col items-center px-6 py-16 text-center">
+    <img
+      src="/brand/efgbc.webp"
+      alt="EFGBC District logo"
+      class="mb-8 h-40 w-40 rounded-full shadow-xl"
+    />
+
+    @if (district.isLoading()) {
+      <div class="text-sm text-neutral-400">Loading district…</div>
+    } @else if (district.error()) {
+      <div class="text-sm text-red-500">Could not load the district.</div>
+    } @else {
+      <h1 class="mb-2 text-4xl font-extrabold text-brand md:text-5xl">
+        {{ district.value()?.name }}
+      </h1>
+    }
+
+    <p class="max-w-2xl text-lg text-neutral-600">
+      One district, one family — serving our churches, their ministers and every
+      member together.
+    </p>
+
+    @if (district.value(); as d) {
+      <div class="mt-8 flex gap-8">
+        <div>
+          <p class="text-3xl font-bold text-brand-blue">{{ d.churchCount }}</p>
+          <p class="text-sm text-neutral-500">Churches</p>
+        </div>
+        <div>
+          <p class="text-3xl font-bold text-brand-blue">{{ d.memberCount }}</p>
+          <p class="text-sm text-neutral-500">Members</p>
+        </div>
+      </div>
+    }
+
+    <div class="mt-10 flex flex-wrap justify-center gap-4">
+      <a
+        routerLink="/login"
+        class="rounded-full bg-brand px-8 py-3 font-semibold text-white shadow-lg transition hover:bg-brand-strong"
+      >
+        Sign In
+      </a>
+      <a
+        routerLink="/login"
+        class="rounded-full border-2 border-brand-blue px-8 py-3 font-semibold text-brand-blue transition hover:bg-brand-blue hover:text-white"
+      >
+        Create Account
+      </a>
+    
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-neutral-200 py-6 text-center text-sm text-neutral-400">
+  © 2026 {{ district.value()?.name ?? 'EFGBC' }}. All rights reserved.
+</footer>

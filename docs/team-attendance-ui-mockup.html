@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICMS - Team Attendance (UI Mockup)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f4f6; color: #1f2937; }
+
+  .topbar { background: #1e3a5f; color: #fff; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+  .topbar h1 { font-size: 18px; font-weight: 600; }
+  .topbar span { font-size: 13px; opacity: .8; }
+
+  .container { max-width: 1040px; margin: 28px auto; padding: 0 24px; }
+
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+  .toolbar h2 { font-size: 20px; }
+
+  .btn { border: 0; border-radius: 6px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; }
+
+  .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin-bottom: 16px; }
+
+  .row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 5px; }
+  .field select, .field input[type=date] { border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 10px; font-size: 14px; background: #fff; }
+  .field select:focus, .field input:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid #e5e7eb; }
+  .tab { border: 0; background: none; padding: 9px 16px; font-size: 14px; font-weight: 600; color: #6b7280; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab.active { color: #1d4ed8; border-bottom-color: #2563eb; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tr:hover td { background: #f9fafb; }
+
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 600; display: inline-block; }
+  .badge-leader { background: #fef3c7; color: #92400e; }
+  .badge-member { background: #f3f4f6; color: #4b5563; }
+  .badge-present { background: #dcfce7; color: #15803d; }
+  .badge-late { background: #fef3c7; color: #b45309; }
+  .badge-absent { background: #fee2e2; color: #b91c1c; }
+  .badge-card { background: #dbeafe; color: #1d4ed8; }
+
+  .status-select { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+  .reason-input { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px; width: 170px; }
+
+  .banner { display: none; border-radius: 8px; padding: 11px 14px; font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  .banner.show { display: block; }
+  .banner.ok { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .banner.err { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  .log { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 14px 16px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px; max-height: 240px; overflow: auto; }
+  .log .entry { margin-bottom: 12px; white-space: pre-wrap; word-break: break-all; }
+  .log .method { display: inline-block; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-right: 6px; font-size: 11px; }
+  .log .post { background: #2563eb; color: #fff; }
+  .log .get { background: #059669; color: #fff; }
+  .log .code { color: #fbbf24; }
+  .log .dim { color: #94a3b8; }
+
+  .hint { font-size: 12.5px; color: #6b7280; margin-top: 10px; }
+  .empty { text-align: center; color: #9ca3af; padding: 26px 0; font-size: 14px; }
+  .counts { display: flex; gap: 10px; margin-top: 12px; }
+  .count-chip { border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; background: #f9fafb; border: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>ICMS — Team Attendance</h1>
+  <span>Church 7 · Dire Dawa Geffersa · mock of live API</span>
+</div>
+
+<div class="container">
+  <div class="toolbar">
+    <h2 id="pageTitle">Mark Attendance</h2>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <div class="field">
+        <label>Team</label>
+        <select id="teamSelect" style="min-width:200px"></select>
+      </div>
+      <div class="field">
+        <label>Meeting date</label>
+        <input type="date" id="dateInput">
+      </div>
+      <button class="btn btn-primary" id="loadBtn">Open roster</button>
+    </div>
+    <div class="hint">Cards are shown but disabled — attendance belongs to sub-teams / standalone teams only (409 <code>team_is_category</code>).</div>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="panel" id="markTab">
+    <div class="tabs">
+      <button class="tab active" data-tab="mark">Mark attendance</button>
+      <button class="tab" data-tab="grid">Records</button>
+      <button class="tab" data-tab="report">Report</button>
+    </div>
+
+    <div id="view-mark">
+      <div id="roster"></div>
+      <div class="row" style="justify-content:flex-end; margin-top:14px;">
+        <button class="btn btn-primary" id="saveBtn">Save attendance</button>
+      </div>
+      <div class="hint">Present + Late count as "attended" in the report. Absent requires a reason (optional). Re-saving the same date <b>corrects</b> previous marks — it never duplicates.</div>
+    </div>
+
+    <div id="view-grid" style="display:none;"></div>
+    <div id="view-report" style="display:none;"></div>
+  </div>
+
+  <div class="panel">
+    <div class="hint" style="margin-top:0; margin-bottom:8px; font-weight:700; color:#334155;">API log (simulated)</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+const CHURCH_ID = 7;
+const TODAY = '2026-08-16';
+
+const TEAMS = [
+  { id: 1, name: 'Choir Team', card: true, rule: 'Single' },
+  { id: 2, name: 'Choir A', parent: 1, rule: 'Single' },
+  { id: 3, name: 'Choir B', parent: 1, rule: 'Single' },
+  { id: 9, name: 'Friday Prayer', parent: 8, rule: 'Multiple' },
+  { id: 10, name: 'Monday Prayer', parent: 8, rule: 'Multiple' },
+  { id: 12, name: 'Youth Team', rule: 'Single' },
+  { id: 13, name: 'Media Team', rule: 'Single' }
+];
+
+const ROSTERS = {
+  9:  [ { id: 3, name: 'Abebe Kebede', efgbc: 'EFGBC-NWAA-000001', role: 'Leader' },
+       { id: 6, name: 'Helen Bekele', efgbc: 'EFGBC-NWAA-000004', role: 'Leader' } ],
+  2:  [ { id: 3, name: 'Abebe Kebede', efgbc: 'EFGBC-NWAA-000001', role: 'Member' },
+       { id: 11, name: 'Helen Tadele', efgbc: 'EFGBC-NWAA-000009', role: 'Member' } ],
+  3:  [ { id: 3, name: 'Abebe Kebede', efgbc: 'EFGBC-NWAA-000001', role: 'Member' } ],
+  10: [ { id: 6, name: 'Helen Bekele', efgbc: 'EFGBC-NWAA-000004', role: 'Member' } ],
+  12: [ { id: 11, name: 'Helen Tadele', efgbc: 'EFGBC-NWAA-000009', role: 'Member' } ],
+  13: [ { id: 11, name: 'Helen Tadele', efgbc: 'EFGBC-NWAA-000009', role: 'Member' } ]
+};
+
+let ATTENDANCE = {
+  9: [
+    { date: '2026-08-13', entries: [{ memberId: 3, status: 'Absent', reason: 'Travel' }, { memberId: 6, status: 'Present', reason: '' }] },
+    { date: '2026-08-14', entries: [{ memberId: 3, status: 'Present', reason: '' }, { memberId: 6, status: 'Present', reason: '' }] }
+  ]
+};
+
+let currentTeam = null;
+let currentDate = TODAY;
+let draft = {};
+let logEntries = [];
+
+const $ = id => document.getElementById(id);
+const log = (method, url, body, response, code) => {
+  logEntries.unshift({ method, url, body: body || null, response: response || null, code });
+  renderLog();
+};
+
+function renderLog() {
+  $('log').innerHTML = logEntries.map(e =>
+    `<div class="entry">
+      <span class="method ${e.method.toLowerCase()}">${e.method}</span>
+      <span>${e.url}</span>
+      <span class="code">${e.code ? ' → ' + e.code : ''}</span>
+      ${e.body ? '\n  POST body: ' + JSON.stringify(e.body) : ''}
+      ${e.response ? '\n  response: ' + JSON.stringify(e.response) : ''}
+    </div>`).join('');
+}
+
+function seedTeamSelect() {
+  $('teamSelect').innerHTML = TEAMS.map(t =>
+    `<option value="${t.id}">${t.card ? '🃏 ' : ''}${t.name}${t.parent ? ' (sub of ' + TEAMS.find(p => p.id === t.parent).name + ')' : ''} — ${t.rule}</option>`).join('');
+  $('dateInput').value = TODAY;
+}
+
+function banner(msg, ok) {
+  const b = $('banner');
+  b.className = 'banner show ' + (ok ? 'ok' : 'err');
+  b.textContent = msg;
+}
+
+function loadRoster() {
+  const teamId = +$('teamSelect').value;
+  currentTeam = TEAMS.find(t => t.id === teamId);
+  currentDate = $('dateInput').value;
+  banner('', true); $('banner').className = 'banner';
+  draft = {};
+
+  const existing = (ATTENDANCE[currentTeam.id] || [])
+    .find(d => d.date === currentDate);
+
+  const url = `GET /api/churches/${CHURCH_ID}/teams/${currentTeam.id}/members?pageSize=100`;
+  log('GET', url, null, ROSTERS[currentTeam.id] || [], 200);
+
+  if (currentTeam.card) {
+    $('view-mark').style.display = 'block';
+    $('view-grid').style.display = 'none';
+    $('view-report').style.display = 'none';
+    $('roster').innerHTML = `<div class="empty">🃏 ${currentTeam.name} is a category (card).<br>Attendance belongs to its sub-teams — the API answers 409 <code>team_is_category</code>.</div>`;
+    $('saveBtn').disabled = true;
+    return;
+  }
+
+  const members = ROSTERS[currentTeam.id] || [];
+  draft = {};
+  members.forEach(m => {
+    const rec = existing && existing.entries.find(e => e.memberId === m.id);
+    draft[m.id] = rec
+      ? { status: rec.status, reason: rec.reason || '' }
+      : { status: 'Absent', reason: '' };
+  });
+
+  renderRoster(members, existing);
+  $('saveBtn').disabled = members.length === 0;
+  showTab('mark');
+}
+
+function renderRoster(members, existing) {
+  $('roster').innerHTML = `
+    <table>
+      <thead><tr><th>Member</th><th>EFGBC ID</th><th>Role</th><th>Status</th><th>Absence reason</th></tr></thead>
+      <tbody>
+        ${members.map(m => `
+          <tr>
+            <td><b>${m.name}</b></td>
+            <td style="color:#6b7280">${m.efgbc}</td>
+            <td><span class="badge ${m.role === 'Leader' ? 'badge-leader' : 'badge-member'}">${m.role}</span></td>
+            <td>
+              <select class="status-select" data-mid="${m.id}">
+                <option value="Present" ${draft[m.id].status === 'Present' ? 'selected' : ''}>Present</option>
+                <option value="Late" ${draft[m.id].status === 'Late' ? 'selected' : ''}>Late</option>
+                <option value="Absent" ${draft[m.id].status === 'Absent' ? 'selected' : ''}>Absent</option>
+              </select>
+            </td>
+            <td>
+              <input class="reason-input" data-mid="${m.id}" placeholder="sick, travel, work…"
+                value="${draft[m.id].reason}" ${draft[m.id].status !== 'Absent' ? 'disabled' : ''}>
+            </td>
+          </tr>`).join('')
+        }
+      </tbody>
+    </table>
+    ${existing ? `<div class="hint">This date was already saved — reopening it in <b>edit mode</b>. Saving again corrects the marks (upsert).</div>` : ''}`;
+
+  document.querySelectorAll('.status-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const mid = +sel.dataset.mid;
+      draft[mid].status = sel.value;
+      const reason = document.querySelector(`.reason-input[data-mid="${mid}"]`);
+      reason.disabled = sel.value !== 'Absent';
+      if (sel.value !== 'Absent') { reason.value = ''; draft[mid].reason = ''; }
+    });
+  });
+  document.querySelectorAll('.reason-input').forEach(inp => {
+    inp.addEventListener('input', () => { draft[+inp.dataset.mid].reason = inp.value; });
+  });
+}
+
+function saveAttendance() {
+  if (currentTeam.card) return;
+
+  if (currentDate > TODAY) {
+    banner('400 Validation failed — Attendance cannot be marked for a future date.', false);
+    log('POST', `POST /api/churches/${CHURCH_ID}/teams/${currentTeam.id}/attendance`,
+      { attendanceDate: currentDate, entries: Object.keys(draft).map(mid => ({ memberId: +mid, status: draft[+mid].status, reason: draft[+mid].reason })) },
+      { errors: { AttendanceDate: ['Attendance cannot be marked for a future date.'] } }, 400);
+    return;
+  }
+
+  const entries = Object.keys(draft).map(mid => ({
+    memberId: +mid,
+    status: draft[+mid].status,
+    reason: draft[+mid].status === 'Absent' ? draft[+mid].reason : ''
+  }));
+
+  const existing = (ATTENDANCE[currentTeam.id] || []).find(d => d.date === currentDate);
+  if (existing) existing.entries = entries;
+  else ATTENDANCE[currentTeam.id] = [...(ATTENDANCE[currentTeam.id] || []), { date: currentDate, entries }];
+
+  const present = entries.filter(e => e.status === 'Present').length;
+  const late = entries.filter(e => e.status === 'Late').length;
+  const absent = entries.filter(e => e.status === 'Absent').length;
+
+  log('POST', `POST /api/churches/${CHURCH_ID}/teams/${currentTeam.id}/attendance`,
+    { attendanceDate: currentDate, entries: entries.map(e => ({ memberId: e.memberId, status: e.status, reason: e.reason })) },
+    { attendanceDate: currentDate, totalMarked: entries.length, presentCount: present, lateCount: late, absentCount: absent }, 200);
+
+  banner(existing
+    ? `✓ Corrected ${entries.length} record(s) for ${currentDate} — no duplicates.`
+    : `✓ Saved ${entries.length} record(s) for ${currentDate}.`, true);
+
+  showTab('mark');
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  $('view-mark').style.display = tab === 'mark' ? 'block' : 'none';
+  $('view-grid').style.display = tab === 'grid' ? 'block' : 'none';
+  $('view-report').style.display = tab === 'report' ? 'block' : 'none';
+  if (tab === 'grid') renderGrid();
+  if (tab === 'report') renderReport();
+}
+
+function renderGrid() {
+  if (currentTeam.card) { $('view-grid').innerHTML = '<div class="empty">No records for a card.</div>'; return; }
+  const rows = (ATTENDANCE[currentTeam.id] || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  if (!rows.length) { $('view-grid').innerHTML = '<div class="empty">No attendance saved yet.</div>'; return; }
+
+  const url = `GET /api/churches/${CHURCH_ID}/teams/${currentTeam.id}/attendance?from=&to=&pageSize=50`;
+  const records = rows.flatMap(d => d.entries.map(e => ({
+    date: d.date,
+    member: (ROSTERS[currentTeam.id] || []).find(m => m.id === e.memberId),
+    e
+  })));
+  log('GET', url, null, records.map(r => ({ memberId: r.e.memberId, memberName: r.member.name, attendanceDate: r.date, attended: r.e.status !== 'Absent' })), 200);
+
+  $('view-grid').innerHTML = `
+    <table>
+      <thead><tr><th>Date</th><th>Member</th><th>Status</th><th>Reason</th></tr></thead>
+      <tbody>
+        ${records.map(r => `
+          <tr>
+            <td>${r.date}</td>
+            <td><b>${r.member.name}</b></td>
+            <td><span class="badge badge-${r.e.status.toLowerCase()}">${r.e.status}</span></td>
+            <td style="color:#6b7280">${r.e.reason || '—'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="counts">
+      <span class="count-chip">📅 ${rows.length} meeting(s)</span>
+      <span class="count-chip">👤 ${records.length} record(s)</span>
+    </div>`;
+}
+
+function renderReport() {
+  if (currentTeam.card) { $('view-report').innerHTML = '<div class="empty">No report for a card.</div>'; return; }
+  const rows = (ATTENDANCE[currentTeam.id] || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  if (!rows.length) { $('view-report').innerHTML = '<div class="empty">No data — save attendance first.</div>'; return; }
+
+  const url = `GET /api/churches/${CHURCH_ID}/teams/${currentTeam.id}/attendance/summary`;
+  const members = ROSTERS[currentTeam.id] || [];
+  const summary = members.map(m => {
+    const mine = rows.flatMap(d => d.entries.filter(e => e.memberId === m.id));
+    const attended = mine.filter(e => e.status !== 'Absent').length;
+    const total = mine.length;
+    return { m, attended, total, rate: total ? Math.round(attended / total * 100) : 0 };
+  }).sort((a, b) => b.rate - a.rate);
+  log('GET', url, null, summary.map(s => ({ memberId: s.m.id, memberName: s.m.name, totalMeetings: s.total, attended: s.attended, absent: s.total - s.attended, attendanceRate: s.rate })), 200);
+
+  $('view-report').innerHTML = `
+    <table>
+      <thead><tr><th>Member</th><th>Role</th><th>Attended</th><th>Meetings</th><th>Rate</th></tr></thead>
+      <tbody>
+        ${summary.map(s => `
+          <tr>
+            <td><b>${s.m.name}</b></td>
+            <td><span class="badge ${s.m.role === 'Leader' ? 'badge-leader' : 'badge-member'}">${s.m.role}</span></td>
+            <td>${s.attended}/${s.total}</td>
+            <td style="color:#6b7280">${s.total} meeting(s)</td>
+            <td>
+              <div style="background:#e5e7eb;border-radius:999px;height:8px;width:110px;display:inline-block;vertical-align:middle">
+                <div style="background:${s.rate >= 75 ? '#16a34a' : s.rate >= 50 ? '#d97706' : '#dc2626'};height:8px;border-radius:999px;width:${s.rate}%"></div>
+              </div>
+              <b> ${s.rate}%</b>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="hint">Rate = (Present + Late) ÷ meetings marked for the member. Absent with reason is tracked but never counts as attended.</div>`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  seedTeamSelect();
+  loadRoster();
+  $('loadBtn').addEventListener('click', loadRoster);
+  $('saveBtn').addEventListener('click', saveAttendance);
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+});
+</script>
+</body>
+</html>

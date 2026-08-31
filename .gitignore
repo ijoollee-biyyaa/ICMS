@@ -1,0 +1,32 @@
+# Build results / generated
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+.vs/
+artifacts/
+
+# .NET user secrets (local, never commit)
+appsettings.Development.json
+
+# Frontend
+node_modules/
+icms-web/dist/
+icms-web/.angular/
+
+# Temp / local scratch
+*.log
+*.tmp
+
+# Stray local scratch dir that landed inside the project tree
+/AppData/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Environment / local env files
+.env
+*.env

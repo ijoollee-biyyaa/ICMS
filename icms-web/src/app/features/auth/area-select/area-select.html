@@ -1,0 +1,14 @@
+<div class="areas-page">
+  <h1>Welcome, {{ displayName() }}</h1>
+  <p>Choose where you want to work today.</p>
+
+  <div class="areas-grid">
+    @for (area of areas(); track area.path) {
+      <a [routerLink]="area.path" class="area-card">
+        <mat-icon>{{ area.icon }}</mat-icon>
+        <h2>{{ area.label }}</h2>
+        <p>{{ area.description }}</p>
+      </a>
+    }
+  </div>
+</div>

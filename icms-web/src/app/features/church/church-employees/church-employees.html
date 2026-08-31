@@ -1,0 +1,410 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue">
+        My Church · Office
+      </p>
+      <h2 class="text-xl font-semibold text-neutral-800">
+        Employees
+        <span
+          class="ml-2 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-bold text-brand"
+        >
+          {{ employees().length }}
+        </span>
+      </h2>
+      <p class="mt-1 text-sm text-neutral-500">
+        The church office team — ministers and staff, with payroll badges.
+      </p>
+    </div>
+    <button
+      (click)="openCreate()"
+      class="flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 hover:shadow-lg"
+    >
+      <mat-icon class="!h-4 !w-4 !text-[16px]">add</mat-icon>
+      Hire Employee
+    </button>
+  </header>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
+          <mat-icon>work</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Total employees</p>
+          <p class="text-2xl font-bold text-neutral-800">{{ employees().length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+          <mat-icon>badge</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Active</p>
+          <p class="text-2xl font-bold text-emerald-600">{{ activeCount() }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+          <mat-icon>local_church</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Full-time ministers</p>
+          <p class="text-2xl font-bold text-indigo-600">{{ ministerCount() }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Paid from district</p>
+          <p class="text-2xl font-bold text-teal-600">{{ paidFromDistrict() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+          <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
+        </div>
+        <p class="text-sm text-red-700">{{ error() }}</p>
+      </div>
+      <button mat-icon-button (click)="error.set('')" aria-label="Dismiss error">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  @if (created(); as employee) {
+    <div class="overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-br from-brand/10 via-white to-brand-blue/10 shadow-sm">
+      <div class="flex flex-wrap items-start justify-between gap-4 px-5 pt-5">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
+            <mat-icon>key</mat-icon>
+          </div>
+          <div>
+            <h3 class="font-semibold text-neutral-800">Employee account created</h3>
+            <p class="text-sm text-neutral-500">
+              One-time credentials for <strong class="font-semibold text-neutral-700">{{ employee.memberName }}</strong>
+            </p>
+          </div>
+        </div>
+        <button mat-icon-button (click)="dismissCreated()" aria-label="Dismiss credentials">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="px-5 pb-5 pt-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="rounded-xl bg-white/70 p-3">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Email</p>
+            <p class="mt-0.5 font-mono text-sm font-semibold text-neutral-800">{{ employee.accountEmail }}</p>
+          </div>
+          <div class="rounded-xl bg-white/70 p-3">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Temporary password</p>
+            <p class="mt-0.5 font-mono text-sm font-semibold text-brand">{{ employee.accountTempPassword }}</p>
+          </div>
+        </div>
+        <p class="mt-3 text-xs text-neutral-500">
+          Share these once, then have them change the password from Settings → Security.
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Search -->
+  <div class="relative">
+    <mat-icon class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">search</mat-icon>
+    <input
+      type="search"
+      [value]="query()"
+      (input)="onSearch($event)"
+      placeholder="Search by name, position or EFGBC ID…"
+      class="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-12 pr-4 text-sm shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      @for (i of [0, 1, 2, 3]; track i) {
+        <div class="h-28 animate-pulse rounded-2xl bg-neutral-200/60"></div>
+      }
+    </div>
+  } @else if (visible().length === 0) {
+    <div
+      class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white/50 px-6 py-16 text-center"
+    >
+      <mat-icon class="text-5xl text-neutral-300">person_search</mat-icon>
+      <h3 class="mt-4 font-semibold text-neutral-700">
+        {{ query() ? 'No employees match your search' : 'No employees yet' }}
+      </h3>
+      <p class="mt-1 max-w-sm text-sm text-neutral-500">
+        Hire a full-time minister (linked to a member) or staff from outside the church.
+      </p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      @for (employee of visible(); track employee.id) {
+        <div class="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:border-brand/40 hover:shadow-md">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong text-sm font-bold text-white"
+          >
+            {{ employee.employmentType === 'FulltimeMinister' ? 'M' : 'E' }}
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="truncate font-semibold text-neutral-800">{{ employeeName(employee) }}</p>
+              <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-600">
+                {{ employmentLabel(employee.employmentType) }}
+              </span>
+            </div>
+            <p class="mt-0.5 text-sm text-neutral-500">{{ employee.position }}</p>
+            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+              <span class="rounded-full px-2 py-0.5 font-medium" [class]="statusChip(employee.status)">
+                {{ employee.status }}
+              </span>
+              @if (employee.memberEfgbcId) {
+                <span class="rounded-full bg-brand/10 px-2 py-0.5 font-mono text-brand">
+                  {{ employee.memberEfgbcId }}
+                </span>
+              }
+              @if (employee.salaryPaidBy === 'District') {
+                <span class="rounded-full bg-teal-100 px-2 py-0.5 font-medium text-teal-700">
+                  Paid from district
+                </span>
+              }
+              @if (employee.salaryPaidBy === 'Church') {
+                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-medium text-neutral-600">
+                  Paid by church
+                </span>
+              }
+            </div>
+          </div>
+          <div class="shrink-0 text-right">
+            <p class="text-sm font-bold text-neutral-800">{{ salaryText(employee.salary) }}</p>
+            <div class="mt-1 flex items-center justify-end gap-0 opacity-0 transition group-hover:opacity-100">
+              <button mat-icon-button (click)="openEdit(employee)" class="text-neutral-500 hover:text-brand" aria-label="Edit employee">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="askDelete(employee)" class="text-neutral-500 hover:text-red-600" aria-label="Remove employee">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Hire / edit modal -->
+@if (showForm()) {
+  <div
+    class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-sm sm:py-10"
+    (click)="!saving() && closeForm()"
+  >
+    <div
+      class="my-auto w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="relative overflow-hidden bg-gradient-to-br from-brand via-brand-strong to-brand-blue px-6 py-5 text-white"
+      >
+        <div class="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="relative flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold">
+              {{ editing() ? 'Edit employee' : 'Hire an employee' }}
+            </h2>
+            <p class="mt-0.5 text-sm text-white/80">
+              @if (editing(); as employee) {
+                Update the position and payroll of {{ employeeName(employee) }}.
+              } @else {
+                Full-time ministers must belong to this church as members.
+              }
+            </p>
+          </div>
+          <button
+            mat-icon-button
+            class="!text-white"
+            (click)="closeForm()"
+            [disabled]="saving()"
+            aria-label="Close"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-brand/5 via-white to-brand-blue/5 p-6">
+        @if (error()) {
+          <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <mat-icon class="text-red-500">error_outline</mat-icon>
+            <p class="text-sm text-red-700">{{ error() }}</p>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+          <div class="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Position</mat-label>
+              <input matInput formControlName="position" placeholder="Office Manager" maxlength="100" autocomplete="off" />
+              @if (form.controls.position.hasError('required')) {
+                <mat-error>Position is required.</mat-error>
+              } @else if (form.controls.position.hasError('server')) {
+                <mat-error>{{ form.controls.position.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Employment type</mat-label>
+              <mat-select formControlName="employmentType" [disabled]="!!editing()">
+                @for (type of EMPLOYMENT_TYPES; track type) {
+                  <mat-option [value]="type">{{ employmentLabel(type) }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>District staff belongs to the district office, not the church.</mat-hint>
+            </mat-form-field>
+
+            @if (isFulltime()) {
+              <mat-form-field appearance="outline">
+                <mat-label>Minister title</mat-label>
+                <mat-select formControlName="ministerTitle" [disabled]="!!editing()">
+                  @for (title of TITLES; track title) {
+                    <mat-option [value]="title">{{ title }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Member</mat-label>
+                <mat-select formControlName="memberId" [disabled]="!!editing()">
+                  @for (member of roster(); track member.id) {
+                    <mat-option [value]="member.id">{{ fullName(member) }} ({{ member.efgbcId }})</mat-option>
+                  }
+                </mat-select>
+                <mat-hint>A full-time minister must be linked to a member.</mat-hint>
+                @if (form.controls.memberId.hasError('server')) {
+                  <mat-error>{{ form.controls.memberId.getError('server') }}</mat-error>
+                }
+              </mat-form-field>
+            } @else if (editing() === null) {
+              <div class="sm:col-span-2">
+                <div class="rounded-xl border border-neutral-200 bg-white/70 p-3">
+                  <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">
+                    Staff hired from outside (no member) — full name
+                  </p>
+                  <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    <input formControlName="firstName" placeholder="First" class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand" />
+                    <input formControlName="fatherName" placeholder="Father" class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand" />
+                    <input formControlName="grandfatherName" placeholder="Grandfather" class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <mat-form-field appearance="outline">
+              <mat-label>Salary (ETB / month)</mat-label>
+              <input matInput formControlName="salary" type="number" min="0" step="0.01" />
+              @if (form.controls.salary.hasError('server')) {
+                <mat-error>{{ form.controls.salary.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hire date</mat-label>
+              <input matInput formControlName="hireDate" type="date" />
+              @if (form.controls.hireDate.hasError('server')) {
+                <mat-error>{{ form.controls.hireDate.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            @if (editing()) {
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  @for (status of STATUSES; track status) {
+                    <mat-option [value]="status">{{ status }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              class="rounded-full border border-neutral-200 px-6 py-2.5 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-50"
+              (click)="closeForm()"
+              [disabled]="saving()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              [disabled]="form.invalid || saving()"
+              class="rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
+            >
+              {{ saving() ? 'Saving…' : editing() ? 'Save changes' : 'Hire employee' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete confirmation -->
+@if (toDelete(); as employee) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm"
+    (click)="!deleting() && cancelDelete()"
+  >
+    <div
+      class="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="bg-gradient-to-br from-red-500 to-red-600 px-6 py-5 text-white">
+        <h2 class="text-lg font-bold">Remove employee</h2>
+        <p class="mt-0.5 text-sm text-white/80">Soft-removes the employment record.</p>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-neutral-600">
+          Remove
+          <strong class="font-semibold text-neutral-800">{{ employeeName(employee) }}</strong>
+          ({{ employee.position }}) from the church office?
+        </p>
+        <div class="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            class="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-50"
+            (click)="cancelDelete()"
+            [disabled]="deleting()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-red-700 disabled:opacity-60"
+            (click)="confirmDelete()"
+            [disabled]="deleting()"
+          >
+            {{ deleting() ? 'Removing…' : 'Remove' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

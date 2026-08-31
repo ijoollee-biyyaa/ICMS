@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Icms.Api/Icms.Api.csproj" />
+  <Project Path="Icms.Application/Icms.Application.csproj" />
+  <Project Path="Icms.Domain/Icms.Domain.csproj" />
+  <Project Path="Icms.Infrastructure/Icms.Infrastructure.csproj" />
+</Solution>

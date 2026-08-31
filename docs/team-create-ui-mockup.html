@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICMS - Team Creation (UI Mockup)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f4f6; color: #1f2937; }
+
+  .topbar { background: #1e3a5f; color: #fff; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+  .topbar h1 { font-size: 18px; font-weight: 600; }
+  .topbar span { font-size: 13px; opacity: .8; }
+
+  .container { max-width: 960px; margin: 28px auto; padding: 0 24px; }
+
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .toolbar h2 { font-size: 20px; }
+
+  .btn { border: 0; border-radius: 6px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-ghost { background: transparent; color: #6b7280; }
+  .btn-ghost:hover { background: #e5e7eb; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .card .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card .card-title { font-size: 15px; font-weight: 700; }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 600; }
+  .badge-card { background: #dbeafe; color: #1d4ed8; }
+  .badge-team { background: #dcfce7; color: #15803d; }
+  .badge-rule { background: #f3f4f6; color: #4b5563; margin-left: 6px; }
+
+  .subs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .sub-chip { background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; font-size: 12px; padding: 4px 10px; border-radius: 6px; }
+  .sub-chip .plus { cursor: pointer; font-weight: 700; background: #0284c7; color: #fff; border-radius: 4px; padding: 0 5px; margin-left: 4px; }
+
+  .hint { font-size: 12px; color: #6b7280; margin-top: 10px; }
+
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); align-items: center; justify-content: center; z-index: 50; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: #fff; border-radius: 12px; width: 460px; max-width: 94vw; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,.2); }
+  .modal h3 { font-size: 17px; margin-bottom: 4px; }
+  .modal .sub { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .field input[type=text], .field select { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 9px 12px; font-size: 14px; }
+  .field input:focus, .field select:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
+
+  .mode-picker { display: grid; gap: 8px; margin-bottom: 16px; }
+  .mode-option { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+  .mode-option.selected { border-color: #2563eb; background: #eff6ff; }
+  .mode-option .t { font-size: 14px; font-weight: 600; }
+  .mode-option .d { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  .rule-row { display: flex; gap: 8px; }
+  .rule-option { flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; cursor: pointer; }
+  .rule-option.selected { border-color: #2563eb; background: #eff6ff; }
+  .rule-option .t { font-size: 13px; font-weight: 600; }
+  .rule-option .d { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+  .api-panel { background: #0f172a; color: #a5f3fc; font-family: Consolas, monospace; font-size: 12px; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; }
+  .api-panel .method { color: #fbbf24; font-weight: 700; }
+  .api-panel .ok { color: #4ade80; }
+  .api-panel .bad { color: #f87171; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; z-index: 60; }
+  .toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>EFGBC Integrated Church Management</h1>
+  <span>Teams &middot; UI Mockup (simulates the real API)</span>
+</div>
+
+<div class="container">
+  <div class="toolbar">
+    <h2>Teams - Dirre Geferssa FGBC (Church #7)</h2>
+    <button class="btn btn-primary" id="btnCreate">+ Create Team</button>
+  </div>
+
+  <div class="api-panel" id="apiLog">// Every action below shows the exact API call the real backend receives.</div>
+
+  <div class="cards" id="cards"></div>
+
+  <p class="hint">Card = main team (category, not joinable). Sub-teams and standalone teams hold members.
+  Rule <b>Single</b>: a member can join only one team of the card (e.g. Choir A <i>or</i> B <i>or</i> C).
+  Rule <b>Multiple</b>: a member can join any number of sub-teams (e.g. Friday + Monday Prayer).</p>
+</div>
+
+<div class="modal-backdrop" id="backdrop">
+  <div class="modal">
+    <h3>Create Team</h3>
+    <div class="sub">Choose how this team fits the structure.</div>
+
+    <div class="mode-picker" id="modePicker">
+      <div class="mode-option selected" data-mode="card">
+        <div class="t">Main team (card)</div>
+        <div class="d">A container for sub-teams, e.g. Choir, Worship, Prayer. Never holds members.</div>
+      </div>
+      <div class="mode-option" data-mode="sub">
+        <div class="t">Sub-team under a card</div>
+        <div class="d">e.g. Choir A, Friday Prayer. Members join here.</div>
+      </div>
+      <div class="mode-option" data-mode="standalone">
+        <div class="t">Standalone team</div>
+        <div class="d">A team with no sub-teams, e.g. Youth Team, Media Team. Members join directly.</div>
+      </div>
+    </div>
+
+    <div class="field" id="fieldParent">
+      <label for="parentSelect">Parent card</label>
+      <select id="parentSelect"></select>
+    </div>
+
+    <div class="field">
+      <label for="teamName">Team name</label>
+      <input type="text" id="teamName" placeholder="e.g. Choir / Choir A / Youth Team">
+    </div>
+
+    <div class="field" id="fieldRule">
+      <label>Membership rule (decides if a member can join one or many sub-teams of this card)</label>
+      <div class="rule-row">
+        <div class="rule-option selected" data-rule="Single">
+          <div class="t">Single</div>
+          <div class="d">Only one sub-team per member</div>
+        </div>
+        <div class="rule-option" data-rule="Multiple">
+          <div class="t">Multiple</div>
+          <div class="d">Any number of sub-teams</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btnCancel">Cancel</button>
+      <button class="btn btn-primary" id="btnConfirm">Create Team</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const state = [
+    { id: 1, name: 'Choir', isCard: true, rule: 'Single', subs: [
+      { id: 2, name: 'Choir A' }, { id: 3, name: 'Choir B' }, { id: 4, name: 'Choir C' } ] },
+    { id: 5, name: 'Worship', isCard: true, rule: 'Single', subs: [
+      { id: 6, name: 'Worship A' }, { id: 7, name: 'Worship B' } ] },
+    { id: 8, name: 'Prayer', isCard: true, rule: 'Multiple', subs: [
+      { id: 9, name: 'Friday Prayer' }, { id: 10, name: 'Monday Prayer' }, { id: 11, name: 'Youth Prayer' } ] },
+    { id: 12, name: 'Youth Team', isCard: false, rule: 'Single', subs: [] },
+    { id: 13, name: 'Media Team', isCard: false, rule: 'Single', subs: [] }
+  ];
+  let nextId = 14;
+
+  const $ = s => document.querySelector(s);
+  const cardsEl = $('#cards');
+  const apiLog = $('#apiLog');
+  const backdrop = $('#backdrop');
+  let mode = 'card';
+  let rule = 'Single';
+
+  function render() {
+    cardsEl.innerHTML = '';
+    state.forEach(team => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      const badge = team.isCard
+        ? '<span class="badge badge-card">Card</span><span class="badge badge-rule">' + team.rule + '</span>'
+        : '<span class="badge badge-team">Team</span><span class="badge badge-rule">' + team.rule + '</span>';
+      const subs = team.subs.map(s => '<span class="sub-chip">' + s.name + '</span>').join('');
+      div.innerHTML =
+        '<div class="card-head"><span class="card-title">' + team.name + '</span><span>' + badge + '</span></div>' +
+        (team.subs.length ? '<div class="subs">' + subs + '</div>' : '') +
+        (team.isCard ? '<div class="hint">' + (team.subs.length ? 'Open card -> create sub-teams -> add members to them' : 'No sub-teams yet') + '</div>' : '<div class="hint">Members join this team directly.</div>');
+      cardsEl.appendChild(div);
+    });
+  }
+
+  function logRequest(method, url, body, result) {
+    apiLog.textContent =
+      method + ' ' + url + '\n' +
+      'Content-Type: application/json\n\n' +
+      JSON.stringify(body, null, 2) + '\n\n' +
+      result;
+    apiLog.scrollTop = apiLog.scrollHeight;
+  }
+
+  function showToast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  $('#btnCreate').addEventListener('click', () => {
+    $('#teamName').value = '';
+    openModal('card');
+  });
+
+  $('#btnCancel').addEventListener('click', () => backdrop.classList.remove('open'));
+
+  function openModal(m) {
+    setMode(m);
+    const sel = $('#parentSelect');
+    sel.innerHTML = '';
+    state.filter(t => t.isCard).forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name + ' (rule: ' + t.rule + ')';
+      sel.appendChild(opt);
+    });
+    backdrop.classList.add('open');
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.querySelectorAll('.mode-option').forEach(el =>
+      el.classList.toggle('selected', el.dataset.mode === m));
+    $('#fieldParent').style.display = m === 'sub' ? '' : 'none';
+    $('#fieldRule').style.display = m === 'card' ? '' : 'none';
+  }
+
+  document.querySelectorAll('.mode-option').forEach(el =>
+    el.addEventListener('click', () => setMode(el.dataset.mode)));
+
+  document.querySelectorAll('.rule-option').forEach(el =>
+    el.addEventListener('click', () => {
+      rule = el.dataset.rule;
+      document.querySelectorAll('.rule-option').forEach(r => r.classList.toggle('selected', r.dataset.rule === rule));
+    }));
+
+  $('#btnConfirm').addEventListener('click', () => {
+    const name = $('#teamName').value.trim();
+    if (!name) { showToast('Team name is required.'); return; }
+
+    const body = { churchId: 7, name: name, membershipRule: rule };
+    let url = '/api/teams';
+    if (mode === 'sub') {
+      const parentId = Number($('#parentSelect').value);
+      const parent = state.find(t => t.id === parentId);
+      body.parentTeamId = parentId;
+      body.membershipRule = parent.rule;
+    }
+    if (mode === 'standalone') body.membershipRule = 'Single';
+
+    let duplicate;
+    if (mode === 'sub') {
+      const parent = state.find(t => t.id === body.parentTeamId);
+      duplicate = parent.subs.some(s => s.name.toLowerCase() === name.toLowerCase());
+    } else {
+      duplicate = state.some(t => t.name.toLowerCase() === name.toLowerCase());
+    }
+
+    if (duplicate) {
+      logRequest('POST', url, body, 'HTTP 409 - {"title":"team_name_exists","detail":"A team named \'' + name + '\' already exists in this scope."}');
+      showToast('409 - team_name_exists (already exists)');
+      return;
+    }
+
+    backdrop.classList.remove('open');
+
+    const team = { id: nextId++, name: name, isCard: mode !== 'sub', rule: body.membershipRule, subs: [] };
+    if (mode === 'sub') {
+      const parent = state.find(t => t.id === body.parentTeamId);
+      parent.subs.push({ id: team.id, name: name });
+      team.isCard = false;
+      team.rule = parent.rule;
+      state.push(team);
+    } else {
+      state.push(team);
+    }
+
+    logRequest('POST', url, body, 'HTTP 201 Created');
+    render();
+    showToast('Team "' + name + '" created.');
+  });
+
+  render();
+</script>
+</body>
+</html>

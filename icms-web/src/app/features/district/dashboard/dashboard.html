@@ -1,0 +1,174 @@
+<div class="space-y-6">
+  <!-- Hero -->
+  @if (store.district(); as d) {
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue p-8 text-white shadow-xl">
+      <div class="absolute -right-12 -top-12 h-52 w-52 rounded-full bg-white/10 blur-2xl"></div>
+      <div class="absolute -bottom-20 right-32 h-44 w-44 rounded-full bg-white/10 blur-xl"></div>
+
+      <div class="relative flex flex-wrap items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 p-3 backdrop-blur ring-1 ring-white/20">
+            <img src="/brand/efgbc.webp" alt="District logo" class="h-full w-full rounded-xl" />
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/70">District Dashboard</p>
+            <h1 class="mt-1 text-3xl font-extrabold">{{ d.name }}</h1>
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+              <span class="rounded-full bg-white/20 px-3 py-0.5 font-mono text-xs font-semibold tracking-wide">
+                {{ d.code }}
+              </span>
+              <span class="rounded-full bg-white/20 px-3 py-0.5 text-xs">
+                Since {{ (d.createdAt | date: 'yyyy') ?? '—' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <a routerLink="/district/profile"
+             class="flex items-center gap-2 rounded-full bg-white/15 px-5 py-2.5 text-sm font-semibold backdrop-blur transition hover:bg-white/25">
+            <mat-icon class="text-base">badge</mat-icon>
+            Profile
+          </a>
+          <a routerLink="/district/settings"
+             class="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-strong transition hover:bg-pink-50">
+            <mat-icon class="text-base">settings</mat-icon>
+            Settings
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Executive strip -->
+  @let president = store.president();
+  @let vice = store.vicePresident();
+  @if (president || vice) {
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      @if (president) {
+        <div class="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-gradient-to-r from-brand/5 to-transparent p-4 shadow-sm">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong text-white">
+            <mat-icon>star</mat-icon>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">District President</p>
+            <p class="truncate font-semibold text-neutral-800">{{ president.memberName ?? 'Office role' }}</p>
+            <p class="truncate text-xs text-neutral-500">{{ president.position }}</p>
+          </div>
+        </div>
+      }
+      @if (vice) {
+        <div class="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-gradient-to-r from-brand-blue/5 to-transparent p-4 shadow-sm">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue to-blue-400 text-white">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Vice President</p>
+            <p class="truncate font-semibold text-neutral-800">{{ vice.memberName ?? 'Office role' }}</p>
+            <p class="truncate text-xs text-neutral-500">{{ vice.position }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Stats -->
+  <section>
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-lg font-bold text-neutral-800">Key indicators</h2>
+      <span class="text-xs text-neutral-400">Live from the district office</span>
+    </div>
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+      @if (store.isLoading() && !store.district()) {
+        @for (i of [0, 1, 2, 3]; track i) {
+          <div class="h-28 animate-pulse rounded-2xl bg-neutral-200/60"></div>
+        }
+      } @else {
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-brand">
+            <mat-icon>church</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.churchCount() }}</p>
+          <p class="text-sm text-neutral-500">Churches</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue">
+            <mat-icon>group</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.memberCount() }}</p>
+          <p class="text-sm text-neutral-500">Members</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+            <mat-icon>work</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.employeeCount() }}</p>
+          <p class="text-sm text-neutral-500">Office Employees</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+            <mat-icon>local_church</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.ministerCount() }}</p>
+          <p class="text-sm text-neutral-500">Ministers</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.departmentCount() }}</p>
+          <p class="text-sm text-neutral-500">Departments</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.paidFromDistrict() }}</p>
+          <p class="text-sm text-neutral-500">Paid from District</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+            <mat-icon>people</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.activeEmployees() }}</p>
+          <p class="text-sm text-neutral-500">Active Employees</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+            <mat-icon>manage_accounts</mat-icon>
+          </div>
+          <p class="text-3xl font-extrabold text-neutral-800">{{ store.accountCount() }}</p>
+          <p class="text-sm text-neutral-500">Accounts</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (store.error()) {
+    <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <mat-icon class="mt-0.5">error_outline</mat-icon>
+      <p>{{ store.error() }}</p>
+    </div>
+  }
+
+  <!-- Manage the district -->
+  <section>
+    <h2 class="mb-4 text-lg font-bold text-neutral-800">Manage the district</h2>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (module of modules(); track module.path) {
+        <a
+          [routerLink]="module.path"
+          class="group rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-lg"
+        >
+          <div
+            class="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500 transition group-hover:bg-gradient-to-br group-hover:from-brand group-hover:to-brand-blue group-hover:text-white"
+          >
+            <mat-icon class="text-2xl">{{ module.icon }}</mat-icon>
+          </div>
+          <p class="font-semibold text-neutral-800">{{ module.title }}</p>
+          <p class="mt-1 text-sm text-neutral-500">{{ module.description }}</p>
+        </a>
+      }
+    </div>
+  </section>
+</div>
