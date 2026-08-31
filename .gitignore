@@ -30,3 +30,6 @@ Thumbs.db
 # Environment / local env files
 .env
 *.env
+
+# Local Claude/opencode settings (machine-specific)
+/.claude/
