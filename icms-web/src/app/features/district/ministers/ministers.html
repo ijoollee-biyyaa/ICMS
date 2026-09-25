@@ -1,0 +1,556 @@
+<div class="space-y-8">
+  <!-- Page Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue dark:text-blue-400">
+        District Personnel & Ministry
+      </p>
+      <h1 class="mt-1 flex items-center gap-3 text-2xl font-extrabold text-gray-900 dark:text-white">
+        <span>Ministers Showcase</span>
+        <span class="rounded-full bg-brand/10 px-3 py-0.5 text-xs font-bold text-brand dark:bg-brand/20 dark:text-brand-300">
+          {{ totalDistrictMinisters() }} Total Ministers
+        </span>
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Interactive performance deck of full-time ministers assigned across the district's churches.
+      </p>
+    </div>
+
+    <!-- Quick Filter -->
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        (click)="toggleFilterMinistersOnly()"
+        class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold shadow-sm transition"
+        [class.bg-brand]="filterOnlyWithMinisters()"
+        [class.text-white]="filterOnlyWithMinisters()"
+        [class.border-transparent]="filterOnlyWithMinisters()"
+        [class.bg-white]="!filterOnlyWithMinisters()"
+        [class.text-gray-700]="!filterOnlyWithMinisters()"
+        [class.border-gray-200]="!filterOnlyWithMinisters()"
+        [class.dark:bg-gray-800]="!filterOnlyWithMinisters()"
+        [class.dark:text-gray-200]="!filterOnlyWithMinisters()"
+        [class.dark:border-gray-700]="!filterOnlyWithMinisters()"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">filter_list</mat-icon>
+        <span>{{ filterOnlyWithMinisters() ? 'Showing: With Ministers Only' : 'Filter: With Ministers Only' }}</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <app-stat-card
+      icon="local_church"
+      label="District Full-Time Ministers"
+      [value]="totalDistrictMinisters().toString()"
+      accentClass="bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+    />
+    <app-stat-card
+      icon="church"
+      label="Churches with Ministers"
+      [value]="churchesWithMinistersCount().toString()"
+      accentClass="bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300"
+    />
+    <app-stat-card
+      icon="how_to_reg"
+      label="Selected Church Ministers"
+      [value]="totalMinisters().toString()"
+      accentClass="bg-blue-100 text-brand-blue dark:bg-blue-900/30 dark:text-blue-300"
+    />
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PS5 / FIFA PLAYER PERFORMANCE CARD CAROUSEL SPOTLIGHT                     -->
+  <!-- ========================================================================= -->
+  <section class="relative overflow-hidden rounded-3xl border border-brand/20 bg-gradient-to-br from-gray-900 via-neutral-900 to-gray-950 p-6 text-white shadow-2xl sm:p-8">
+    <!-- Ambient Holographic Glow Behind Card -->
+    <div class="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-brand/20 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-brand-blue/20 blur-3xl"></div>
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+    <!-- Spotlight Top Bar -->
+    <div class="relative mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur ring-1 ring-white/20">
+          <mat-icon class="text-brand-300">church</mat-icon>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-brand-300">Church Minister Spotlight</p>
+          <h2 class="text-xl font-extrabold text-white">
+            {{ selectedChurch()?.name ?? 'Select a Church Below' }}
+          </h2>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="rounded-full bg-white/10 px-3 py-1 font-mono text-xs font-semibold text-white/90">
+          {{ selectedChurch()?.code ?? '—' }}
+        </span>
+        <span class="rounded-full bg-brand/20 px-3 py-1 text-xs font-bold text-brand-300">
+          {{ totalMinisters() }} Minister{{ totalMinisters() === 1 ? '' : 's' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- The Carousel Stage -->
+    @if (loadingMinisters()) {
+      <div class="flex flex-col items-center justify-center py-16 text-center">
+        <mat-icon class="animate-spin text-4xl text-brand">progress_activity</mat-icon>
+        <p class="mt-4 text-sm font-medium text-white/70">Scanning church minister roster…</p>
+      </div>
+    } @else if (totalMinisters() === 0) {
+      <!-- Empty State Card -->
+      <div class="relative mx-auto flex max-w-md flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-md">
+        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white/60 ring-1 ring-white/20">
+          <mat-icon class="!h-8 !w-8 !text-[32px]">person_off</mat-icon>
+        </div>
+        <h3 class="mt-4 text-lg font-bold text-white">No Full-Time Ministers Deployed</h3>
+        <p class="mt-2 text-xs leading-relaxed text-white/60">
+          <strong>{{ selectedChurch()?.name }}</strong> currently has no active full-time ministers assigned.
+          Select another church from the directory below to view deployed ministers.
+        </p>
+      </div>
+    } @else {
+      <!-- Active PS5 Performance Card Container -->
+      <div class="relative flex flex-col items-center">
+        @let minister = activeMinister();
+        @if (minister) {
+          <!-- PS5 Holographic Card -->
+          <div class="ps5-card relative w-full max-w-md overflow-hidden rounded-3xl border-2 border-amber-400/40 bg-gradient-to-b from-neutral-800 via-neutral-900 to-black p-6 shadow-[0_0_50px_rgba(234,179,8,0.2)] transition-all hover:border-amber-400/70 hover:shadow-[0_0_60px_rgba(234,179,8,0.3)]">
+            <!-- Shimmer Accent Top -->
+            <div class="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-amber-400/20 blur-2xl"></div>
+            <div class="absolute -bottom-12 -right-12 h-36 w-36 rounded-full bg-brand-blue/30 blur-2xl"></div>
+
+            <!-- Card Header Badges -->
+            <div class="relative flex items-center justify-between gap-2">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 px-3 py-1 font-mono text-[11px] font-black uppercase tracking-wider text-black shadow-md">
+                <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">menu_book</mat-icon>
+                {{ minister.ministerTitle ?? 'MINISTER' }}
+              </span>
+
+              <!-- Dual Employment / Paid-By Domain Rule Badge -->
+              @if (minister.salaryPaidBy === 'District') {
+                <span class="inline-flex items-center gap-1 rounded-full bg-teal-400/20 px-3 py-1 text-[11px] font-bold text-teal-300 ring-1 ring-teal-400/40" title="Full-time Minister funded from District Office Budget">
+                  <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">payments</mat-icon>
+                  Paid from District
+                </span>
+              } @else {
+                <span class="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-bold text-blue-300 ring-1 ring-blue-500/40">
+                  Paid by Church
+                </span>
+              }
+            </div>
+
+            <!-- Avatar / Photo Section -->
+            <div class="relative my-6 flex flex-col items-center text-center">
+              <div class="relative">
+                <div class="flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 via-brand to-brand-blue text-3xl font-black text-white shadow-xl ring-4 ring-white/20">
+                  {{ initials(ministerName(minister)) }}
+                </div>
+                @if (minister.isDistrictPresident) {
+                  <div class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 text-black shadow-lg" title="District President">
+                    <mat-icon class="!h-4 !w-4 !text-[18px]">verified</mat-icon>
+                  </div>
+                }
+              </div>
+
+              <!-- Name & Identity -->
+              <h3 class="mt-4 text-xl font-extrabold uppercase tracking-wide text-white sm:text-2xl">
+                {{ ministerName(minister) }}
+              </h3>
+              <p class="mt-0.5 text-sm font-semibold text-amber-300">
+                {{ minister.position }}
+              </p>
+              @if (minister.memberEfgbcId) {
+                <span class="mt-2 inline-block rounded-md bg-white/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-white/80">
+                  {{ minister.memberEfgbcId }}
+                </span>
+              }
+            </div>
+
+            <!-- Minister Assignment & Service Matrix -->
+            <div class="relative grid grid-cols-2 gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm">
+              <div class="rounded-xl bg-black/40 p-2.5 text-center">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-white/50">Status</p>
+                <p class="mt-0.5 font-bold text-emerald-400">{{ minister.status }}</p>
+              </div>
+
+              <div class="rounded-xl bg-black/40 p-2.5 text-center">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-white/50">Hired Since</p>
+                <p class="mt-0.5 font-mono text-xs font-bold text-white">
+                  {{ (minister.hireDate | date: 'mediumDate') ?? 'Active' }}
+                </p>
+              </div>
+
+              <div class="rounded-xl bg-black/40 p-2.5 text-center">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-white/50">Placement</p>
+                <p class="mt-0.5 truncate text-xs font-bold text-amber-300" title="{{ selectedChurch()?.name }}">
+                  {{ minister.isDistrictPresident ? 'District HQ' : 'Local Church' }}
+                </p>
+              </div>
+
+              <div class="rounded-xl bg-black/40 p-2.5 text-center">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-white/50">Payroll</p>
+                <p class="mt-0.5 font-mono text-xs font-bold text-white">
+                  {{ minister.salary ? (minister.salary | currency: 'ETB ' : 'symbol' : '1.0-0') : 'Official' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Card Bottom Action: View Dossier -->
+            <div class="relative mt-5">
+              <button
+                type="button"
+                (click)="openDossier(minister)"
+                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 py-3 text-sm font-bold text-black shadow-lg transition hover:brightness-110 active:scale-[0.99]"
+              >
+                <mat-icon class="!h-4 !w-4 !text-[18px]">assignment_ind</mat-icon>
+                <span>Inspect Full Minister Dossier</span>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Carousel Navigation Controls -->
+        @if (totalMinisters() > 1) {
+          <div class="mt-6 flex items-center justify-center gap-6">
+            <button
+              type="button"
+              (click)="prevCard()"
+              class="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20 active:scale-95"
+              aria-label="Previous Minister"
+            >
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            <!-- Dots Indicator -->
+            <div class="flex items-center gap-2">
+              @for (m of ministers(); track m.id; let idx = $index) {
+                <button
+                  type="button"
+                  (click)="setCardIndex(idx)"
+                  class="h-2.5 rounded-full transition-all"
+                  [class.w-8]="activeCardIndex() === idx"
+                  [class.bg-amber-400]="activeCardIndex() === idx"
+                  [class.w-2.5]="activeCardIndex() !== idx"
+                  [class.bg-white/30]="activeCardIndex() !== idx"
+                  aria-label="Minister index"
+                ></button>
+              }
+            </div>
+
+            <button
+              type="button"
+              (click)="nextCard()"
+              class="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20 active:scale-95"
+              aria-label="Next Minister"
+            >
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+          <p class="mt-2 text-center text-xs text-white/50">
+            Showing minister {{ activeCardIndex() + 1 }} of {{ totalMinisters() }} in {{ selectedChurch()?.name }}
+          </p>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- CHURCHES DIRECTORY TABLE                                                  -->
+  <!-- ========================================================================= -->
+  <section class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Churches Directory</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Click any row to reveal that church's full-time ministers in the showcase card deck above.
+        </p>
+      </div>
+    </div>
+
+    <app-table
+      [data]="displayedChurches()"
+      [searchFn]="searchChurch"
+      searchPlaceholder="Search churches by name, code or city to inspect ministers…"
+      [pageSizeOptions]="[10, 25, 50]"
+    >
+      <!-- Church Column -->
+      <app-table-column key="name" header="Church" [sortable]="true" [sortValue]="churchName">
+        <ng-template let-church>
+          <div
+            class="flex items-center gap-3 py-1 cursor-pointer"
+            (click)="selectChurch(church)"
+          >
+            <div
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+              [class.bg-brand]="selectedChurch()?.id === church.id"
+              [class.bg-gray-400]="selectedChurch()?.id !== church.id"
+            >
+              <mat-icon class="!h-4 !w-4 !text-[18px]">church</mat-icon>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span
+                  class="font-semibold transition hover:text-brand"
+                  [class.text-brand]="selectedChurch()?.id === church.id"
+                  [class.dark:text-brand-300]="selectedChurch()?.id === church.id"
+                  [class.text-gray-900]="selectedChurch()?.id !== church.id"
+                  [class.dark:text-white]="selectedChurch()?.id !== church.id"
+                >
+                  {{ church.name }}
+                </span>
+                <span class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                  {{ church.code }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-400 dark:text-gray-500">{{ church.type }} Church</p>
+            </div>
+          </div>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Location Column -->
+      <app-table-column key="location" header="Location" [sortable]="true" [sortValue]="churchLocation" headerClass="hidden sm:table-cell" cellClass="hidden sm:table-cell">
+        <ng-template let-church>
+          <span class="text-xs text-gray-600 dark:text-gray-300">
+            {{ churchLocation(church) || '—' }}
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Ministers Count Column -->
+      <app-table-column key="ministers" header="Ministers" [sortable]="true" [sortValue]="churchMinisters" align="center">
+        <ng-template let-church>
+          <span
+            class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold transition"
+            [class.bg-amber-100]="(church.ministerCount ?? 0) > 0"
+            [class.text-amber-800]="(church.ministerCount ?? 0) > 0"
+            [class.dark:bg-amber-950/40]="(church.ministerCount ?? 0) > 0"
+            [class.dark:text-amber-300]="(church.ministerCount ?? 0) > 0"
+            [class.bg-gray-100]="(church.ministerCount ?? 0) === 0"
+            [class.text-gray-400]="(church.ministerCount ?? 0) === 0"
+            [class.dark:bg-gray-800]="(church.ministerCount ?? 0) === 0"
+          >
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">local_church</mat-icon>
+            <span>{{ church.ministerCount ?? 0 }}</span>
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Members Count Column -->
+      <app-table-column key="members" header="Members" [sortable]="true" [sortValue]="churchMembers" align="center" headerClass="hidden md:table-cell" cellClass="hidden md:table-cell">
+        <ng-template let-church>
+          <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
+            {{ church.memberCount ?? 0 }}
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Action Column -->
+      <app-table-column key="actions" header="Action" align="right">
+        <ng-template let-church>
+          <button
+            type="button"
+            (click)="selectChurch(church)"
+            class="inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition"
+            [class.bg-brand]="selectedChurch()?.id === church.id"
+            [class.text-white]="selectedChurch()?.id === church.id"
+            [class.border-brand]="selectedChurch()?.id === church.id"
+            [class.border-gray-200]="selectedChurch()?.id !== church.id"
+            [class.bg-white]="selectedChurch()?.id !== church.id"
+            [class.text-gray-700]="selectedChurch()?.id !== church.id"
+            [class.dark:border-gray-700]="selectedChurch()?.id !== church.id"
+            [class.dark:bg-gray-800]="selectedChurch()?.id !== church.id"
+            [class.dark:text-gray-200]="selectedChurch()?.id !== church.id"
+            [class.hover:border-brand]="selectedChurch()?.id !== church.id"
+          >
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">{{ selectedChurch()?.id === church.id ? 'check' : 'visibility' }}</mat-icon>
+            <span>{{ selectedChurch()?.id === church.id ? 'Viewing' : 'Inspect' }}</span>
+          </button>
+        </ng-template>
+      </app-table-column>
+    </app-table>
+  </section>
+</div>
+
+<!-- ========================================================================= -->
+<!-- COMPREHENSIVE MINISTER DOSSIER MODAL                                      -->
+<!-- ========================================================================= -->
+@if (selectedMinisterForDossier(); as minister) {
+  <div
+    class="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-md sm:py-8"
+    role="dialog"
+    aria-modal="true"
+    (click)="closeDossier()"
+  >
+    <div
+      class="my-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Dossier Header -->
+      <div class="relative overflow-hidden bg-gradient-to-r from-amber-600 via-amber-700 to-yellow-600 px-6 py-5 text-white">
+        <div class="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="relative flex items-start justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl font-black backdrop-blur ring-2 ring-white/30">
+              {{ initials(ministerName(minister)) }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 font-mono text-[10px] font-black uppercase tracking-wider">
+                  {{ minister.ministerTitle ?? 'MINISTER' }}
+                </span>
+                <span class="rounded-full bg-black/20 px-2 py-0.5 text-xs font-semibold">
+                  {{ selectedChurch()?.name }}
+                </span>
+              </div>
+              <h2 class="mt-1 text-xl font-extrabold text-white">
+                {{ ministerName(minister) }}
+              </h2>
+              <p class="text-xs text-white/80">
+                {{ minister.position }} · EFGBC ID: <strong>{{ minister.memberEfgbcId ?? '—' }}</strong>
+              </p>
+            </div>
+          </div>
+
+          <button
+            mat-icon-button
+            class="!text-white hover:bg-white/10"
+            (click)="closeDossier()"
+            aria-label="Close dossier"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dossier Content -->
+      <div class="max-h-[75vh] overflow-y-auto p-6 space-y-6">
+        @if (loadingDossier()) {
+          <div class="flex items-center justify-center py-10 text-gray-400">
+            <mat-icon class="animate-spin text-3xl text-amber-500">progress_activity</mat-icon>
+            <span class="ml-3 text-sm font-medium">Pulling complete minister records…</span>
+          </div>
+        } @else {
+          <!-- Ministry Placement & Payroll Card -->
+          <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4.5 dark:border-gray-800 dark:bg-white/[0.02]">
+            <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+              <mat-icon class="!h-4 !w-4 !text-[16px]">work</mat-icon>
+              Ministry Service & Payroll
+            </h3>
+
+            <div class="mt-3 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
+              <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                <p class="text-gray-400 dark:text-gray-500">Status</p>
+                <p class="mt-1 font-bold text-emerald-600 dark:text-emerald-400">{{ minister.status }}</p>
+              </div>
+
+              <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                <p class="text-gray-400 dark:text-gray-500">Hire Date</p>
+                <p class="mt-1 font-bold text-gray-800 dark:text-white">
+                  {{ (minister.hireDate | date: 'mediumDate') ?? '—' }}
+                </p>
+              </div>
+
+              <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                <p class="text-gray-400 dark:text-gray-500">Salary</p>
+                <p class="mt-1 font-bold text-gray-800 dark:text-white">
+                  {{ minister.salary ? (minister.salary | currency: 'ETB ' : 'symbol' : '1.0-0') : '—' }}
+                </p>
+              </div>
+
+              <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                <p class="text-gray-400 dark:text-gray-500">Paid By</p>
+                <p class="mt-1 font-bold" [class.text-teal-600]="minister.salaryPaidBy === 'District'" [class.text-blue-600]="minister.salaryPaidBy !== 'District'">
+                  {{ minister.salaryPaidBy === 'District' ? 'District Office' : 'Church' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spiritual Journey Card -->
+          @if (dossierMember(); as member) {
+            <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4.5 dark:border-gray-800 dark:bg-white/[0.02]">
+              <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand dark:text-brand-300">
+                <mat-icon class="!h-4 !w-4 !text-[16px]">church</mat-icon>
+                Spiritual Journey & Registry
+              </h3>
+
+              <dl class="mt-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
+                <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <dt class="text-gray-400 dark:text-gray-500">Spiritual Gift</dt>
+                  <dd class="mt-1 font-bold text-gray-800 dark:text-white">{{ member.spiritualGift || 'Not recorded' }}</dd>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <dt class="text-gray-400 dark:text-gray-500">Conversion Date</dt>
+                  <dd class="mt-1 font-bold text-gray-800 dark:text-white">{{ (member.conversionDate | date: 'mediumDate') || '—' }}</dd>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <dt class="text-gray-400 dark:text-gray-500">Baptism Date</dt>
+                  <dd class="mt-1 font-bold text-gray-800 dark:text-white">{{ (member.baptismDate | date: 'mediumDate') || '—' }}</dd>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <dt class="text-gray-400 dark:text-gray-500">Baptism Place</dt>
+                  <dd class="mt-1 font-bold text-gray-800 dark:text-white">{{ member.baptismPlace || '—' }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <!-- Personal & Contact Details -->
+            <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4.5 dark:border-gray-800 dark:bg-white/[0.02]">
+              <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-blue dark:text-blue-400">
+                <mat-icon class="!h-4 !w-4 !text-[16px]">person</mat-icon>
+                Personal & Contact Details
+              </h3>
+
+              <div class="mt-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
+                <div class="flex justify-between rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <span class="text-gray-400 dark:text-gray-500">Gender</span>
+                  <span class="font-bold text-gray-800 dark:text-white">{{ member.gender }}</span>
+                </div>
+
+                <div class="flex justify-between rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <span class="text-gray-400 dark:text-gray-500">Marital Status</span>
+                  <span class="font-bold text-gray-800 dark:text-white">{{ member.maritalStatus }}</span>
+                </div>
+
+                <div class="flex justify-between rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <span class="text-gray-400 dark:text-gray-500">Phone</span>
+                  <span class="font-bold text-gray-800 dark:text-white">{{ member.phone || '—' }}</span>
+                </div>
+
+                <div class="flex justify-between rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <span class="text-gray-400 dark:text-gray-500">Email</span>
+                  <span class="font-mono font-semibold text-gray-800 dark:text-white truncate max-w-[150px]">{{ member.email || '—' }}</span>
+                </div>
+
+                <div class="flex justify-between rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800 sm:col-span-2">
+                  <span class="text-gray-400 dark:text-gray-500">Location</span>
+                  <span class="font-semibold text-gray-800 dark:text-white">
+                    {{ memberLocation(member) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Dossier Footer -->
+      <div class="flex items-center justify-end border-t border-gray-100 p-4 dark:border-gray-800">
+        <button
+          type="button"
+          (click)="closeDossier()"
+          class="rounded-xl border border-gray-200 bg-white px-5 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        >
+          Close Dossier
+        </button>
+      </div>
+    </div>
+  </div>
+}

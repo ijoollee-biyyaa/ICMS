@@ -1,46 +1,38 @@
-import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
-
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-
-interface NavItem {
-  label: string;
-  icon: string;
-  path: string;
-}
+import { SidebarService } from '../../shared/services/sidebar.service';
+import { AppLayoutComponent } from '../../shared/layout/app-layout/app-layout.component';
 
 @Component({
   selector: 'app-member-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatIcon, MatIconButton],
-  templateUrl: './member-shell.html',
-  styleUrl: './member-shell.scss',
+  imports: [AppLayoutComponent],
+  template: `<app-layout></app-layout>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MemberShell {
+export class MemberShell implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private sidebarService = inject(SidebarService);
 
-  readonly currentUser = this.auth.currentUser;
-  readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
-
-  readonly nav = computed<NavItem[]>(() => {
-    const items: NavItem[] = [
-      { label: 'Dashboard', icon: 'dashboard', path: '/member/dashboard' },
+  ngOnInit() {
+    const items = [
+      { name: 'Dashboard', materialIcon: 'dashboard', path: '/member/dashboard' },
+      { name: 'My Profile', materialIcon: 'badge', path: '/member/profile' },
+      { name: 'Attendance', materialIcon: 'event_available', path: '/member/attendance' },
+      { name: 'Payments', materialIcon: 'payments', path: '/member/payments' },
+      { name: 'Teams', materialIcon: 'groups', path: '/member/teams' },
+      { name: 'Manage Account', materialIcon: 'manage_accounts', path: '/member/account' },
     ];
+    
     if (
       this.auth.hasRole('Admin') ||
       this.auth.hasRole('DistrictSubAdmin') ||
       this.auth.hasRole('ChurchAdmin')
     ) {
-      items.push({ label: 'Switch Area', icon: 'swap_horiz', path: '/areas' });
+      items.push({ name: 'Switch Area', materialIcon: 'swap_horiz', path: '/areas' });
     }
-    return items;
-  });
-
-  signOut() {
-    void this.auth.logout().then(() => {
-      this.router.navigate(['/']);
-    });
+    
+    this.sidebarService.setNavItems(items);
   }
 }

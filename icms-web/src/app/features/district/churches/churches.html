@@ -1,139 +1,107 @@
-﻿<div class="space-y-6">
-  <header class="flex flex-wrap items-center justify-between gap-3">
+<div class="space-y-6">
+  <!-- Page Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue">
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue dark:text-blue-400">
         District Office
       </p>
-      <h2 class="text-xl font-semibold text-neutral-800">
-        Churches
-        <span
-          class="ml-2 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-bold text-brand"
-        >
+      <h1 class="mt-1 flex items-center gap-3 text-2xl font-extrabold text-gray-900 dark:text-white">
+        <span>Churches</span>
+        <span class="rounded-full bg-brand/10 px-3 py-0.5 text-xs font-bold text-brand dark:bg-brand/20 dark:text-brand-300">
           {{ store.churchCount() }}
         </span>
-      </h2>
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Directory of all local and daughter churches in the district with their personnel and memberships.
+      </p>
     </div>
     <button
+      type="button"
       (click)="openForm()"
-      class="flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 hover:shadow-lg"
+      class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-95 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand/40"
     >
       <mat-icon class="!h-4 !w-4 !text-[16px]">add</mat-icon>
       New Church
     </button>
   </header>
 
+  <!-- Summary Cards with full dark mode support -->
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white"
-        >
-          <mat-icon>church</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
-            Total churches
-          </p>
-          <p class="text-2xl font-bold text-neutral-800">{{ store.churchCount() }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue"
-        >
-          <mat-icon>home</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
-            Local
-          </p>
-          <p class="text-2xl font-bold text-brand-blue">{{ store.localCount() }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500"
-        >
-          <mat-icon>account_tree</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
-            Daughter
-          </p>
-          <p class="text-2xl font-bold text-neutral-700">{{ store.daughterCount() }}</p>
-        </div>
-      </div>
-    </div>
+    <app-stat-card
+      icon="church"
+      label="Total Churches"
+      [value]="store.churchCount().toString()"
+      accentClass="bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300"
+    />
+    <app-stat-card
+      icon="home"
+      label="Local Churches (HQ)"
+      [value]="store.localCount().toString()"
+      accentClass="bg-blue-100 text-brand-blue dark:bg-blue-900/30 dark:text-blue-300"
+    />
+    <app-stat-card
+      icon="account_tree"
+      label="Daughter Churches"
+      [value]="store.daughterCount().toString()"
+      accentClass="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+    />
   </div>
 
+  <!-- Error Banner -->
   @if (store.error(); as message) {
-    <div
-      class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4"
-    >
+    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
       <div class="flex items-center gap-3">
-        <div
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600"
-        >
-          <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
-        </div>
-        <p class="text-sm text-red-700">{{ message }}</p>
+        <mat-icon class="text-red-500 dark:text-red-400">error_outline</mat-icon>
+        <p>{{ message }}</p>
       </div>
-      <button
-        mat-icon-button
-        (click)="store.clearError()"
-        aria-label="Dismiss error"
-      >
+      <button mat-icon-button (click)="store.clearError()" aria-label="Dismiss error">
         <mat-icon>close</mat-icon>
       </button>
     </div>
   }
 
+  <!-- Newly Issued Credentials Card -->
   @if (store.created(); as created) {
     <div
       id="credentials-card"
-      class="overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-br from-brand/10 via-white to-brand-blue/10 shadow-sm"
+      class="overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-br from-brand/5 via-white to-brand-blue/5 p-5 shadow-sm dark:border-brand/30 dark:from-brand/10 dark:via-gray-900 dark:to-brand-blue/10"
     >
-      <div class="flex items-start justify-between gap-4 px-5 pt-5">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4 dark:border-gray-800">
         <div class="flex items-center gap-3">
-          <div
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white"
-          >
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white shadow-sm">
             <mat-icon>key</mat-icon>
           </div>
           <div>
-            <h3 class="font-semibold text-neutral-800">Church admin account created</h3>
-            <p class="text-sm text-neutral-500">
-              One-time credentials for
-              <strong class="font-semibold text-neutral-700">{{
-                created.church.name
-              }}</strong>
+            <h3 class="font-bold text-gray-900 dark:text-white">Church Admin Account Created</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              One-time credentials generated for <strong class="text-gray-700 dark:text-gray-300">{{ created.church.name }}</strong>
             </p>
           </div>
         </div>
-        <button
-          mat-icon-button
-          (click)="dismissCredentials()"
-          aria-label="Dismiss credentials"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            (click)="downloadCredentials()"
+            class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+          >
+            <mat-icon class="!h-4 !w-4 !text-[16px]">download</mat-icon>
+            Download PDF
+          </button>
+          <button mat-icon-button (click)="dismissCredentials()" aria-label="Dismiss credentials">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
-        <div class="rounded-xl border border-neutral-200 bg-white/80 p-4">
-          <p class="text-[11px] uppercase tracking-wide text-neutral-400">
-            Admin email
-          </p>
-          <p class="mt-1 truncate font-mono text-sm font-semibold text-neutral-800">
+      <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="rounded-xl border border-gray-200 bg-white/80 p-3.5 dark:border-gray-800 dark:bg-gray-800/80">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Admin Email</p>
+          <p class="mt-1 truncate font-mono text-sm font-semibold text-gray-900 dark:text-white">
             {{ created.adminEmail }}
           </p>
           <button
             type="button"
-            class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand transition hover:underline"
             (click)="copyCredentials('email')"
           >
             <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">content_copy</mat-icon>
@@ -141,224 +109,234 @@
           </button>
         </div>
 
-        <div class="rounded-xl border border-neutral-200 bg-white/80 p-4">
-          <p class="text-[11px] uppercase tracking-wide text-neutral-400">
-            Temporary password
-          </p>
-          <p class="mt-1 truncate font-mono text-sm font-semibold text-neutral-800">
-            {{
-              showCredentials()
-                ? created.adminTempPassword
-                : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'
-            }}
+        <div class="rounded-xl border border-gray-200 bg-white/80 p-3.5 dark:border-gray-800 dark:bg-gray-800/80">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Temporary Password</p>
+          <p class="mt-1 truncate font-mono text-sm font-semibold text-brand dark:text-brand-300">
+            {{ showCredentials() ? created.adminTempPassword : '••••••••••••' }}
           </p>
           <div class="mt-2 flex items-center gap-3">
             <button
               type="button"
-              class="inline-flex items-center gap-1 text-xs font-semibold text-brand"
-              (click)="toggleCredentialsReveal()"
-            >
-              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">{{
-                showCredentials() ? 'visibility_off' : 'visibility'
-              }}</mat-icon>
-              {{ showCredentials() ? 'Hide' : 'Reveal' }}
-            </button>
-            <button
-              type="button"
-              class="inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-neutral-700"
+              class="inline-flex items-center gap-1 text-xs font-semibold text-brand transition hover:underline"
               (click)="copyCredentials('password')"
             >
               <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">content_copy</mat-icon>
-              {{ copied() === 'password' ? 'Copied!' : 'Copy' }}
+              {{ copied() === 'password' ? 'Copied!' : 'Copy password' }}
+            </button>
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              (click)="toggleCredentialsReveal()"
+            >
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">{{ showCredentials() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              {{ showCredentials() ? 'Hide' : 'Reveal' }}
             </button>
           </div>
         </div>
-      </div>
-
-      <div class="flex items-center justify-between gap-3 border-t border-brand/10 px-5 py-3">
-        <p class="flex items-center gap-1 text-xs text-neutral-500">
-          <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">info</mat-icon>
-          The password is shown once and cannot be recovered — save a copy.
-        </p>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-blue px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
-          (click)="downloadCredentials()"
-        >
-          <mat-icon class="!h-4 !w-4 !text-[16px]">download</mat-icon>
-          Download PDF
-        </button>
       </div>
     </div>
   }
 
-  <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-    @if (store.isLoading()) {
-      <div
-        class="col-span-full rounded-2xl border border-neutral-200 bg-white px-6 py-10 text-center text-sm text-neutral-500"
-      >
-        Loading churches…
-      </div>
-    } @else if (store.churches().length === 0) {
-      <div
-        class="col-span-full rounded-2xl border border-dashed border-neutral-300 bg-white px-6 py-12 text-center"
-      >
-        <p class="text-sm text-neutral-500">No churches yet.</p>
-        <button
-          type="button"
-          (click)="openForm()"
-          class="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-strong"
-        >
-          <mat-icon class="!h-4 !w-4 !text-[16px]">add</mat-icon>
-          Create the first church
-        </button>
-      </div>
-    } @else {
-      @for (church of store.churches(); track church.id) {
-        <div
-          class="group flex flex-col rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:border-brand/40 hover:shadow-md"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div
-                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white"
-              >
-                <mat-icon class="!h-5 !w-5 !text-[20px]">church</mat-icon>
-              </div>
-              <div class="min-w-0">
-                <h3 class="truncate font-semibold text-neutral-800">
+  <!-- Modern Data Table -->
+  <section class="rounded-2xl">
+    <app-table
+      [data]="store.churches()"
+      [searchFn]="searchChurch"
+      searchPlaceholder="Search churches by name, code, location or phone…"
+      [pageSizeOptions]="[10, 25, 50, 100]"
+    >
+      <!-- Church Column -->
+      <app-table-column key="name" header="Church" [sortable]="true" [sortValue]="churchName">
+        <ng-template let-church>
+          <div class="flex items-center gap-3 py-1 cursor-pointer" (click)="viewChurch(church)">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue text-white shadow-sm ring-2 ring-white/60 dark:ring-gray-700/60"
+            >
+              <mat-icon class="!h-5 !w-5 !text-[20px]">church</mat-icon>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="truncate font-semibold text-gray-900 transition hover:text-brand dark:text-white dark:hover:text-brand-300">
                   {{ church.name }}
-                </h3>
-                <p class="text-xs text-neutral-500">
-                  <span
-                    class="mr-1 rounded-full bg-brand-blue/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-brand-blue"
-                  >
-                    {{ church.code }}
-                  </span>
-                  @if (church.type === 'Local') {
-                    <span
-                      class="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-brand-blue"
-                    >
-                      Local
-                    </span>
-                  } @else {
-                    <span
-                      class="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold text-neutral-600"
-                    >
-                      Daughter
-                    </span>
-                  }
-                </p>
+                </span>
+                <span class="rounded-md bg-brand-blue/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-blue dark:bg-blue-900/30 dark:text-blue-300">
+                  {{ church.code }}
+                </span>
               </div>
-            </div>
-
-            <div class="shrink-0">
-              <button mat-icon-button [matMenuTriggerFor]="cardMenu" aria-label="Actions">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #cardMenu="matMenu" xPosition="before">
-                <button mat-menu-item (click)="openForm(church)">
-                  <mat-icon>edit</mat-icon>
-                  Edit church
-                </button>
-                <button mat-menu-item (click)="deleteChurch(church)">
-                  <mat-icon class="text-red-500">delete</mat-icon>
-                  Delete church
-                </button>
-              </mat-menu>
-            </div>
-          </div>
-
-          <dl class="mt-4 space-y-2 text-sm">
-            @if (parentName(church); as parent) {
-              <div class="flex items-start justify-between gap-3">
-                <dt class="text-neutral-400">Parent</dt>
-                <dd class="truncate font-medium text-neutral-700">{{ parent }}</dd>
-              </div>
-            }
-            @if (location(church.city, church.subcity); as loc) {
-              <div class="flex items-start justify-between gap-3">
-                <dt class="text-neutral-400">Location</dt>
-                <dd class="text-right font-medium text-neutral-700">{{ loc }}</dd>
-              </div>
-            }
-            @if (church.email || church.phone || church.tel) {
-              <div class="flex items-start justify-between gap-3">
-                <dt class="text-neutral-400">Contact</dt>
-                <dd class="text-right font-medium text-neutral-700">
-                  {{ church.email || church.phone || church.tel }}
-                </dd>
-              </div>
-            }
-          </dl>
-
-          <div class="mt-4 flex-1"></div>
-          <div class="mt-4 flex items-center justify-between border-t border-neutral-100 pt-3">
-            <span class="text-xs text-neutral-400">
-              @if (store.created()?.church.id === church.id) {
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-1 font-semibold text-brand hover:underline"
-                  (click)="revealCredentials()"
-                >
-                  <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">key</mat-icon>
-                  Credentials issued
-                </button>
-              } @else {
-                @if (url(church.websiteUrl); as site) {
-                  <a
-                    [href]="site"
-                    target="_blank"
-                    rel="noopener"
-                    class="inline-flex items-center gap-1 text-neutral-500 transition hover:text-brand"
-                  >
-                    <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">language</mat-icon>
-                    Website
-                  </a>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                @if (church.type === 'Local') {
+                  <span class="font-medium text-brand-blue dark:text-blue-400">Local Church (HQ)</span>
                 } @else {
-                  No website
+                  <span>Daughter of <strong>{{ parentName(church) ?? 'District' }}</strong></span>
                 }
-              }
+              </p>
+            </div>
+          </div>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Type Column -->
+      <app-table-column key="type" header="Type" [sortable]="true" [sortValue]="churchTypeVal" headerClass="hidden sm:table-cell" cellClass="hidden sm:table-cell">
+        <ng-template let-church>
+          @if (church.type === 'Local') {
+            <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-brand-blue dark:bg-blue-900/30 dark:text-blue-300">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">home</mat-icon>
+              Local
             </span>
-            <span class="text-xs text-neutral-400">
-              {{ church.type === 'Local' ? 'HQ' : 'Daughter of district' }}
+          } @else {
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">account_tree</mat-icon>
+              Daughter
+            </span>
+          }
+        </ng-template>
+      </app-table-column>
+
+      <!-- Location Column -->
+      <app-table-column key="location" header="Location" [sortable]="true" [sortValue]="churchLocationVal" headerClass="hidden md:table-cell" cellClass="hidden md:table-cell">
+        <ng-template let-church>
+          <div class="text-xs text-gray-600 dark:text-gray-300">
+            @if (location(church.city, church.subcity); as loc) {
+              <div class="flex items-center gap-1">
+                <mat-icon class="!h-3.5 !w-3.5 !text-[14px] text-gray-400">place</mat-icon>
+                <span>{{ loc }}</span>
+              </div>
+            } @else {
+              <span class="text-gray-400 dark:text-gray-500">—</span>
+            }
+          </div>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Members Count Column -->
+      <app-table-column key="members" header="Members" [sortable]="true" [sortValue]="churchMembersVal" align="center">
+        <ng-template let-church>
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">people</mat-icon>
+            {{ church.memberCount ?? 0 }}
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Staff & Ministers Column -->
+      <app-table-column key="staff" header="Ministers / Staff" [sortable]="true" [sortValue]="churchPersonnelVal" align="center" headerClass="hidden lg:table-cell" cellClass="hidden lg:table-cell">
+        <ng-template let-church>
+          <div class="flex items-center justify-center gap-1.5 text-xs">
+            <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-300" title="Full-time Ministers">
+              <mat-icon class="!h-3 !w-3 !text-[12px]">local_church</mat-icon>
+              {{ church.ministerCount ?? 0 }}
+            </span>
+            <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300" title="Office Staff">
+              <mat-icon class="!h-3 !w-3 !text-[12px]">badge</mat-icon>
+              {{ church.employeeCount ?? 0 }}
             </span>
           </div>
-        </div>
-      }
-    }
+        </ng-template>
+      </app-table-column>
+
+      <!-- Contact Column -->
+      <app-table-column key="contact" header="Contact" headerClass="hidden xl:table-cell" cellClass="hidden xl:table-cell">
+        <ng-template let-church>
+          <div class="text-xs text-gray-500 dark:text-gray-400">
+            @if (church.phone || church.tel) {
+              <div class="flex items-center gap-1">
+                <mat-icon class="!h-3 !w-3 !text-[12px]">phone</mat-icon>
+                <span>{{ church.phone || church.tel }}</span>
+              </div>
+            }
+            @if (church.email) {
+              <div class="flex items-center gap-1 mt-0.5 truncate max-w-[180px]">
+                <mat-icon class="!h-3 !w-3 !text-[12px]">mail</mat-icon>
+                <span class="truncate">{{ church.email }}</span>
+              </div>
+            }
+            @if (!church.phone && !church.tel && !church.email) {
+              <span class="text-gray-400 dark:text-gray-500">—</span>
+            }
+          </div>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Actions Column -->
+      <app-table-column key="actions" header="Actions" align="right">
+        <ng-template let-church>
+          <div class="flex items-center justify-end gap-1.5">
+            <button
+              type="button"
+              (click)="viewChurch(church)"
+              class="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-brand hover:text-brand dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-brand dark:hover:text-white"
+            >
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">visibility</mat-icon>
+              Details
+            </button>
+
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="churchMenu"
+              aria-label="Actions"
+              class="!h-8 !w-8 !leading-8 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+              <mat-icon class="!h-4 !w-4 !text-[18px]">more_vert</mat-icon>
+            </button>
+            <mat-menu #churchMenu="matMenu" xPosition="before">
+              <button mat-menu-item (click)="viewChurch(church)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Full Details</span>
+              </button>
+              <button mat-menu-item (click)="openForm(church)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit Church</span>
+              </button>
+              <button mat-menu-item (click)="deleteChurch(church)">
+                <mat-icon class="text-red-500">delete</mat-icon>
+                <span class="text-red-600">Delete Church</span>
+              </button>
+            </mat-menu>
+          </div>
+        </ng-template>
+      </app-table-column>
+    </app-table>
   </section>
 </div>
 
+<!-- ========================================================================= -->
+<!-- Modern Redesigned Form Modal: Create & Edit Church                       -->
+<!-- ========================================================================= -->
 @if (showForm()) {
   <div
-    class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-sm sm:py-10"
+    class="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md sm:py-8"
+    role="dialog"
+    aria-modal="true"
     (click)="!isSaving() && closeForm()"
   >
     <div
-      class="my-auto w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl"
+      class="my-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900"
       (click)="$event.stopPropagation()"
     >
-      <div
-        class="relative overflow-hidden bg-gradient-to-br from-brand via-brand-strong to-brand-blue px-6 py-5 text-white"
-      >
+      <!-- Modal Header -->
+      <div class="relative overflow-hidden bg-gradient-to-r from-brand via-brand-strong to-brand-blue px-6 py-5 text-white">
         <div class="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
         <div class="relative flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-bold">
-              {{ editing() ? 'Edit church' : 'Create church' }}
-            </h2>
-            <p class="mt-0.5 text-sm text-white/80">
-              @if (editing(); as church) {
-                Update the details of {{ church.name }}.
-              } @else {
-                Register a new church and its administrator account.
-              }
-            </p>
+          <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur ring-1 ring-white/20">
+              <mat-icon>{{ editing() ? 'edit' : 'add_business' }}</mat-icon>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold">
+                {{ editing() ? 'Edit Church' : 'Register New Church' }}
+              </h2>
+              <p class="mt-0.5 text-xs text-white/80">
+                @if (editing(); as church) {
+                  Update information, contact, and address for {{ church.name }}.
+                } @else {
+                  Set up a local or daughter church and generate its administrator credentials.
+                }
+              </p>
+            </div>
           </div>
           <button
             mat-icon-button
-            class="!text-white"
+            class="!text-white hover:bg-white/10"
             (click)="closeForm()"
             [disabled]="isSaving()"
             aria-label="Close"
@@ -368,233 +346,271 @@
         </div>
       </div>
 
-      <div class="bg-gradient-to-br from-brand/5 via-white to-brand-blue/5 p-6">
+      <!-- Modal Body -->
+      <div class="max-h-[75vh] overflow-y-auto p-6 space-y-6">
         @if (store.error(); as message) {
-          <div
-            class="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
-          >
+          <div class="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
             <mat-icon class="text-red-500">error_outline</mat-icon>
-            <p class="text-sm text-red-700">{{ message }}</p>
+            <p>{{ message }}</p>
           </div>
         }
 
-        <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
-          <div class="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
-            <mat-form-field appearance="outline">
-              <mat-label>Church name</mat-label>
-              <input
-                matInput
-                formControlName="name"
-                placeholder="Kazanchis Gospel Church"
-                maxlength="200"
-              />
-              @if (form.controls.name.hasError('required')) {
-                <mat-error>Church name is required.</mat-error>
-              } @else if (form.controls.name.hasError('maxlength')) {
-                <mat-error>Church name is too long (200 characters max).</mat-error>
-              } @else if (form.controls.name.hasError('server')) {
-                <mat-error>{{ form.controls.name.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+          <!-- Section 1: Identity -->
+          <div class="rounded-2xl border border-gray-100 bg-gray-50/60 p-4.5 dark:border-gray-800 dark:bg-white/[0.02]">
+            <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <mat-icon class="!h-4 !w-4 !text-[16px] text-brand">apartment</mat-icon>
+              Church Identification
+            </h3>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Code</mat-label>
-              <input
-                matInput
-                formControlName="code"
-                placeholder="KAZ-02"
-                maxlength="10"
-                class="!uppercase"
-              />
-              @if (form.controls.code.hasError('required')) {
-                <mat-error>Church code is required.</mat-error>
-              } @else if (form.controls.code.hasError('pattern')) {
-                <mat-error>Use 2–10 letters, digits or dashes.</mat-error>
-              } @else if (form.controls.code.hasError('server')) {
-                <mat-error>{{ form.controls.code.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Type</mat-label>
-              <mat-select formControlName="type">
-                <mat-option value="Local">Local</mat-option>
-                <mat-option value="Daughter">Daughter</mat-option>
-              </mat-select>
-              @if (form.controls.type.hasError('server')) {
-                <mat-error>{{ form.controls.type.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
-
-@if (type() === 'Daughter') {
-              <mat-form-field appearance="outline">
-                <mat-label>Parent church</mat-label>
-                <mat-select formControlName="parentChurchId">
-                  @for (parent of localChurches(); track parent.id) {
-                    <mat-option [value]="parent.id">{{ parent.name }}</mat-option>
-                  }
-                </mat-select>
-                <mat-hint>A local church that hosts this daughter church.</mat-hint>
-                @if (form.controls.parentChurchId.hasError('required')) {
-                  <mat-error>Select a local parent church.</mat-error>
-                } @else if (form.controls.parentChurchId.hasError('server')) {
-                  <mat-error>
-                    {{ form.controls.parentChurchId.getError('server') }}
-                  </mat-error>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <!-- Name -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Church Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="name"
+                  placeholder="e.g. Bethel Evangelical Church"
+                  maxlength="200"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+                @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+                  <p class="mt-1 text-xs text-red-500">Church name is required.</p>
                 }
-              </mat-form-field>
-            }
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>City</mat-label>
-              <input
-                matInput
-                formControlName="city"
-                placeholder="Addis Ababa"
-                maxlength="100"
-              />
-              @if (form.controls.city.hasError('maxlength')) {
-                <mat-error>City is too long (100 characters max).</mat-error>
-              } @else if (form.controls.city.hasError('server')) {
-                <mat-error>{{ form.controls.city.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
+              <!-- Code -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Church Code <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="code"
+                  placeholder="e.g. BET-01"
+                  maxlength="10"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 font-mono text-sm uppercase outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+                <p class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">2–10 uppercase letters, numbers, or dashes.</p>
+                @if (form.controls.code.touched && form.controls.code.hasError('required')) {
+                  <p class="mt-1 text-xs text-red-500">Church code is required.</p>
+                } @else if (form.controls.code.touched && form.controls.code.hasError('pattern')) {
+                  <p class="mt-1 text-xs text-red-500">Invalid format (2–10 letters, digits or dashes).</p>
+                }
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Subcity</mat-label>
-              <input matInput formControlName="subcity" placeholder="Bole" maxlength="100" />
-              @if (form.controls.subcity.hasError('maxlength')) {
-                <mat-error>Subcity is too long (100 characters max).</mat-error>
-              } @else if (form.controls.subcity.hasError('server')) {
-                <mat-error>{{ form.controls.subcity.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
+              <!-- Type -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Church Type <span class="text-red-500">*</span>
+                </label>
+                <select
+                  formControlName="type"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="Local">Local Church (HQ)</option>
+                  <option value="Daughter">Daughter Church</option>
+                </select>
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Email</mat-label>
-              <input matInput formControlName="email" type="email" maxlength="100" />
-              @if (form.controls.email.hasError('email')) {
-                <mat-error>Enter a valid email address.</mat-error>
-              } @else if (form.controls.email.hasError('maxlength')) {
-                <mat-error>Email is too long (100 characters max).</mat-error>
-              } @else if (form.controls.email.hasError('server')) {
-                <mat-error>{{ form.controls.email.getError('server') }}</mat-error>
+              <!-- Parent Church (for Daughter) -->
+              @if (type() === 'Daughter') {
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Parent Church <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    formControlName="parentChurchId"
+                    class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  >
+                    <option [ngValue]="null">Select local parent church…</option>
+                    @for (parent of localChurches(); track parent.id) {
+                      <option [value]="parent.id">{{ parent.name }} ({{ parent.code }})</option>
+                    }
+                  </select>
+                  @if (form.controls.parentChurchId.touched && form.controls.parentChurchId.hasError('required')) {
+                    <p class="mt-1 text-xs text-red-500">Please select a parent local church.</p>
+                  }
+                </div>
               }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Phone</mat-label>
-              <input
-                matInput
-                formControlName="phone"
-                placeholder="+251 911 000 000"
-                maxlength="20"
-              />
-              @if (form.controls.phone.hasError('maxlength')) {
-                <mat-error>Phone is too long (20 characters max).</mat-error>
-              } @else if (form.controls.phone.hasError('server')) {
-                <mat-error>{{ form.controls.phone.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Tel</mat-label>
-              <input
-                matInput
-                formControlName="tel"
-                placeholder="011 000 0000"
-                maxlength="20"
-              />
-              @if (form.controls.tel.hasError('maxlength')) {
-                <mat-error>Tel is too long (20 characters max).</mat-error>
-              } @else if (form.controls.tel.hasError('server')) {
-                <mat-error>{{ form.controls.tel.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Map address</mat-label>
-              <input matInput formControlName="mapAddress" />
-              @if (form.controls.mapAddress.hasError('server')) {
-                <mat-error>{{ form.controls.mapAddress.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="sm:col-span-2">
-              <mat-label>Website URL</mat-label>
-              <input
-                matInput
-                formControlName="websiteUrl"
-                placeholder="https://church.example.org"
-                maxlength="200"
-              />
-              @if (form.controls.websiteUrl.hasError('maxlength')) {
-                <mat-error>Website URL is too long (200 characters max).</mat-error>
-              } @else if (form.controls.websiteUrl.hasError('server')) {
-                <mat-error>{{ form.controls.websiteUrl.getError('server') }}</mat-error>
-              }
-            </mat-form-field>
+            </div>
           </div>
 
-          @if (!editing()) {
-            <div class="rounded-2xl border border-brand/15 bg-brand/5 p-4">
-              <h4 class="font-semibold text-neutral-800">Church administrator</h4>
-              <p class="mt-0.5 text-xs text-neutral-500">
-                An admin account is generated automatically — the email and temporary
-                password are shown once after creation.
-              </p>
-              <div
-                class="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-3"
-              >
-                <mat-form-field appearance="outline">
-                  <mat-label>First name</mat-label>
-                  <input matInput formControlName="adminFirstName" />
-                  @if (form.controls.adminFirstName.hasError('required')) {
-                    <mat-error>Required</mat-error>
-                  } @else if (form.controls.adminFirstName.hasError('server')) {
-                    <mat-error>{{ form.controls.adminFirstName.getError('server') }}</mat-error>
-                  }
-                </mat-form-field>
+          <!-- Section 2: Location & Contact -->
+          <div class="rounded-2xl border border-gray-100 bg-gray-50/60 p-4.5 dark:border-gray-800 dark:bg-white/[0.02]">
+            <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <mat-icon class="!h-4 !w-4 !text-[16px] text-brand-blue">pin_drop</mat-icon>
+              Location & Contact Details
+            </h3>
 
-                <mat-form-field appearance="outline">
-                  <mat-label>Father name</mat-label>
-                  <input matInput formControlName="adminFatherName" />
-                  @if (form.controls.adminFatherName.hasError('required')) {
-                    <mat-error>Required</mat-error>
-                  } @else if (form.controls.adminFatherName.hasError('server')) {
-                    <mat-error>{{ form.controls.adminFatherName.getError('server') }}</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Grandfather name</mat-label>
-                  <input matInput formControlName="adminGrandfatherName" />
-                  @if (form.controls.adminGrandfatherName.hasError('required')) {
-                    <mat-error>Required</mat-error>
-                  } @else if (form.controls.adminGrandfatherName.hasError('server')) {
-                    <mat-error>{{ form.controls.adminGrandfatherName.getError('server') }}</mat-error>
-                  }
-                </mat-form-field>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">City</label>
+                <input
+                  type="text"
+                  formControlName="city"
+                  placeholder="e.g. Addis Ababa"
+                  maxlength="100"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
               </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Subcity / Zone</label>
+                <input
+                  type="text"
+                  formControlName="subcity"
+                  placeholder="e.g. Bole"
+                  maxlength="100"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Mobile Phone</label>
+                <input
+                  type="tel"
+                  formControlName="phone"
+                  placeholder="+251 911 000 000"
+                  maxlength="20"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Landline Tel</label>
+                <input
+                  type="tel"
+                  formControlName="tel"
+                  placeholder="011 000 0000"
+                  maxlength="20"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Official Email</label>
+                <input
+                  type="email"
+                  formControlName="email"
+                  placeholder="contact@church.org"
+                  maxlength="100"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Website</label>
+                <input
+                  type="url"
+                  formControlName="websiteUrl"
+                  placeholder="https://church.org"
+                  maxlength="200"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Specific Physical / Map Address</label>
+                <input
+                  type="text"
+                  formControlName="mapAddress"
+                  placeholder="e.g. Near St. Paul Hospital, Ring Road"
+                  class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Initial Administrator Account (Create Mode Only) -->
+          @if (!editing()) {
+            <div class="rounded-2xl border border-brand/20 bg-brand/5 p-4.5 dark:border-brand/30 dark:bg-brand/10">
+              <div class="flex items-start gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-sm">
+                  <mat-icon class="!h-5 !w-5 !text-[20px]">person_add</mat-icon>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-gray-900 dark:text-white">Church Administrator Account</h4>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    An initial church admin will be provisioned. Their system email and temporary password will be presented immediately upon creation.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">First Name <span class="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    formControlName="adminFirstName"
+                    placeholder="First"
+                    class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-sm outline-none transition focus:border-brand dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.adminFirstName.touched && form.controls.adminFirstName.hasError('required')) {
+                    <p class="mt-1 text-xs text-red-500">Required</p>
+                  }
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Father Name <span class="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    formControlName="adminFatherName"
+                    placeholder="Father"
+                    class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-sm outline-none transition focus:border-brand dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.adminFatherName.touched && form.controls.adminFatherName.hasError('required')) {
+                    <p class="mt-1 text-xs text-red-500">Required</p>
+                  }
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">Grandfather Name <span class="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    formControlName="adminGrandfatherName"
+                    placeholder="Grandfather"
+                    class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-sm outline-none transition focus:border-brand dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.adminGrandfatherName.touched && form.controls.adminGrandfatherName.hasError('required')) {
+                    <p class="mt-1 text-xs text-red-500">Required</p>
+                  }
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="rounded-xl border border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
+              <p>
+                <strong class="font-semibold text-gray-700 dark:text-gray-300">Note:</strong> Church administrator accounts and roles are managed under the
+                <a routerLink="/district/accounts" class="font-semibold text-brand hover:underline">Accounts module</a>.
+              </p>
             </div>
           }
 
-          <div class="flex items-center justify-end gap-3 pt-2">
+          <!-- Modal Actions -->
+          <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">
             <button
-              mat-button
               type="button"
               (click)="closeForm()"
               [disabled]="isSaving()"
+              class="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
-              mat-flat-button
-              color="primary"
               type="submit"
               [disabled]="isSaving()"
+              class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-95 disabled:opacity-50"
             >
-              {{ isSaving() ? 'Saving…' : editing() ? 'Update church' : 'Create church' }}
+              @if (isSaving()) {
+                <mat-icon class="animate-spin !h-4 !w-4 !text-[16px]">progress_activity</mat-icon>
+                <span>Saving…</span>
+              } @else {
+                <mat-icon class="!h-4 !w-4 !text-[16px]">{{ editing() ? 'save' : 'check' }}</mat-icon>
+                <span>{{ editing() ? 'Save Changes' : 'Create Church' }}</span>
+              }
             </button>
           </div>
         </form>

@@ -37,6 +37,30 @@ public class MemberDashboardService(IMemberDashboardRepository dashboardReposito
             new MemberDashboardDto(member.Id, BuildProfile(member), cards.Count, cards, service));
     }
 
+    public async Task<Result<MemberHistoryDto, MemberDashboardError>> GetHistoryAsync(
+        long memberId, CancellationToken ct)
+    {
+        var member = await dashboardRepository.GetMemberAsync(memberId, ct);
+        if (member is null)
+            return Result<MemberHistoryDto, MemberDashboardError>.Failure(
+                MemberDashboardError.MemberNotFound(memberId));
+
+        var attendanceRows = await dashboardRepository.GetAttendanceHistoryAsync(memberId, ct);
+        var paymentRows = await dashboardRepository.GetPaymentHistoryAsync(memberId, ct);
+
+        return Result<MemberHistoryDto, MemberDashboardError>.Success(
+            new MemberHistoryDto(
+                memberId,
+                attendanceRows
+                    .Select(a => new MemberAttendanceHistoryDto(
+                        a.TeamId, a.TeamName, a.AttendanceDate, a.Status.ToString(), a.Reason))
+                    .ToList(),
+                paymentRows
+                    .Select(p => new MemberPaymentHistoryDto(
+                        p.Id, p.TeamId, p.TeamName, p.Month, p.Amount, p.PaidAt))
+                    .ToList()));
+    }
+
     private static MemberServiceSummaryDto BuildService(
         List<MemberTeamCardDto> cards,
         List<EmployeeServiceRow> employeeRows,
@@ -120,6 +144,7 @@ public class MemberDashboardService(IMemberDashboardRepository dashboardReposito
             membership.TeamId,
             membership.TeamName,
             membership.Role.ToString(),
+            membership.ChurchId,
             new MemberAttendanceSummaryDto(
                 meetings.Count, present, late, absent, present + late,
                 rate, teamAttendance.MaxBy(a => a.AttendanceDate)?.AttendanceDate),

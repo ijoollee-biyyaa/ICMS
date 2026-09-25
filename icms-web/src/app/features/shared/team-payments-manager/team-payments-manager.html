@@ -1,0 +1,192 @@
+<div class="space-y-6">
+  @if (notice()) {
+    <div class="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+      <mat-icon class="mt-0.5">check_circle</mat-icon>
+      <p>{{ notice() }}</p>
+    </div>
+  }
+  @if (error()) {
+    <div class="flex items-start justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+      <div class="flex items-start gap-3">
+        <mat-icon class="mt-0.5">error_outline</mat-icon>
+        <p>{{ error() }}</p>
+      </div>
+      <button mat-icon-button (click)="error.set('')" aria-label="Dismiss error">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="grid grid-cols-1 gap-4">
+      @for (i of [0, 1, 2]; track i) {
+        <div class="h-24 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-gray-800"></div>
+      }
+    </div>
+  } @else {
+    <!-- Record payment -->
+    <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">Monthly contributions</h3>
+          <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+            Members help the social life of the team with any amount they choose.
+            One payment per member per month.
+          </p>
+        </div>
+        <span class="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">
+          Total {{ amountText(paymentTotal()) }}
+        </span>
+      </div>
+
+      <form [formGroup]="paymentForm" (ngSubmit)="recordPayment()" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <mat-form-field appearance="outline">
+          <mat-label>Member</mat-label>
+          <mat-select formControlName="memberId">
+            @for (member of roster(); track member.memberId) {
+              <mat-option [value]="member.memberId">{{ member.memberName }}</mat-option>
+            } @empty {
+              <mat-option [value]="''" disabled>No members yet</mat-option>
+            }
+          </mat-select>
+          @if (paymentForm.controls.memberId.hasError('required')) {
+            <mat-error>Select a member.</mat-error>
+          } @else if (paymentForm.controls.memberId.hasError('server')) {
+            <mat-error>{{ paymentForm.controls.memberId.getError('server') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Month</mat-label>
+          <input matInput formControlName="month" type="month" placeholder="2026-09" />
+          @if (paymentForm.controls.month.hasError('required')) {
+            <mat-error>Month is required.</mat-error>
+          } @else if (paymentForm.controls.month.hasError('server')) {
+            <mat-error>{{ paymentForm.controls.month.getError('server') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Amount (ETB)</mat-label>
+          <input matInput formControlName="amount" type="number" min="0.01" step="0.01" />
+          @if (paymentForm.controls.amount.hasError('required')) {
+            <mat-error>Amount is required.</mat-error>
+          } @else if (paymentForm.controls.amount.hasError('min')) {
+            <mat-error>Enter a positive amount.</mat-error>
+          } @else if (paymentForm.controls.amount.hasError('server')) {
+            <mat-error>{{ paymentForm.controls.amount.getError('server') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="sm:col-span-3 flex justify-end">
+          <button
+            type="submit"
+            [disabled]="paymentForm.invalid || busy()"
+            class="flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-strong disabled:opacity-60"
+          >
+            <mat-icon class="!h-4 !w-4 !text-[16px]">add</mat-icon>
+            {{ busy() ? 'Saving…' : 'Add payment' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Giving report -->
+    <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-semibold text-gray-900 dark:text-white">Giving report</h3>
+        <span class="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">
+          Total {{ amountText(paymentTotal()) }}
+        </span>
+      </div>
+      @if (summary().length === 0) {
+        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          No payments recorded yet for this team.
+        </p>
+      } @else {
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 text-left text-xs uppercase tracking-wider text-gray-400 dark:border-gray-800">
+                <th class="py-2 pr-4 font-semibold">Member</th>
+                <th class="py-2 pr-4 font-semibold">Payments</th>
+                <th class="py-2 pr-4 font-semibold">Total given</th>
+                <th class="py-2 font-semibold">Last paid</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+              @for (row of summary(); track row.memberId) {
+                <tr>
+                  <td class="py-2.5 pr-4">
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ row.memberName }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ row.memberEfgbcId }}</p>
+                  </td>
+                  <td class="py-2.5 pr-4 text-gray-700 dark:text-gray-300">{{ row.paymentCount }}</td>
+                  <td class="py-2.5 pr-4 font-semibold text-brand dark:text-brand-300">{{ amountText(row.totalAmount) }}</td>
+                  <td class="py-2.5 text-gray-600 dark:text-gray-300">
+                    {{ row.lastPaidMonth ? monthLabel(row.lastPaidMonth) : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <!-- Recent payments -->
+    @if (payments().length > 0) {
+      <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+        <h3 class="font-semibold text-gray-900 dark:text-white">Payment history</h3>
+        <div class="mt-4 space-y-2">
+          @for (payment of payments(); track payment.id) {
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ payment.memberName }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ monthLabel(payment.month) }}</p>
+              </div>
+              @if (editingPayment() === payment.id) {
+                <div class="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    [value]="editingAmount()"
+                    (input)="onEditAmount($event)"
+                    class="w-28 rounded-lg border border-gray-200 bg-transparent px-3 py-1.5 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-brand dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30"
+                  />
+                  <button
+                    type="button"
+                    (click)="saveEdit(payment)"
+                    class="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-strong"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    (click)="cancelEdit()"
+                    class="rounded-full border border-gray-200 px-4 py-1.5 text-xs font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              } @else {
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold text-brand dark:text-brand-300">{{ amountText(payment.amount) }}</span>
+                  <button
+                    mat-icon-button
+                    (click)="startEdit(payment)"
+                    class="text-gray-500 hover:text-brand dark:text-gray-400 dark:hover:text-brand-300"
+                    aria-label="Edit payment amount"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

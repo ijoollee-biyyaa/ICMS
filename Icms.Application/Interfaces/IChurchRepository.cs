@@ -12,7 +12,11 @@ public interface IChurchRepository
     Task<bool> HasMembersAsync(long churchId, CancellationToken ct);
     Task<bool> HasDaughterChurchesAsync(long churchId, CancellationToken ct);
     Task<int> CountMembersAsync(long churchId, CancellationToken ct);
+    Task<int> CountActiveMembersAsync(long churchId, CancellationToken ct);
+    Task<int> CountEmployeesAsync(long churchId, CancellationToken ct);
+    Task<int> CountMinistersAsync(long churchId, CancellationToken ct);
     Task<int> CountDaughterChurchesAsync(long churchId, CancellationToken ct);
     Task<IReadOnlyList<Church>> GetByDistrictPagedAsync(long districtId, string? search, int page, int pageSize, CancellationToken ct);
     Task<int> CountByDistrictAsync(long districtId, string? search, CancellationToken ct);
+    Task<Dictionary<long, (int MemberCount, int EmployeeCount, int MinisterCount)>> GetChurchMetricsAsync(IEnumerable<long> churchIds, CancellationToken ct);
 }

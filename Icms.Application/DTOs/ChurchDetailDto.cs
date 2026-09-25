@@ -16,7 +16,10 @@ public record ChurchDetailDto(
     string? MapAddress,
     string? WebsiteUrl,
     int DaughterCount,
-    int MemberCount)
+    int MemberCount,
+    int ActiveMemberCount = 0,
+    int EmployeeCount = 0,
+    int MinisterCount = 0)
 {
     public IReadOnlyList<LinkDto> Links { get; init; } = [];
 }

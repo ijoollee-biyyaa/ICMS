@@ -14,23 +14,6 @@ namespace Icms.Api.Controllers.V1;
 public class TeamAttendanceController(
     ITeamAttendanceService attendanceService) : ControllerBase
 {
-    [HttpPost]
-    [ProducesResponseType(typeof(SaveAttendanceResult), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    [EndpointSummary("Save attendance for a meeting")]
-    [EndpointDescription("Marks every listed member as present or absent for the given date. Re-saving the same date corrects previous marks. All entries must be active members of the team, otherwise nothing is saved.")]
-    public async Task<IActionResult> SaveAttendance(
-        long churchId, long teamId, SaveAttendanceRequest request, CancellationToken ct)
-    {
-        var result = await attendanceService.SaveAttendanceAsync(churchId, teamId, request, ct);
-
-        return result.Match<IActionResult>(
-            saved => Ok(saved),
-            error => error.ToResult(Request));
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<TeamAttendanceRecordDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

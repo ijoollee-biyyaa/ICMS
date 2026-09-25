@@ -17,6 +17,7 @@ export interface UserProfile {
   role: string;
   churchId: number | null;
   memberId: number | null;
+  churchName: string | null;
 }
 
 /** Mirrors ChangePasswordRequest — POST /api/auth/change-password. */

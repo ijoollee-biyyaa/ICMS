@@ -216,54 +216,6 @@ namespace Icms.Infrastructure.Migrations
                     b.ToTable("Churches");
                 });
 
-            modelBuilder.Entity("Icms.Domain.Entities.ClearanceCertificate", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("CertificateCode")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<long>("FromChurchId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTimeOffset>("IssuedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("IssuedByUserId")
-                        .HasColumnType("text");
-
-                    b.Property<long>("MemberId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("ToChurchId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TransferId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CertificateCode")
-                        .IsUnique();
-
-                    b.HasIndex("FromChurchId");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("ToChurchId");
-
-                    b.HasIndex("TransferId")
-                        .IsUnique();
-
-                    b.ToTable("ClearanceCertificates");
-                });
-
             modelBuilder.Entity("Icms.Domain.Entities.ContactMessage", b =>
                 {
                     b.Property<long>("Id")
@@ -648,8 +600,25 @@ namespace Icms.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<DateOnly?>("BaptismDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("BaptismPlace")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<long>("ChurchId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<long?>("ClearanceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateOnly?>("ConversionDate")
+                        .HasColumnType("date");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -687,6 +656,9 @@ namespace Icms.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("HealthStatus")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -699,6 +671,13 @@ namespace Icms.Infrastructure.Migrations
                     b.Property<int>("JoinedVia")
                         .HasColumnType("integer");
 
+                    b.Property<string>("LocalAddress")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("MaritalStatus")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
@@ -707,8 +686,16 @@ namespace Icms.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("SpiritualGift")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Subcity")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -966,6 +953,9 @@ namespace Icms.Infrastructure.Migrations
                     b.Property<DateOnly?>("AttendanceDate")
                         .HasColumnType("date");
 
+                    b.Property<long>("MeetingId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("MemberId")
                         .HasColumnType("bigint");
 
@@ -983,12 +973,49 @@ namespace Icms.Infrastructure.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("TeamId", "AttendanceDate");
-
-                    b.HasIndex("TeamId", "MemberId", "AttendanceDate")
+                    b.HasIndex("MeetingId", "MemberId")
                         .IsUnique();
 
+                    b.HasIndex("TeamId", "AttendanceDate");
+
                     b.ToTable("TeamAttendances");
+                });
+
+            modelBuilder.Entity("Icms.Domain.Entities.TeamMeeting", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CreatedById")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateOnly>("MeetingDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long>("TeamId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("TeamId", "MeetingDate");
+
+                    b.ToTable("TeamMeetings");
                 });
 
             modelBuilder.Entity("Icms.Domain.Entities.TeamMember", b =>
@@ -1105,59 +1132,155 @@ namespace Icms.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTimeOffset?>("ClosedAt")
+                    b.Property<string>("ClearanceCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("ClearanceDocumentUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CompletedByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("DestinationName")
+                    b.Property<long?>("DestinationChurchId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("DestinationChurchName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<long>("FromChurchId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("DestinationDistrictOrDenomination")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<int>("InitiatedBy")
+                    b.Property<int>("Direction")
                         .HasColumnType("integer");
 
+                    b.Property<string>("IncomingFatherName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("IncomingFirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("IncomingGrandfatherName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("InitiatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("InitiatedByUserId")
-                        .HasColumnType("text");
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("MemberId")
+                    b.Property<long?>("MemberId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("PreviousEfgbcId")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("RecommendationNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<long?>("SourceChurchId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SourceChurchName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("SourceDistrictOrDenomination")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
-
-                    b.Property<long?>("ToChurchId")
-                        .HasColumnType("bigint");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.Property<string>("VoidReason")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTimeOffset?>("VoidedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("VoidedByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClearanceCode")
+                        .IsUnique();
+
+                    b.HasIndex("DestinationChurchId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("SourceChurchId");
+
+                    b.ToTable("Transfers");
+                });
+
+            modelBuilder.Entity("Icms.Domain.Entities.TransferSnapshot", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AttendanceSummaryJson")
+                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("DepartmentsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaymentSummaryJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("SnapshotAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TeamsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("TransferId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("ToChurchId");
+                    b.HasIndex("TransferId")
+                        .IsUnique();
 
-                    b.HasIndex("FromChurchId", "Status");
-
-                    b.ToTable("Transfers");
+                    b.ToTable("TransferSnapshots");
                 });
 
             modelBuilder.Entity("Icms.Domain.Entities.UpgradeApplication", b =>
@@ -1487,40 +1610,6 @@ namespace Icms.Infrastructure.Migrations
                     b.Navigation("ParentChurch");
                 });
 
-            modelBuilder.Entity("Icms.Domain.Entities.ClearanceCertificate", b =>
-                {
-                    b.HasOne("Icms.Domain.Entities.Church", "FromChurch")
-                        .WithMany()
-                        .HasForeignKey("FromChurchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Icms.Domain.Entities.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Icms.Domain.Entities.Church", "ToChurch")
-                        .WithMany()
-                        .HasForeignKey("ToChurchId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Icms.Domain.Entities.Transfer", "Transfer")
-                        .WithOne("Certificate")
-                        .HasForeignKey("Icms.Domain.Entities.ClearanceCertificate", "TransferId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("FromChurch");
-
-                    b.Navigation("Member");
-
-                    b.Navigation("ToChurch");
-
-                    b.Navigation("Transfer");
-                });
-
             modelBuilder.Entity("Icms.Domain.Entities.DeathRecord", b =>
                 {
                     b.HasOne("Icms.Domain.Entities.Church", "Church")
@@ -1744,6 +1833,12 @@ namespace Icms.Infrastructure.Migrations
 
             modelBuilder.Entity("Icms.Domain.Entities.TeamAttendance", b =>
                 {
+                    b.HasOne("Icms.Domain.Entities.TeamMeeting", "Meeting")
+                        .WithMany("Attendances")
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Icms.Domain.Entities.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
@@ -1756,7 +1851,27 @@ namespace Icms.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Meeting");
+
                     b.Navigation("Member");
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Icms.Domain.Entities.TeamMeeting", b =>
+                {
+                    b.HasOne("Icms.Domain.Entities.Member", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Icms.Domain.Entities.Team", "Team")
+                        .WithMany("Meetings")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("Team");
                 });
@@ -1819,28 +1934,37 @@ namespace Icms.Infrastructure.Migrations
 
             modelBuilder.Entity("Icms.Domain.Entities.Transfer", b =>
                 {
-                    b.HasOne("Icms.Domain.Entities.Church", "FromChurch")
-                        .WithMany("OutgoingTransfers")
-                        .HasForeignKey("FromChurchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.HasOne("Icms.Domain.Entities.Church", "DestinationChurch")
+                        .WithMany("IncomingTransfers")
+                        .HasForeignKey("DestinationChurchId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Icms.Domain.Entities.Member", "Member")
                         .WithMany("Transfers")
                         .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Icms.Domain.Entities.Church", "ToChurch")
-                        .WithMany("IncomingTransfers")
-                        .HasForeignKey("ToChurchId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("FromChurch");
+                    b.HasOne("Icms.Domain.Entities.Church", "SourceChurch")
+                        .WithMany("OutgoingTransfers")
+                        .HasForeignKey("SourceChurchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DestinationChurch");
 
                     b.Navigation("Member");
 
-                    b.Navigation("ToChurch");
+                    b.Navigation("SourceChurch");
+                });
+
+            modelBuilder.Entity("Icms.Domain.Entities.TransferSnapshot", b =>
+                {
+                    b.HasOne("Icms.Domain.Entities.Transfer", "Transfer")
+                        .WithOne("Snapshot")
+                        .HasForeignKey("Icms.Domain.Entities.TransferSnapshot", "TransferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Transfer");
                 });
 
             modelBuilder.Entity("Icms.Domain.Entities.UpgradeApplication", b =>
@@ -1971,6 +2095,8 @@ namespace Icms.Infrastructure.Migrations
 
                     b.Navigation("Attendances");
 
+                    b.Navigation("Meetings");
+
                     b.Navigation("Members");
 
                     b.Navigation("Payments");
@@ -1978,9 +2104,14 @@ namespace Icms.Infrastructure.Migrations
                     b.Navigation("SubTeams");
                 });
 
+            modelBuilder.Entity("Icms.Domain.Entities.TeamMeeting", b =>
+                {
+                    b.Navigation("Attendances");
+                });
+
             modelBuilder.Entity("Icms.Domain.Entities.Transfer", b =>
                 {
-                    b.Navigation("Certificate");
+                    b.Navigation("Snapshot");
                 });
 #pragma warning restore 612, 618
         }

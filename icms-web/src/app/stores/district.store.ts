@@ -14,11 +14,12 @@ import {
   setAllEntities,
   withEntities,
 } from '@ngrx/signals/entities';
-import { EMPTY, forkJoin, pipe } from 'rxjs';
+import { EMPTY, forkJoin, of, pipe } from 'rxjs';
 import { catchError, concatMap, exhaustMap, map, tap } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { DistrictService } from '../services/district.service';
+import { AuthService } from '../services/auth.service';
 import {
   CreateDistrictRequest,
   DistrictDetail,
@@ -97,29 +98,38 @@ export const DistrictStore = signalStore(
     ),
   })),
 
-  withMethods((store, api = inject(DistrictService)) => {
+  withMethods((store, api = inject(DistrictService), auth = inject(AuthService)) => {
     const load = rxMethod<void>(
       pipe(
         exhaustMap(() => {
           if (store.loaded()) return EMPTY;
           patchState(store, { isLoading: true, error: null });
           const id = store.districtId();
+          const canManageAccounts = auth.hasRole('Admin');
 
           return forkJoin({
-            district: api.getDistrict(id),
-            employees: api.getEmployees(id, 1, 100),
-            ministers: api.getMinisters(id, 1, 100),
-            executives: api.getExecutives(id),
-            departments: api.getDepartments(id, 1, 100),
-            accounts: api.getAccounts(id),
+            district: api.getDistrict(id).pipe(catchError(() => of(null))),
+            employees: api.getEmployees(id, 1, 100).pipe(
+              catchError(() => of({ items: [], totalCount: 0, page: 1, pageSize: 100 }))
+            ),
+            ministers: api.getMinisters(id, 1, 100).pipe(
+              catchError(() => of({ items: [], totalCount: 0, page: 1, pageSize: 100 }))
+            ),
+            executives: api.getExecutives(id).pipe(catchError(() => of(null))),
+            departments: api.getDepartments(id, 1, 100).pipe(
+              catchError(() => of({ items: [], totalCount: 0, page: 1, pageSize: 100 }))
+            ),
+            accounts: canManageAccounts
+              ? api.getAccounts(id).pipe(catchError(() => of([])))
+              : of([]),
           }).pipe(
             map((data) => ({
               district: data.district,
-              employees: data.employees.items,
-              ministers: data.ministers.items,
+              employees: data.employees?.items || [],
+              ministers: data.ministers?.items || [],
               executives: data.executives,
-              departments: data.departments.items,
-              accounts: data.accounts,
+              departments: data.departments?.items || [],
+              accounts: data.accounts || [],
             })),
             tap((data) =>
               patchState(store, {

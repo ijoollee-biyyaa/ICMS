@@ -10,26 +10,46 @@ public class TransferConfiguration : IEntityTypeConfiguration<Transfer>
     {
         builder.HasKey(t => t.Id);
 
-        builder.Property(t => t.DestinationName).HasMaxLength(200);
-        builder.Property(t => t.VoidReason).HasMaxLength(255);
+        builder.Property(t => t.ClearanceCode)
+            .IsRequired()
+            .HasMaxLength(30);
 
-        builder.HasIndex(t => t.MemberId);
-        builder.HasIndex(t => new { t.FromChurchId, t.Status });
+        builder.HasIndex(t => t.ClearanceCode)
+            .IsUnique();
 
         builder.HasOne(t => t.Member)
             .WithMany(m => m.Transfers)
             .HasForeignKey(t => t.MemberId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(t => t.FromChurch)
+        builder.HasOne(t => t.SourceChurch)
             .WithMany(c => c.OutgoingTransfers)
-            .HasForeignKey(t => t.FromChurchId)
+            .HasForeignKey(t => t.SourceChurchId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(t => t.ToChurch)
+        builder.HasOne(t => t.DestinationChurch)
             .WithMany(c => c.IncomingTransfers)
-            .HasForeignKey(t => t.ToChurchId)
+            .HasForeignKey(t => t.DestinationChurchId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(t => t.SourceChurchName).HasMaxLength(200);
+        builder.Property(t => t.SourceDistrictOrDenomination).HasMaxLength(200);
+        
+        builder.Property(t => t.DestinationChurchName).HasMaxLength(200);
+        builder.Property(t => t.DestinationDistrictOrDenomination).HasMaxLength(200);
+
+        builder.Property(t => t.IncomingFirstName).HasMaxLength(100);
+        builder.Property(t => t.IncomingFatherName).HasMaxLength(100);
+        builder.Property(t => t.IncomingGrandfatherName).HasMaxLength(100);
+        builder.Property(t => t.PreviousEfgbcId).HasMaxLength(30);
+
+        builder.Property(t => t.ClearanceDocumentUrl).HasMaxLength(500);
+        builder.Property(t => t.RecommendationNotes).HasMaxLength(2000);
+        builder.Property(t => t.VoidReason).HasMaxLength(500);
+
+        builder.Property(t => t.InitiatedByUserId).HasMaxLength(450);
+        builder.Property(t => t.CompletedByUserId).HasMaxLength(450);
+        builder.Property(t => t.VoidedByUserId).HasMaxLength(450);
 
         builder.HasQueryFilter(t => !t.IsDeleted);
     }

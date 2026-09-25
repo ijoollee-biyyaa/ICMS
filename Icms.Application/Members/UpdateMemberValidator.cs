@@ -42,5 +42,20 @@ public class UpdateMemberValidator : AbstractValidator<UpdateMemberRequest>
 
         RuleFor(x => x.PhotoUrl)
             .MaximumLength(MemberConstants.PhotoUrlMaxLength);
+
+        RuleFor(x => x.City)
+            .MaximumLength(100);
+
+        RuleFor(x => x.Subcity)
+            .MaximumLength(100);
+
+        RuleFor(x => x.LocalAddress)
+            .MaximumLength(200);
+
+        RuleFor(x => x.BaptismPlace)
+            .MaximumLength(200);
+
+        RuleFor(x => x.SpiritualGift)
+            .MaximumLength(150);
     }
 }

@@ -1,73 +1,474 @@
-<header class="flex items-center justify-between px-6 py-4">
-  <div class="flex items-center gap-3">
-    <img src="/brand/efgbc.webp" alt="EFGBC logo" class="h-12 w-12 rounded-full" />
-    <div class="leading-tight">
-      <p class="text-lg font-bold text-brand">EFGBC</p>
-      <p class="text-xs text-brand-blue">Ethiopian Full Gospel Believers Church</p>
-    </div>
+<div class="relative min-h-screen overflow-x-hidden bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100">
+  <!-- Ambient Gradient Background Glows -->
+  <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+    <div class="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] max-w-[90vw] rounded-full bg-gradient-to-tr from-brand/20 via-brand-blue/15 to-transparent blur-[120px] opacity-75 dark:opacity-40"></div>
+    <div class="absolute top-[800px] -left-40 h-[400px] w-[400px] rounded-full bg-brand-blue/15 blur-[100px] opacity-60 dark:opacity-30"></div>
+    <div class="absolute top-[1400px] -right-40 h-[450px] w-[450px] rounded-full bg-brand/15 blur-[110px] opacity-60 dark:opacity-30"></div>
   </div>
-  <nav class="hidden items-center gap-6 text-sm font-medium text-neutral-600 md:flex">
-    <a href="#" class="hover:text-brand">Home</a>
-    <a href="#" class="hover:text-brand">About</a>
-    <a href="#" class="hover:text-brand">Our Churches</a>
-    <a href="#" class="hover:text-brand">Contact</a>
-  </nav>
-</header>
 
-<main>
-  <section class="flex flex-col items-center px-6 py-16 text-center">
-    <img
-      src="/brand/efgbc.webp"
-      alt="EFGBC District logo"
-      class="mb-8 h-40 w-40 rounded-full shadow-xl"
-    />
-
-    @if (district.isLoading()) {
-      <div class="text-sm text-neutral-400">Loading district…</div>
-    } @else if (district.error()) {
-      <div class="text-sm text-red-500">Could not load the district.</div>
-    } @else {
-      <h1 class="mb-2 text-4xl font-extrabold text-brand md:text-5xl">
-        {{ district.value()?.name }}
-      </h1>
-    }
-
-    <p class="max-w-2xl text-lg text-neutral-600">
-      One district, one family — serving our churches, their ministers and every
-      member together.
-    </p>
-
-    @if (district.value(); as d) {
-      <div class="mt-8 flex gap-8">
-        <div>
-          <p class="text-3xl font-bold text-brand-blue">{{ d.churchCount }}</p>
-          <p class="text-sm text-neutral-500">Churches</p>
+  <!-- Corporate Header / Navbar -->
+  <header class="sticky top-0 z-50 border-b border-gray-200/80 bg-white/85 backdrop-blur-md transition-colors duration-300 dark:border-gray-800/80 dark:bg-gray-900/85">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+      <!-- Brand Logo -->
+      <a routerLink="/" class="group flex items-center gap-3 transition">
+        <div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong p-0.5 shadow-md shadow-brand/20 transition group-hover:scale-105">
+          <img src="/brand/efgbc.webp" alt="EFGBC Logo" class="h-full w-full rounded-[14px] object-cover bg-white" />
         </div>
-        <div>
-          <p class="text-3xl font-bold text-brand-blue">{{ d.memberCount }}</p>
-          <p class="text-sm text-neutral-500">Members</p>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-lg font-black tracking-tight text-gray-900 dark:text-white">EFGBC</span>
+            <span class="rounded bg-brand/10 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand dark:bg-brand/20 dark:text-brand-300">
+              ICMS
+            </span>
+          </div>
+          <span class="hidden text-xs font-medium text-gray-500 dark:text-gray-400 sm:block">
+            Integrated Church Management System
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden items-center gap-7 text-sm font-semibold text-gray-600 dark:text-gray-300 md:flex">
+        <a href="#overview" class="transition hover:text-brand dark:hover:text-brand-400">Overview</a>
+        <a href="#pillars" class="transition hover:text-brand dark:hover:text-brand-400">Architecture</a>
+        <a href="#stats" class="transition hover:text-brand dark:hover:text-brand-400">District Scale</a>
+        <a href="#governance" class="transition hover:text-brand dark:hover:text-brand-400">Governance</a>
+      </nav>
+
+      <!-- Utility Actions (Theme Toggle & Sign In) -->
+      <div class="flex items-center gap-2.5 sm:gap-3.5">
+        <!-- Theme Toggle Button -->
+        <button
+          type="button"
+          (click)="toggleTheme()"
+          [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-750"
+        >
+          @if (isDark()) {
+            <mat-icon class="!h-5 !w-5 !text-[20px] text-amber-400">light_mode</mat-icon>
+          } @else {
+            <mat-icon class="!h-5 !w-5 !text-[20px] text-gray-600">dark_mode</mat-icon>
+          }
+        </button>
+
+        <!-- Primary Sign In CTA -->
+        <a
+          routerLink="/login"
+          class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-strong px-4 py-2 text-sm font-bold text-white shadow-lg shadow-brand/25 transition hover:brightness-110 active:scale-95 sm:px-5 sm:py-2.5"
+        >
+          <span>Sign In</span>
+          <mat-icon class="!h-4 !w-4 !text-[18px]">login</mat-icon>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="overview" class="relative pt-12 pb-20 sm:pt-20 sm:pb-28 lg:pt-24 lg:pb-32">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col items-center text-center">
+        <!-- Status / Category Pill -->
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-50/80 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand shadow-sm backdrop-blur-sm dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-brand"></span>
+          </span>
+          <span>Ethiopian Full Gospel Believers Church • Enterprise Cloud</span>
+        </div>
+
+        <!-- Hero Headline -->
+        <h1 class="max-w-4xl text-3xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-white">
+          Unified Governance for
+          <span class="bg-gradient-to-r from-brand via-brand-strong to-brand-blue bg-clip-text text-transparent">
+            Churches, District & Ministries
+          </span>
+        </h1>
+
+        <!-- Hero Subtitle -->
+        <p class="mt-6 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg lg:text-xl dark:text-gray-300">
+          A centralized digital infrastructure connecting district headquarters, chartered local assemblies, full-time ministers, and ministry fellowship under one secure, high-integrity governance platform.
+        </p>
+
+        <!-- Dual Call-to-Action Buttons -->
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-4 sm:mt-10">
+          <a
+            routerLink="/login"
+            class="group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-brand via-brand-strong to-brand-blue px-7 py-3.5 text-base font-bold text-white shadow-xl shadow-brand/25 transition hover:brightness-110 active:scale-95"
+          >
+            <span>Launch ICMS Portal</span>
+            <mat-icon class="!h-5 !w-5 !text-[20px] transition group-hover:translate-x-1">arrow_forward</mat-icon>
+          </a>
+
+          <a
+            href="#pillars"
+            class="inline-flex items-center gap-2.5 rounded-2xl border border-gray-300 bg-white/80 px-6 py-3.5 text-base font-bold text-gray-700 shadow-sm backdrop-blur-sm transition hover:border-gray-400 hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-750"
+          >
+            <span>Explore Architecture</span>
+            <mat-icon class="!h-5 !w-5 !text-[20px] text-gray-500 dark:text-gray-400">south</mat-icon>
+          </a>
+        </div>
+
+        <!-- Live Intelligence Dashboard Showcase Card -->
+        <div class="mt-14 w-full max-w-4xl sm:mt-16">
+          <div class="relative overflow-hidden rounded-3xl border border-gray-200/90 bg-white/90 p-5 shadow-2xl backdrop-blur-xl transition dark:border-gray-800 dark:bg-gray-900/90 sm:p-7">
+            <!-- Showcase Card Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
+              <div class="flex items-center gap-3">
+                <div class="flex h-3 w-3 gap-1.5">
+                  <span class="h-3 w-3 rounded-full bg-red-400/80"></span>
+                  <span class="h-3 w-3 rounded-full bg-amber-400/80"></span>
+                  <span class="h-3 w-3 rounded-full bg-emerald-400/80"></span>
+                </div>
+                <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
+                <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  <mat-icon class="!h-4 !w-4 !text-[16px] text-brand">corporate_fare</mat-icon>
+                  <span>
+                    @if (district.isLoading()) {
+                      District Headquarters Synchronizing…
+                    } @else {
+                      {{ district.value()?.name ?? 'District Headquarters' }}
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <!-- System Health Badge -->
+              <div class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Operational • Cloud Sync Active</span>
+              </div>
+            </div>
+
+            <!-- Showcase Card Metrics Row -->
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+              <!-- Chartered Churches Metric -->
+              <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 text-left dark:border-gray-800/80 dark:bg-gray-800/50">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Churches</span>
+                  <mat-icon class="!h-5 !w-5 !text-[20px] text-brand-blue">church</mat-icon>
+                </div>
+                <p class="mt-2 text-2xl font-black text-gray-900 sm:text-3xl dark:text-white">
+                  @if (district.isLoading()) {
+                    <span class="animate-pulse text-gray-400">…</span>
+                  } @else {
+                    {{ district.value()?.churchCount ?? '—' }}
+                  }
+                </p>
+                <p class="mt-0.5 text-xs text-emerald-600 font-medium dark:text-emerald-400">Chartered Assemblies</p>
+              </div>
+
+              <!-- Registered Members Metric -->
+              <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 text-left dark:border-gray-800/80 dark:bg-gray-800/50">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Members</span>
+                  <mat-icon class="!h-5 !w-5 !text-[20px] text-brand">groups</mat-icon>
+                </div>
+                <p class="mt-2 text-2xl font-black text-gray-900 sm:text-3xl dark:text-white">
+                  @if (district.isLoading()) {
+                    <span class="animate-pulse text-gray-400">…</span>
+                  } @else {
+                    {{ district.value()?.memberCount ?? '—' }}
+                  }
+                </p>
+                <p class="mt-0.5 text-xs text-brand font-medium dark:text-brand-300">Active Congregants</p>
+              </div>
+
+              <!-- Ministry Stewardship Metric -->
+              <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 text-left dark:border-gray-800/80 dark:bg-gray-800/50">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Ministers</span>
+                  <mat-icon class="!h-5 !w-5 !text-[20px] text-indigo-500">badge</mat-icon>
+                </div>
+                <p class="mt-2 text-2xl font-black text-gray-900 sm:text-3xl dark:text-white">Full-Time</p>
+                <p class="mt-0.5 text-xs text-indigo-600 font-medium dark:text-indigo-400">Dual-Payroll Synced</p>
+              </div>
+
+              <!-- Transfer Clearances Metric -->
+              <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 text-left dark:border-gray-800/80 dark:bg-gray-800/50">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Transfers</span>
+                  <mat-icon class="!h-5 !w-5 !text-[20px] text-amber-500">verified</mat-icon>
+                </div>
+                <p class="mt-2 text-2xl font-black text-gray-900 sm:text-3xl dark:text-white">100%</p>
+                <p class="mt-0.5 text-xs text-amber-600 font-medium dark:text-amber-400">Digital Clearance</p>
+              </div>
+            </div>
+
+            <!-- Quick Action Bar inside preview -->
+            <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 p-3.5 dark:from-gray-800/70 dark:via-gray-800/40 dark:to-gray-800/70">
+              <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+                <mat-icon class="!h-4 !w-4 !text-[18px] text-brand">lock</mat-icon>
+                <span>Authorized Multi-Workspace Access: District HQ • Local Church • Member Portal</span>
+              </div>
+              <a
+                routerLink="/login"
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline dark:text-brand-400"
+              >
+                <span>Sign in to Workspace</span>
+                <mat-icon class="!h-3.5 !w-3.5 !text-[15px]">arrow_forward</mat-icon>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-    }
-
-    <div class="mt-10 flex flex-wrap justify-center gap-4">
-      <a
-        routerLink="/login"
-        class="rounded-full bg-brand px-8 py-3 font-semibold text-white shadow-lg transition hover:bg-brand-strong"
-      >
-        Sign In
-      </a>
-      <a
-        routerLink="/login"
-        class="rounded-full border-2 border-brand-blue px-8 py-3 font-semibold text-brand-blue transition hover:bg-brand-blue hover:text-white"
-      >
-        Create Account
-      </a>
-    
     </div>
   </section>
-</main>
 
-<footer class="border-t border-neutral-200 py-6 text-center text-sm text-neutral-400">
-  © 2026 {{ district.value()?.name ?? 'EFGBC' }}. All rights reserved.
-</footer>
+  <!-- Platform Capabilities & Architecture Grid -->
+  <section id="pillars" class="relative py-16 sm:py-24 border-t border-gray-200/80 bg-white dark:border-gray-800/80 dark:bg-gray-900/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto">
+        <p class="text-xs font-bold uppercase tracking-widest text-brand dark:text-brand-400">
+          Core Architecture
+        </p>
+        <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+          Built for the Institutional Scale of EFGBC
+        </h2>
+        <p class="mt-3 text-base text-gray-600 dark:text-gray-400">
+          Every layer of ICMS reflects church bylaws, district hierarchy, ministerial regulations, and fellowship integrity.
+        </p>
+      </div>
+
+      <div class="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Pillar 1: District Office Governance -->
+        <div class="group relative rounded-3xl border border-gray-200 bg-gray-50/50 p-7 transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-brand/50">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300">
+            <mat-icon class="!h-6 !w-6 !text-[24px]">corporate_fare</mat-icon>
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">
+            District Headquarters Governance
+          </h3>
+          <p class="mt-2.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Executive leadership supervision (President & Vice President appointments), district department operations, and consolidated regional audit intelligence.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-bold text-brand dark:text-brand-400">
+            <span>Executive Oversight</span>
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Local Assembly Administration -->
+        <div class="group relative rounded-3xl border border-gray-200 bg-gray-50/50 p-7 transition hover:-translate-y-1 hover:border-brand-blue/40 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-brand-blue/50">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300">
+            <mat-icon class="!h-6 !w-6 !text-[24px]">church</mat-icon>
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">
+            Local Assembly Administration
+          </h3>
+          <p class="mt-2.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Comprehensive church directories, elder councils, member milestone records (baptism, dedication, marriage), and local pastoral leadership.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-bold text-brand-blue dark:text-blue-300">
+            <span>Assembly Management</span>
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Pillar 3: Clergy Dual-Employment & Payroll -->
+        <div class="group relative rounded-3xl border border-gray-200 bg-gray-50/50 p-7 transition hover:-translate-y-1 hover:border-indigo-400/40 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-indigo-400/50">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-300">
+            <mat-icon class="!h-6 !w-6 !text-[24px]">payments</mat-icon>
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">
+            Dual-Employment & Payroll Stewardship
+          </h3>
+          <p class="mt-2.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Smart synchronization when church ministers are appointed to district roles. Automatic <code class="rounded bg-gray-200 px-1 py-0.5 text-xs dark:bg-gray-800">SalaryPaidBy</code> tracking ensures zero double-counting.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+            <span>Payroll Integrity</span>
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Pillar 4: Ministry Teams & Fellowship -->
+        <div class="group relative rounded-3xl border border-gray-200 bg-gray-50/50 p-7 transition hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-emerald-400/50">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
+            <mat-icon class="!h-6 !w-6 !text-[24px]">diversity_3</mat-icon>
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">
+            Ministry Teams vs. Departments
+          </h3>
+          <p class="mt-2.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Strict domain modeling separating voluntary ministry fellowship (Choir, Worship, Youth, Women, Bible Study) from hired administrative departments.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            <span>Ministry Fellowship</span>
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Pillar 5: Automated Transfer Clearances -->
+        <div class="group relative rounded-3xl border border-gray-200 bg-gray-50/50 p-7 transition hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-amber-400/50">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300">
+            <mat-icon class="!h-6 !w-6 !text-[24px]">move_up</mat-icon>
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">
+            Inter-Church Member Transfers
+          </h3>
+          <p class="mt-2.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Digital transfer workflows between assemblies. Automated clearance checks ensure members maintain their spiritual history without orphan records.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400">
+            <span>Verified Clearances</span>
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Pillar 6: Institutional Security & RBAC -->
+        <div class="group relative rounded-3xl border border-gray-200 bg-gray-50/50 p-7 transition hover:-translate-y-1 hover:border-purple-400/40 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-purple-400/50">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300">
+            <mat-icon class="!h-6 !w-6 !text-[24px]">security</mat-icon>
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">
+            Institutional Multi-Tier RBAC
+          </h3>
+          <p class="mt-2.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Secure boundaries for District Administrators, Church Admins, Pastors, and Members. Automatic multi-workspace routing based on authorized roles.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs font-bold text-purple-600 dark:text-purple-400">
+            <span>Secure Access</span>
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- District Scale & Statistics Ribbon -->
+  <section id="stats" class="relative py-16 sm:py-24 border-t border-gray-200/80 dark:border-gray-800/80">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="rounded-3xl border border-brand/20 bg-gradient-to-br from-brand/5 via-brand-blue/5 to-transparent p-8 sm:p-12 dark:border-brand-500/20 dark:from-brand-500/10 dark:via-brand-blue/5">
+        <div class="grid grid-cols-1 gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p class="text-4xl font-black text-brand sm:text-5xl">
+              @if (district.isLoading()) {
+                <span class="animate-pulse">…</span>
+              } @else {
+                {{ district.value()?.churchCount ?? '—' }}
+              }
+            </p>
+            <p class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Chartered Assemblies
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Across Regional Jurisdictions
+            </p>
+          </div>
+
+          <div>
+            <p class="text-4xl font-black text-brand-blue sm:text-5xl">
+              @if (district.isLoading()) {
+                <span class="animate-pulse">…</span>
+              } @else {
+                {{ district.value()?.memberCount ?? '—' }}
+              }
+            </p>
+            <p class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Active Members
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Baptized & Registered Believers
+            </p>
+          </div>
+
+          <div>
+            <p class="text-4xl font-black text-emerald-600 sm:text-5xl dark:text-emerald-400">
+              100%
+            </p>
+            <p class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Audit Transparency
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Zero Double-Counted Payrolls
+            </p>
+          </div>
+
+          <div>
+            <p class="text-4xl font-black text-purple-600 sm:text-5xl dark:text-purple-400">
+              99.9%
+            </p>
+            <p class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Cloud Availability
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Real-time Assembly Sync
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Governance Philosophy / Vision Statement -->
+  <section id="governance" class="relative py-16 sm:py-24 border-t border-gray-200/80 bg-white dark:border-gray-800/80 dark:bg-gray-900/40">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300">
+        <mat-icon class="!h-7 !w-7 !text-[28px]">format_quote</mat-icon>
+      </div>
+      <blockquote class="mt-6 text-2xl font-bold leading-relaxed text-gray-900 sm:text-3xl lg:text-4xl dark:text-white">
+        “One district, one family — serving our churches, their ministers, and every member together with accountability, transparency, and spiritual excellence.”
+      </blockquote>
+      <div class="mt-6 flex flex-col items-center">
+        <p class="text-base font-extrabold text-brand dark:text-brand-400">
+          Ethiopian Full Gospel Believers Church
+        </p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          District Executive Council & Administration
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Call to Action Banner -->
+  <section class="relative py-16 sm:py-20 border-t border-gray-200/80 dark:border-gray-800/80">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-gray-900 via-gray-900 to-brand-950 px-6 py-12 text-center text-white shadow-2xl sm:px-12 sm:py-16">
+        <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-brand/20 blur-3xl"></div>
+        <div class="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-brand-blue/20 blur-3xl"></div>
+
+        <h2 class="relative text-2xl font-extrabold tracking-tight sm:text-4xl">
+          Ready to Access Your ICMS Workspace?
+        </h2>
+        <p class="relative mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-gray-300 sm:text-base">
+          Log in with your authorized corporate credentials to manage district operations, local church records, ministry teams, or your individual membership portfolio.
+        </p>
+        <div class="relative mt-8 flex flex-wrap justify-center gap-4">
+          <a
+            routerLink="/login"
+            class="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-brand to-brand-strong px-8 py-4 text-base font-bold text-white shadow-xl shadow-brand/30 transition hover:brightness-110 active:scale-95"
+          >
+            <span>Proceed to Sign In</span>
+            <mat-icon class="!h-5 !w-5 !text-[20px]">login</mat-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Corporate Footer -->
+  <footer class="border-t border-gray-200 bg-white py-12 text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+        <div class="flex items-center gap-3">
+          <img src="/brand/efgbc.webp" alt="EFGBC logo" class="h-9 w-9 rounded-xl object-cover bg-white" />
+          <div>
+            <p class="text-sm font-bold text-gray-900 dark:text-white">EFGBC ICMS</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Integrated Church Management System</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold">
+          <a href="#overview" class="hover:text-brand dark:hover:text-brand-400">Overview</a>
+          <a href="#pillars" class="hover:text-brand dark:hover:text-brand-400">Architecture</a>
+          <a href="#stats" class="hover:text-brand dark:hover:text-brand-400">Statistics</a>
+          <a routerLink="/login" class="text-brand font-bold hover:underline dark:text-brand-400">Sign In</a>
+        </div>
+
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+          © 2026 Ethiopian Full Gospel Believers Church. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>

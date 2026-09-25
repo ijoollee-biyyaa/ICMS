@@ -1,4 +1,11 @@
 export type Gender = 'Male' | 'Female';
+export type MaritalStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
+export type HealthStatus =
+  | 'Healthy'
+  | 'ChronicIllness'
+  | 'Disability'
+  | 'UnderMedicalCare'
+  | 'Other';
 export type JobStatus =
   | 'Student'
   | 'Employed'
@@ -19,13 +26,23 @@ export interface Member {
   grandfatherName: string;
   dateOfBirth: string | null;
   gender: Gender;
+  maritalStatus: MaritalStatus;
   jobStatus: JobStatus;
+  healthStatus: HealthStatus;
   phone: string | null;
   email: string | null;
+  city: string | null;
+  subcity: string | null;
+  localAddress: string | null;
   photoUrl: string | null;
   status: MemberStatus;
   joinedVia: JoinChannel;
   joinedAt: string | null;
+  conversionDate: string | null;
+  baptismPlace: string | null;
+  baptismDate: string | null;
+  spiritualGift: string | null;
+  clearanceId: number | null;
   createdAt: string;
 }
 
@@ -37,12 +54,22 @@ export interface CreateMemberRequest {
   grandfatherName: string;
   dateOfBirth: string | null;
   gender: Gender;
+  maritalStatus?: MaritalStatus;
   jobStatus: JobStatus;
+  healthStatus?: HealthStatus;
   phone: string | null;
   email: string | null;
+  city?: string | null;
+  subcity?: string | null;
+  localAddress?: string | null;
   photoUrl: string | null;
   joinedVia: JoinChannel;
   joinedAt: string | null;
+  conversionDate?: string | null;
+  baptismPlace?: string | null;
+  baptismDate?: string | null;
+  spiritualGift?: string | null;
+  clearanceId?: number | null;
 }
 
 /** Body for PUT /api/members/{id} — mirrors UpdateMemberRequest. */
@@ -52,10 +79,19 @@ export interface UpdateMemberRequest {
   grandfatherName: string;
   dateOfBirth: string | null;
   gender: Gender;
+  maritalStatus?: MaritalStatus;
   jobStatus: JobStatus;
+  healthStatus?: HealthStatus;
   phone: string | null;
   email: string | null;
+  city?: string | null;
+  subcity?: string | null;
+  localAddress?: string | null;
   photoUrl: string | null;
+  conversionDate?: string | null;
+  baptismPlace?: string | null;
+  baptismDate?: string | null;
+  spiritualGift?: string | null;
 }
 
 // ---- Member dashboard (GET /api/members/{id}/dashboard) ----------------
@@ -111,6 +147,7 @@ export interface MemberTeamCard {
   teamId: number;
   teamName: string;
   role: string;
+  churchId: number;
   attendance: MemberAttendanceSummary;
   payments: MemberPaymentSummary;
 }
@@ -130,6 +167,33 @@ export interface MemberDashboard {
   teamCount: number;
   teams: MemberTeamCard[];
   service: MemberServiceSummary;
+}
+
+// ---- Member history (GET /api/members/{id}/history) ----------------------
+
+export type AttendanceStatusValue = 'Present' | 'Late' | 'Absent';
+
+export interface MemberAttendanceHistory {
+  teamId: number;
+  teamName: string;
+  attendanceDate: string;
+  status: AttendanceStatusValue;
+  reason: string | null;
+}
+
+export interface MemberPaymentHistory {
+  id: number;
+  teamId: number;
+  teamName: string;
+  month: string;
+  amount: number;
+  paidAt: string;
+}
+
+export interface MemberHistory {
+  memberId: number;
+  attendance: MemberAttendanceHistory[];
+  payments: MemberPaymentHistory[];
 }
 
 // ---- Member stats & login accounts -------------------------------------

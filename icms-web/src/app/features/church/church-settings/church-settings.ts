@@ -9,13 +9,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import {
-  MatError,
-  MatFormField,
-  MatHint,
-  MatLabel,
-} from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { Router } from '@angular/router';
 
@@ -30,11 +23,6 @@ type Section = 'general' | 'security';
   selector: 'app-church-settings',
   imports: [
     ReactiveFormsModule,
-    MatFormField,
-    MatLabel,
-    MatHint,
-    MatError,
-    MatInput,
     MatIcon,
   ],
   templateUrl: './church-settings.html',

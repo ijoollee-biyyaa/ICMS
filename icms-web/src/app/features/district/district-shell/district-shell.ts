@@ -1,94 +1,53 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
-
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { DistrictStore } from '../../../stores/district.store';
 import { AuthService } from '../../../services/auth.service';
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-interface NavItem {
-  label: string;
-  icon: string;
-  path: string;
-  adminOnly?: boolean;
-}
+import { SidebarService } from '../../shared/services/sidebar.service';
+import { AppLayoutComponent } from '../../shared/layout/app-layout/app-layout.component';
 
 @Component({
   selector: 'app-district-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatIcon, MatIconButton],
-  templateUrl: './district-shell.html',
+  imports: [AppLayoutComponent],
+  template: `<app-layout></app-layout>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DistrictShell {
+export class DistrictShell implements OnInit {
   readonly store = inject(DistrictStore);
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-
-  readonly currentUser = this.auth.currentUser;
+  private sidebarService = inject(SidebarService);
 
   constructor() {
     this.store.load();
   }
 
-  signOut() {
-    void this.auth.logout().then(() => this.router.navigate(['/']));
-  }
+  ngOnInit() {
+    const isAdmin = this.auth.hasRole('Admin');
 
-  readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+    const navItems = [
+      { name: 'Dashboard', materialIcon: 'dashboard', path: '/district/dashboard' },
+      { name: 'District Profile', materialIcon: 'badge', path: '/district/profile' },
+      { name: 'Churches', materialIcon: 'church', path: '/district/churches' },
+      { name: 'Ministers', materialIcon: 'local_church', path: '/district/ministers' },
+    ];
 
-  private readonly allSections: NavSection[] = [
-    {
-      title: 'Overview',
-      items: [
-        { label: 'Dashboard', icon: 'dashboard', path: '/district/dashboard' },
-        { label: 'District Profile', icon: 'badge', path: '/district/profile' },
-      ],
-    },
-    {
-      title: 'People',
-      items: [
-        { label: 'Members', icon: 'group', path: '/district/members' },
-        { label: 'Churches', icon: 'church', path: '/district/churches' },
-        { label: 'Ministers', icon: 'local_church', path: '/district/ministers' },
-      ],
-    },
-    {
-      title: 'Office',
-      items: [
-        { label: 'Office Employees', icon: 'work', path: '/district/employees' },
-        { label: 'Departments', icon: 'account_balance', path: '/district/departments' },
-        { label: 'Payments', icon: 'payments', path: '/district/payments' },
-      ],
-    },
-    {
-      title: 'Management',
-      items: [
-        { label: 'Accounts', icon: 'manage_accounts', path: '/district/accounts', adminOnly: true },
-        { label: 'Settings', icon: 'settings', path: '/district/settings', adminOnly: true },
-        { label: 'Reports', icon: 'bar_chart', path: '/district/reports' },
-        { label: 'Create District', icon: 'add_business', path: '/district/create', adminOnly: true },
-      ],
-    },
-  ];
+    const othersItems = [
+      { name: 'Office Employees', materialIcon: 'work', path: '/district/employees' },
+      { name: 'Departments', materialIcon: 'account_balance', path: '/district/departments' },
+      { name: 'Payments', materialIcon: 'payments', path: '/district/payments' },
+      { name: 'Reports', materialIcon: 'bar_chart', path: '/district/reports' },
+    ];
 
-  readonly nav = computed<NavSection[]>(() => {
-    const sections = this.allSections.map((section) => ({
-      ...section,
-      items: section.items.filter((item) => !item.adminOnly || this.isAdmin()),
-    }));
-    if (this.auth.homes().length > 1) {
-      sections.push({
-        title: 'Areas',
-        items: [
-          { label: 'Switch Area', icon: 'swap_horiz', path: '/areas' },
-        ],
-      });
+    if (isAdmin) {
+      othersItems.push(
+        { name: 'Accounts', materialIcon: 'manage_accounts', path: '/district/accounts' },
+        { name: 'Settings', materialIcon: 'settings', path: '/district/settings' },
+        { name: 'Create District', materialIcon: 'add_business', path: '/district/create' }
+      );
     }
-    return sections;
-  });
+
+    if (this.auth.homes().length > 1) {
+      othersItems.push({ name: 'Switch Area', materialIcon: 'swap_horiz', path: '/areas' });
+    }
+
+    this.sidebarService.setNavItems(navItems, othersItems);
+  }
 }

@@ -1,0 +1,84 @@
+<header
+  class="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-gray-200 bg-white/90 px-4 backdrop-blur dark:border-gray-800 dark:bg-gray-900/90 sm:px-6"
+>
+  <button
+    type="button"
+    mat-icon-button
+    aria-label="Toggle sidebar"
+    (click)="navToggle.emit()"
+    class="!text-gray-600 dark:!text-gray-300"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <h1 class="truncate text-lg font-semibold text-gray-900 dark:text-white">
+    {{ title() }}
+  </h1>
+
+  <div class="ml-auto flex items-center gap-2 sm:gap-3">
+    @if (chip()) {
+      <span
+        class="hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex"
+        [class]="chipClass()"
+      >
+        {{ chip() }}
+      </span>
+    }
+
+    <!-- Theme toggle -->
+    <button
+      type="button"
+      mat-icon-button
+      aria-label="Toggle dark mode"
+      (click)="toggleTheme()"
+      class="!text-gray-600 dark:!text-gray-300"
+    >
+      @if (isDark()) {
+        <mat-icon>light_mode</mat-icon>
+      } @else {
+        <mat-icon>dark_mode</mat-icon>
+      }
+    </button>
+
+    <!-- Account menu -->
+    <button
+      type="button"
+      [matMenuTriggerFor]="accountMenu"
+      class="flex items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-gray-100 dark:hover:bg-white/5"
+    >
+      <span
+        class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300"
+      >
+        {{ initials() }}
+      </span>
+      <span class="hidden text-sm font-medium text-gray-700 dark:text-gray-300 md:block">
+        {{ currentUser()?.displayName ?? 'Account' }}
+      </span>
+      <mat-icon class="hidden !text-gray-400 md:block">expand_more</mat-icon>
+    </button>
+  </div>
+</header>
+
+<mat-menu #accountMenu="matMenu" class="!min-w-[220px]">
+  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+      {{ currentUser()?.displayName ?? 'Account' }}
+    </p>
+    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+      {{ currentUser()?.email }}
+    </p>
+  </div>
+
+  <button mat-menu-item [routerLink]="profilePath()">
+    <mat-icon>person_outline</mat-icon>
+    <span>My Profile</span>
+  </button>
+  <button mat-menu-item [routerLink]="accountPath()">
+    <mat-icon>settings</mat-icon>
+    <span>Manage Account</span>
+  </button>
+  <button mat-menu-item (click)="signOut()" class="!text-red-600 dark:!text-red-400">
+    <mat-icon>logout</mat-icon>
+    <span>Sign out</span>
+  </button>
+</mat-menu>

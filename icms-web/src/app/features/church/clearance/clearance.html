@@ -1,0 +1,503 @@
+<app-page-header title="Clearance Management" subtitle="Track and manage member transfers between churches.">
+  <div page-header-actions class="flex gap-2">
+    <button type="button" (click)="openCreate('outgoing')"
+      class="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
+      <mat-icon class="mr-1 !h-4 !w-4 !text-[16px]">upload</mat-icon> Outgoing
+    </button>
+    <button type="button" (click)="openCreate('incoming')"
+      class="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+      <mat-icon class="mr-1 !h-4 !w-4 !text-[16px]">download</mat-icon> Incoming
+    </button>
+    <button type="button" (click)="openCreate('rejoin')"
+      class="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+      <mat-icon class="mr-1 !h-4 !w-4 !text-[16px]">person_add</mat-icon> Rejoin
+    </button>
+  </div>
+</app-page-header>
+
+@if (error()) {
+  <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+    {{ error() }}
+    <button type="button" (click)="error.set('')" class="ml-2 font-semibold underline">Dismiss</button>
+  </div>
+}
+
+<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+  <app-stat-card label="Total" [value]="stats()?.total ?? 0 | number" icon="description" />
+  <app-stat-card label="Initiated" [value]="stats()?.initiated ?? 0 | number" icon="pending" />
+  <app-stat-card label="Completed" [value]="stats()?.completed ?? 0 | number" icon="task_alt" />
+  <app-stat-card label="Voided" [value]="stats()?.voided ?? 0 | number" icon="cancel" />
+</div>
+
+<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex gap-1 rounded-xl bg-gray-100 p-1 dark:bg-white/5">
+      @for (tab of ['outgoing', 'incoming', 'district']; track tab) {
+        <button type="button" (click)="switchTab(tab)"
+          class="rounded-lg px-4 py-2 text-sm font-medium transition"
+          [class.bg-white]="activeTab() === tab"
+          [class.shadow-sm]="activeTab() === tab"
+          [class.dark:bg-gray-800]="activeTab() === tab"
+          [class.text-gray-900]="activeTab() === tab"
+          [class.dark:text-white]="activeTab() === tab"
+          [class.text-gray-500]="activeTab() !== tab"
+          [class.dark:text-gray-400]="activeTab() !== tab">
+          {{ tab === 'outgoing' ? 'Outgoing' : tab === 'incoming' ? 'Incoming Transfers' : 'District View' }}
+        </button>
+      }
+    </div>
+    <div class="relative">
+      <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !h-4 !w-4 !text-[16px]">search</mat-icon>
+      <input type="text" [value]="query()" (input)="onSearch($event)" placeholder="Search code, name..."
+        class="w-48 rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm placeholder-gray-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500" />
+    </div>
+  </div>
+
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-gray-100 dark:border-gray-800">
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">Code</th>
+          @if (activeTab() === 'district') {
+            <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">From Church</th>
+          }
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">Direction</th>
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">Member</th>
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">Destination</th>
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">Status</th>
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400">Date</th>
+          <th class="pb-3 font-semibold text-gray-600 dark:text-gray-400 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="8" class="py-12 text-center text-gray-400">Loading...</td></tr>
+        } @else if (clearances().length === 0) {
+          <tr><td colspan="8" class="py-12 text-center text-gray-400">No clearance requests found.</td></tr>
+        } @else {
+          @for (item of clearances(); track item.id) {
+            <tr (click)="openDetail(item)"
+              class="cursor-pointer border-b border-gray-50 transition hover:bg-gray-50/50 dark:border-gray-800/50 dark:hover:bg-white/[0.02]">
+              <td class="py-3 font-mono text-xs text-gray-700 dark:text-gray-300">{{ item.clearanceCode }}</td>
+              @if (activeTab() === 'district') {
+                <td class="py-3 text-gray-700 dark:text-gray-300">{{ item.sourceChurchName }}</td>
+              }
+              <td class="py-3">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="directionClass(item.direction)">
+                  {{ directionLabel(item.direction) }}
+                </span>
+              </td>
+              <td class="py-3 text-gray-900 dark:text-white">
+                {{ item.memberName ?? (item.incomingFirstName + ' ' + item.incomingFatherName + ' ' + item.incomingGrandfatherName) }}
+                @if (item.memberEfgbcId) {
+                  <span class="ml-1 text-xs text-gray-400">({{ item.memberEfgbcId }})</span>
+                }
+              </td>
+              <td class="py-3 text-sm text-gray-500 dark:text-gray-400">
+                {{ item.destinationChurchName ?? item.sourceChurchName ?? '—' }}
+              </td>
+              <td class="py-3">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="statusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="py-3 text-gray-500 dark:text-gray-400">{{ formatDate(item.createdAt) }}</td>
+              <td class="py-3 text-right">
+                <div class="flex items-center justify-end gap-1" (click)="$event.stopPropagation()">
+                  @if (item.status === 'Initiated' && item.direction === 'Incoming') {
+                    <button type="button" (click)="acceptTransfer(item)" [disabled]="acceptingId() === item.id"
+                      class="rounded-lg px-2 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-40 dark:text-emerald-300 dark:hover:bg-emerald-500/10">
+                      {{ acceptingId() === item.id ? 'Accepting...' : 'Accept' }}
+                    </button>
+                  }
+                  <button type="button" (click)="downloadPdf(item)"
+                    class="rounded-lg px-2 py-1 text-xs font-medium text-gray-500 transition hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5">
+                    <mat-icon class="!h-4 !w-4 !text-[14px]">download</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalCount() > 0) {
+    <div class="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+      <span>Showing {{ ((page() - 1) * pageSize()) + 1 }}-{{ Math.min(page() * pageSize(), totalCount()) }} of {{ totalCount() }}</span>
+      <div class="flex items-center gap-1">
+        <select (change)="changePageSize($event)"
+          class="rounded border border-gray-200 bg-white px-2 py-1 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+          @for (size of PAGE_SIZES; track size) {
+            <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+          }
+        </select>
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)"
+          class="rounded px-2 py-1 transition hover:bg-gray-100 disabled:opacity-40 dark:hover:bg-white/5">Prev</button>
+        @for (p of pageNumbers(); track p) {
+          <button type="button" (click)="goToPage(p)"
+            class="rounded px-2.5 py-1 text-xs font-medium transition"
+            [class.bg-brand]="p === page()" [class.text-white]="p === page()"
+            [class.hover:bg-gray-100]="p !== page()" [class.dark:hover:bg-white/5]="p !== page()">{{ p }}</button>
+        }
+        <button type="button" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)"
+          class="rounded px-2 py-1 transition hover:bg-gray-100 disabled:opacity-40 dark:hover:bg-white/5">Next</button>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- Detail slide-over -->
+@if (selected()) {
+  <div class="fixed inset-0 z-50 flex justify-end">
+    <div class="absolute inset-0 bg-black/40" (click)="closeDetail()"></div>
+    <div class="relative w-full max-w-lg overflow-y-auto bg-white shadow-2xl dark:bg-gray-900">
+      <div class="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Transfer Details</h3>
+        <button type="button" (click)="closeDetail()" class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ selected()!.clearanceCode }}</span>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="directionClass(selected()!.direction)">{{ directionLabel(selected()!.direction) }}</span>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="statusClass(selected()!.status)">{{ selected()!.status }}</span>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400">From Church</h4>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selected()!.sourceChurchName }}</p>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400">Member</h4>
+          @if (selected()!.memberName) { <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selected()!.memberName }}</p> }
+          @if (selected()!.memberEfgbcId) { <p class="text-xs text-gray-400">EFGBC ID: {{ selected()!.memberEfgbcId }}</p> }
+          @if (selected()!.previousEfgbcId) { <p class="text-xs text-gray-400">Previous EFGBC ID: {{ selected()!.previousEfgbcId }}</p> }
+        </div>
+
+        @if (selected()!.destinationChurchName || selected()!.destinationDistrictOrDenomination || selected()!.sourceChurchName) {
+          <div>
+            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400">Church Details</h4>
+            @if (selected()!.destinationChurchName) { <p class="mt-1 text-sm text-gray-900 dark:text-white">Destination: {{ selected()!.destinationChurchName }}</p> }
+            @if (selected()!.destinationDistrictOrDenomination) { <p class="text-xs text-gray-400">{{ selected()!.destinationDistrictOrDenomination }}</p> }
+            @if (selected()!.sourceChurchName) { <p class="mt-1 text-sm text-gray-900 dark:text-white">Source: {{ selected()!.sourceChurchName }}</p> }
+            @if (selected()!.sourceDistrictOrDenomination) { <p class="text-xs text-gray-400">{{ selected()!.sourceDistrictOrDenomination }}</p> }
+          </div>
+        }
+
+        @if (selected()!.recommendationNotes) {
+          <div>
+            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400">Notes</h4>
+            <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ selected()!.recommendationNotes }}</p>
+          </div>
+        }
+
+        @if (selected()!.voidReason) {
+          <div>
+            <h4 class="text-sm font-semibold text-rose-500">Void Reason</h4>
+            <p class="mt-1 text-sm text-rose-700 dark:text-rose-300">{{ selected()!.voidReason }}</p>
+          </div>
+        }
+
+        @if (selected()!.clearanceDocumentUrl) {
+          <div>
+            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400">Attached Document</h4>
+            <a [href]="selected()!.clearanceDocumentUrl" target="_blank" class="mt-1 inline-flex items-center gap-1 text-sm text-brand hover:underline">
+              <mat-icon class="!h-4 !w-4 !text-[14px]">open_in_new</mat-icon> View Document
+            </a>
+          </div>
+        }
+
+        <div class="grid grid-cols-2 gap-4 text-xs text-gray-400">
+          <div><span class="font-medium">Initiated:</span> {{ formatDateTime(selected()!.initiatedAt) }}</div>
+          @if (selected()!.completedAt) {
+            <div><span class="font-medium">Completed:</span> {{ formatDateTime(selected()!.completedAt) }}</div>
+          }
+          @if (selected()!.voidedAt) {
+            <div><span class="font-medium">Voided:</span> {{ formatDateTime(selected()!.voidedAt) }}</div>
+          }
+        </div>
+
+        <div class="flex gap-3 border-t border-gray-200 pt-4 dark:border-gray-800">
+          @if (selected()!.status === 'Initiated' && selected()!.direction === 'Incoming') {
+            <button type="button" (click)="acceptTransfer(selected()!)" [disabled]="acceptingId() === selected()!.id"
+              class="flex-1 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40">
+              {{ acceptingId() === selected()!.id ? 'Accepting...' : 'Accept Transfer' }}
+            </button>
+          }
+          @if (selected()!.direction === 'Incoming' && selected()!.status === 'Initiated' && !selected()!.memberId) {
+            <button type="button" (click)="registerMemberFromClearance(selected()!)"
+              class="flex-1 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong">
+              <mat-icon class="mr-1 !h-4 !w-4 !text-[16px]">person_add</mat-icon> Register Member
+            </button>
+          }
+          <button type="button" (click)="downloadPdf(selected()!)"
+            class="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+            <mat-icon class="mr-1 !h-4 !w-4 !text-[16px]">download</mat-icon> PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Create modal -->
+@if (showCreateModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="closeCreate()"></div>
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          @if (createType() === 'outgoing') { Outgoing Clearance }
+          @else if (createType() === 'incoming') { Incoming Clearance }
+          @else { Rejoin Member }
+        </h3>
+        <button type="button" (click)="closeCreate()" class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      @if (error()) {
+        <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+          {{ error() }}
+        </div>
+      }
+
+      <!-- ======= OUTGOING ======= -->
+      @if (createType() === 'outgoing') {
+        <div class="space-y-4">
+          <!-- Member search -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Select Member</label>
+            <div class="relative">
+              <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !h-4 !w-4 !text-[16px]">search</mat-icon>
+              <input type="text" [value]="outgoingMemberSearch()" (input)="onOutgoingMemberSearch($event)" placeholder="Search by name or EFGBC ID..."
+                class="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm placeholder-gray-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500" />
+              @if (outgoingMembers().length > 0) {
+                <div class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                  @for (m of outgoingMembers(); track m.id) {
+                    <button type="button" (click)="selectOutgoingMember(m)"
+                      class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="font-medium text-gray-900 dark:text-white">{{ m.fullName }}</span>
+                      <span class="text-xs text-gray-400">{{ m.efgbcId }}</span>
+                    </button>
+                  }
+                </div>
+              }
+              @if (outgoingSelectedMember()) {
+                <div class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-500/10">
+                  <mat-icon class="!h-4 !w-4 text-emerald-600 dark:text-emerald-400">check_circle</mat-icon>
+                  <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">{{ outgoingSelectedMember()!.fullName }}</span>
+                  <span class="text-xs text-emerald-600 dark:text-emerald-400">({{ outgoingSelectedMember()!.efgbcId }})</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Destination mode toggle -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Destination</label>
+            <div class="flex gap-1 rounded-xl bg-gray-100 p-1 dark:bg-white/5">
+              <button type="button" (click)="outgoingDestMode.set('sameDistrict')"
+                class="flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                [class.bg-white]="outgoingDestMode() === 'sameDistrict'"
+                [class.shadow-sm]="outgoingDestMode() === 'sameDistrict'"
+                [class.dark:bg-gray-800]="outgoingDestMode() === 'sameDistrict'"
+                [class.text-gray-900]="outgoingDestMode() === 'sameDistrict'"
+                [class.dark:text-white]="outgoingDestMode() === 'sameDistrict'"
+                [class.text-gray-500]="outgoingDestMode() !== 'sameDistrict'"
+                [class.dark:text-gray-400]="outgoingDestMode() !== 'sameDistrict'">
+                Same District
+              </button>
+              <button type="button" (click)="outgoingDestMode.set('external')"
+                class="flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                [class.bg-white]="outgoingDestMode() === 'external'"
+                [class.shadow-sm]="outgoingDestMode() === 'external'"
+                [class.dark:bg-gray-800]="outgoingDestMode() === 'external'"
+                [class.text-gray-900]="outgoingDestMode() === 'external'"
+                [class.dark:text-white]="outgoingDestMode() === 'external'"
+                [class.text-gray-500]="outgoingDestMode() !== 'external'"
+                [class.dark:text-gray-400]="outgoingDestMode() !== 'external'">
+                Outside District
+              </button>
+            </div>
+          </div>
+
+          <!-- Same district: church search -->
+          @if (outgoingDestMode() === 'sameDistrict') {
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Destination Church</label>
+              <p class="mb-2 text-xs text-gray-400">Select a church in your district. The transfer will be auto-approved and wait for the destination church to accept.</p>
+              <div class="relative">
+                <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !h-4 !w-4 !text-[16px]">search</mat-icon>
+                <input type="text" [value]="outgoingDistrictChurchSearch()" (input)="onOutgoingDestSearch($event)" placeholder="Search church name..."
+                  class="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm placeholder-gray-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500" />
+                @if (outgoingDistrictChurches().length > 0) {
+                  <div class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                    @for (c of outgoingDistrictChurches(); track c.id) {
+                      <button type="button" (click)="selectOutgoingDestChurch(c)"
+                        class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50 dark:hover:bg-white/5">
+                        <span class="font-medium text-gray-900 dark:text-white">{{ c.name }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+                @if (outgoingSelectedDestChurch()) {
+                  <div class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-500/10">
+                    <mat-icon class="!h-4 !w-4 text-emerald-600 dark:text-emerald-400">check_circle</mat-icon>
+                    <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">{{ outgoingSelectedDestChurch()!.name }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- External: manual entry -->
+          @if (outgoingDestMode() === 'external') {
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">External Destination</label>
+              <p class="mb-2 text-xs text-gray-400">Member is leaving the district. Account will be locked.</p>
+              <div class="space-y-3">
+                <input type="text" [ngModel]="outgoingExternalChurch()" (ngModelChange)="outgoingExternalChurch.set($event)" placeholder="Church name"
+                  class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+                <input type="text" [ngModel]="outgoingExternalDistrict()" (ngModelChange)="outgoingExternalDistrict.set($event)" placeholder="District name"
+                  class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+              </div>
+            </div>
+          }
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+            <textarea [ngModel]="outgoingNotes()" (ngModelChange)="outgoingNotes.set($event)" rows="2"
+              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"></textarea>
+          </div>
+        </div>
+      }
+
+      <!-- ======= INCOMING ======= -->
+      @if (createType() === 'incoming') {
+        <div class="space-y-4">
+          <p class="text-xs text-gray-400">After creating this clearance, you'll be redirected to the member registration page to complete the member's profile.</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">From Church</label>
+              <input type="text" [ngModel]="incomingSourceChurch()" (ngModelChange)="incomingSourceChurch.set($event)" placeholder="Source church name"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">From District/Denomination</label>
+              <input type="text" [ngModel]="incomingSourceDistrict()" (ngModelChange)="incomingSourceDistrict.set($event)" placeholder="(Optional) District or denomination"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
+              <input type="text" [ngModel]="incomingFirstName()" (ngModelChange)="incomingFirstName.set($event)"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Father Name</label>
+              <input type="text" [ngModel]="incomingFatherName()" (ngModelChange)="incomingFatherName.set($event)"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Grandfather Name</label>
+              <input type="text" [ngModel]="incomingGrandfatherName()" (ngModelChange)="incomingGrandfatherName.set($event)"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Previous EFGBC ID</label>
+              <input type="text" [ngModel]="incomingPreviousEfgbcId()" (ngModelChange)="incomingPreviousEfgbcId.set($event)"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+            <textarea [ngModel]="incomingNotes()" (ngModelChange)="incomingNotes.set($event)" rows="2"
+              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"></textarea>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Clearance Document</label>
+            <div class="flex items-center gap-3">
+              <label class="cursor-pointer rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:border-brand hover:text-brand dark:border-gray-700 dark:text-gray-400">
+                <mat-icon class="mr-1 !h-4 !w-4 !text-[14px]">upload</mat-icon> Choose File
+                <input type="file" class="hidden" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+              </label>
+              @if (incomingFileUrl()) { <span class="text-sm text-emerald-600 dark:text-emerald-400">File uploaded</span> }
+              @if (uploading()) { <span class="text-sm text-gray-400">{{ uploadProgress() }}</span> }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ======= REJOIN ======= -->
+      @if (createType() === 'rejoin') {
+        <div class="space-y-4">
+          <p class="text-xs text-gray-400">Search the district for deactivated members to reactivate them into your church.</p>
+          
+          <!-- Rejoin search -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Search Deactivated Member</label>
+            <div class="relative">
+              <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !h-4 !w-4 !text-[16px]">search</mat-icon>
+              <input type="text" [value]="rejoinSearch()" (input)="onRejoinSearch($event)" placeholder="Search by name or EFGBC ID..."
+                class="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm placeholder-gray-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500" />
+              
+              @if (rejoinCandidates().length > 0) {
+                <div class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                  @for (c of rejoinCandidates(); track c.id) {
+                    <button type="button" (click)="selectRejoinCandidate(c)"
+                      class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="font-medium text-gray-900 dark:text-white">{{ c.fullName }}</span>
+                      <span class="text-xs text-gray-400">({{ c.efgbcId }}) - Last at {{ c.churchName }}</span>
+                    </button>
+                  }
+                </div>
+              }
+              
+              @if (rejoinSelectedCandidate()) {
+                <div class="mt-2 flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 dark:bg-indigo-500/10">
+                  <mat-icon class="!h-4 !w-4 text-indigo-600 dark:text-indigo-400">check_circle</mat-icon>
+                  <span class="text-sm font-medium text-indigo-700 dark:text-indigo-300">{{ rejoinSelectedCandidate()!.fullName }}</span>
+                  <span class="text-xs text-indigo-600 dark:text-indigo-400">({{ rejoinSelectedCandidate()!.efgbcId }})</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes (Optional)</label>
+            <textarea [ngModel]="rejoinNotes()" (ngModelChange)="rejoinNotes.set($event)" rows="2"
+              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"></textarea>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Clearance Document (Optional)</label>
+            <div class="flex items-center gap-3">
+              <label class="cursor-pointer rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:border-brand hover:text-brand dark:border-gray-700 dark:text-gray-400">
+                <mat-icon class="mr-1 !h-4 !w-4 !text-[14px]">upload</mat-icon> Choose File
+                <input type="file" class="hidden" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+              </label>
+              @if (rejoinFileUrl()) { <span class="text-sm text-emerald-600 dark:text-emerald-400">File uploaded</span> }
+              @if (uploading()) { <span class="text-sm text-gray-400">{{ uploadProgress() }}</span> }
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="mt-6 flex gap-3">
+        <button type="button" (click)="closeCreate()"
+          class="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Cancel</button>
+        <button type="button" (click)="submitCreate()" [disabled]="saving()"
+          class="flex-1 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong disabled:opacity-40">
+          @if (saving()) { Saving... } @else { Create }
+        </button>
+      </div>
+    </div>
+  </div>
+}

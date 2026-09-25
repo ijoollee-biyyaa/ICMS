@@ -1,15 +1,15 @@
 <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
   <!-- Section tabs -->
   <aside class="w-full shrink-0 lg:w-64">
-    <div class="rounded-2xl border border-neutral-200 bg-white p-2 shadow-sm">
+    <div class="rounded-2xl border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       @for (section of sections; track section.id) {
         <button
           (click)="setSection(section.id)"
           class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition"
           [class]="
             active() === section.id
-              ? 'bg-gradient-to-r from-brand to-brand-blue text-white shadow'
-              : 'text-neutral-600 hover:bg-neutral-100'
+              ? 'bg-brand text-white shadow'
+              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/[0.03]'
           "
         >
           <mat-icon class="text-lg">{{ section.icon }}</mat-icon>
@@ -22,108 +22,132 @@
   <!-- Panels -->
   <div class="flex-1">
     @if (active() === 'general') {
-      <section class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h3 class="text-lg font-semibold text-neutral-800">Church information</h3>
-        <p class="mt-1 text-sm text-neutral-500">
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Church information</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Read-only summary of this church's record.
         </p>
 
         <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div class="rounded-xl bg-neutral-50 p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Name</p>
-            <p class="mt-1 font-semibold text-neutral-800">{{ churchName() }}</p>
+          <div class="rounded-xl bg-gray-50 p-4 dark:bg-white/[0.02]">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Name</p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ churchName() }}</p>
           </div>
-          <div class="rounded-xl bg-neutral-50 p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Code</p>
-            <p class="mt-1 font-semibold text-neutral-800">{{ store.church()?.code ?? '—' }}</p>
+          <div class="rounded-xl bg-gray-50 p-4 dark:bg-white/[0.02]">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Code</p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ store.church()?.code ?? '—' }}</p>
           </div>
-          <div class="rounded-xl bg-neutral-50 p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Location</p>
-            <p class="mt-1 font-semibold text-neutral-800">{{ churchLocation() }}</p>
+          <div class="rounded-xl bg-gray-50 p-4 dark:bg-white/[0.02]">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Location</p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ churchLocation() }}</p>
           </div>
-          <div class="rounded-xl bg-neutral-50 p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Type</p>
-            <p class="mt-1 font-semibold text-neutral-800">{{ store.church()?.type ?? '—' }}</p>
+          <div class="rounded-xl bg-gray-50 p-4 dark:bg-white/[0.02]">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Type</p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ store.church()?.type ?? '—' }}</p>
           </div>
-          <div class="rounded-xl bg-neutral-50 p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Members</p>
-            <p class="mt-1 font-semibold text-neutral-800">{{ store.memberCount() }}</p>
+          <div class="rounded-xl bg-gray-50 p-4 dark:bg-white/[0.02]">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Members</p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ store.memberCount() }}</p>
           </div>
-          <div class="rounded-xl bg-neutral-50 p-4">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Daughter churches</p>
-            <p class="mt-1 font-semibold text-neutral-800">{{ store.daughterCount() }}</p>
+          <div class="rounded-xl bg-gray-50 p-4 dark:bg-white/[0.02]">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Daughter churches</p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ store.daughterCount() }}</p>
           </div>
         </div>
 
-        <div class="mt-6 flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-          <mat-icon class="mt-0.5 text-brand">info</mat-icon>
-          <p class="text-sm text-neutral-500">
-            Editing church profile details isn't available in this build yet.
+        <div class="mt-6 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 dark:border-gray-800 dark:bg-white/[0.02]">
+          <mat-icon class="mt-0.5 text-brand dark:text-brand-300">info</mat-icon>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Editing church profile details is available from the Church Profile page.
           </p>
         </div>
       </section>
     }
 
     @if (active() === 'security') {
-      <section class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h3 class="text-lg font-semibold text-neutral-800">Change password</h3>
-        <p class="mt-1 text-sm text-neutral-500">
-          Signed in as <strong class="font-semibold text-neutral-700">{{ adminName() }}</strong>.
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Change password</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Signed in as <strong class="font-semibold text-gray-700 dark:text-gray-200">{{ adminName() }}</strong>.
           Changing the password signs you out everywhere.
         </p>
 
         @if (success()) {
-          <div class="mt-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <mat-icon class="text-emerald-600">check_circle</mat-icon>
-            <p class="text-sm text-emerald-700">{{ success() }}</p>
+          <div class="mt-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-800 dark:bg-emerald-950/40">
+            <mat-icon class="text-emerald-600 dark:text-emerald-300">check_circle</mat-icon>
+            <p class="text-sm text-emerald-700 dark:text-emerald-300">{{ success() }}</p>
           </div>
         }
 
         @if (error()) {
-          <div class="mt-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-            <mat-icon class="text-red-500">error_outline</mat-icon>
-            <p class="text-sm text-red-700">{{ error() }}</p>
+          <div class="mt-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-950/40">
+            <mat-icon class="text-red-500 dark:text-red-300">error_outline</mat-icon>
+            <p class="text-sm text-red-700 dark:text-red-300">{{ error() }}</p>
           </div>
         }
 
-        <form [formGroup]="form" (ngSubmit)="save()" class="mt-6 space-y-4">
-          <mat-form-field appearance="outline">
-            <mat-label>Current password</mat-label>
-            <input matInput formControlName="currentPassword" type="password" autocomplete="current-password" />
-            @if (form.controls.currentPassword.hasError('required')) {
-              <mat-error>Your current password is required.</mat-error>
-            } @else if (form.controls.currentPassword.hasError('server')) {
-              <mat-error>{{ form.controls.currentPassword.getError('server') }}</mat-error>
+        <form [formGroup]="form" (ngSubmit)="save()" class="mt-6 space-y-5">
+          <!-- Current Password -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Current password</label>
+            <input
+              formControlName="currentPassword"
+              type="password"
+              autocomplete="current-password"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:focus:border-brand-500"
+            />
+            @if (form.controls.currentPassword.touched || form.controls.currentPassword.dirty) {
+              @if (form.controls.currentPassword.hasError('required')) {
+                <p class="mt-1.5 text-xs text-red-500">Your current password is required.</p>
+              } @else if (form.controls.currentPassword.hasError('server')) {
+                <p class="mt-1.5 text-xs text-red-500">{{ form.controls.currentPassword.getError('server') }}</p>
+              }
             }
-          </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>New password</mat-label>
-            <input matInput formControlName="newPassword" type="password" autocomplete="new-password" />
-            @if (form.controls.newPassword.hasError('required')) {
-              <mat-error>A new password is required.</mat-error>
-            } @else if (form.controls.newPassword.hasError('minlength')) {
-              <mat-error>At least 8 characters.</mat-error>
-            } @else if (form.controls.newPassword.hasError('sameAsCurrent')) {
-              <mat-error>It must be different from your current password.</mat-error>
+          <!-- New Password -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">New password</label>
+            <input
+              formControlName="newPassword"
+              type="password"
+              autocomplete="new-password"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:focus:border-brand-500"
+            />
+            @if (form.controls.newPassword.touched || form.controls.newPassword.dirty) {
+              @if (form.controls.newPassword.hasError('required')) {
+                <p class="mt-1.5 text-xs text-red-500">A new password is required.</p>
+              } @else if (form.controls.newPassword.hasError('minlength')) {
+                <p class="mt-1.5 text-xs text-red-500">At least 8 characters.</p>
+              } @else if (form.controls.newPassword.hasError('sameAsCurrent')) {
+                <p class="mt-1.5 text-xs text-red-500">It must be different from your current password.</p>
+              }
             }
-          </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Confirm new password</mat-label>
-            <input matInput formControlName="confirmPassword" type="password" autocomplete="new-password" />
-            @if (form.controls.confirmPassword.hasError('required')) {
-              <mat-error>Repeat the new password.</mat-error>
-            } @else if (form.controls.confirmPassword.hasError('mismatch')) {
-              <mat-error>Passwords don't match.</mat-error>
+          <!-- Confirm Password -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Confirm new password</label>
+            <input
+              formControlName="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-brand-300 focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:focus:border-brand-500"
+            />
+            @if (form.controls.confirmPassword.touched || form.controls.confirmPassword.dirty) {
+              @if (form.controls.confirmPassword.hasError('required')) {
+                <p class="mt-1.5 text-xs text-red-500">Repeat the new password.</p>
+              } @else if (form.controls.confirmPassword.hasError('mismatch')) {
+                <p class="mt-1.5 text-xs text-red-500">Passwords don't match.</p>
+              }
             }
-          </mat-form-field>
+          </div>
 
           <div class="flex justify-end pt-2">
             <button
               type="submit"
               [disabled]="form.invalid || saving()"
-              class="rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
+              class="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               {{ saving() ? 'Changing…' : 'Change password' }}
             </button>

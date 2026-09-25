@@ -19,10 +19,11 @@ import {
 import { environment } from '../../../../../environments/environment';
 import { fullName, initials } from '../../../../common/member-names';
 import { problemDetail } from '../../../../common/http-errors';
+import { MemberEditModal } from '../member-edit-modal/member-edit-modal';
 
 @Component({
   selector: 'app-member-detail',
-  imports: [MatIconButton, MatIcon, RouterLink],
+  imports: [MatIconButton, MatIcon, RouterLink, MemberEditModal],
   templateUrl: './member-detail.html',
   styleUrl: './member-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,8 +44,23 @@ export class MemberDetailPage {
   readonly issuing = signal(false);
   readonly credentials = signal<IssueMemberCredentials | null>(null);
   readonly copied = signal(false);
+  readonly showEditModal = signal(false);
 
-  readonly photoUrl = computed(() => this.member()?.photoUrl ?? null);
+  readonly photoUrl = computed(() => {
+    const url = this.member()?.photoUrl ?? null;
+    if (!url) return null;
+    // Resolve relative /uploads paths to the API origin (avoids proxy restart)
+    if (url.startsWith('/uploads')) return `${environment.apiBase}${url}`;
+    return url;
+  });
+
+  openEdit() {
+    this.showEditModal.set(true);
+  }
+
+  onMemberSaved(updated: Member) {
+    this.member.set(updated);
+  }
 
   constructor() {
     this.load();
@@ -110,11 +126,11 @@ export class MemberDetailPage {
   statusClass(status: string): string {
     switch (status) {
       case 'Active':
-        return 'bg-emerald-100 text-emerald-700';
+        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300';
       case 'Transferring':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300';
       default:
-        return 'bg-neutral-100 text-neutral-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-gray-500/15 dark:text-gray-300';
     }
   }
 
@@ -140,7 +156,26 @@ export class MemberDetailPage {
     }
   }
 
-  // ---- Photo upload (direct to Cloudinary, URL saved via member update) ---
+  healthBadgeClass(health: string | null | undefined): string {
+    switch (health) {
+      case 'Healthy':
+        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300';
+      case 'ChronicIllness':
+      case 'UnderMedicalCare':
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300';
+      case 'Disability':
+        return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300';
+      default:
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+    }
+  }
+
+  formatLabel(val: string | null | undefined): string {
+    if (!val) return '—';
+    return val.replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  // ---- Photo upload (via internal API) ------------------------------------
 
   onPhotoSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -148,20 +183,12 @@ export class MemberDetailPage {
     input.value = '';
     if (!file) return;
 
-    const { cloudName, uploadPreset } = environment.cloudinary;
-    if (!cloudName || !uploadPreset) {
-      this.error.set(
-        'Profile photo upload is not configured. Set environment.cloudinary in the app settings.',
-      );
-      return;
-    }
-
     if (!file.type.startsWith('image/')) {
       this.error.set('Please choose an image file.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      this.error.set('Photo must be 5 MB or smaller.');
+    if (file.size > 10 * 1024 * 1024) {
+      this.error.set('Photo must be 10 MB or smaller.');
       return;
     }
 
@@ -171,51 +198,16 @@ export class MemberDetailPage {
     this.error.set('');
     this.uploadingPhoto.set(true);
 
-    const form = new FormData();
-    form.append('file', file);
-    form.append('upload_preset', uploadPreset);
-
-    fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: 'POST', body: form },
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const url = data?.secure_url as string | undefined;
-        if (!url) {
-          this.error.set('Cloudinary rejected the image. Check the upload preset.');
-          this.uploadingPhoto.set(false);
-          return;
-        }
-        this.churchService
-          .updateMember(m.id, {
-            firstName: m.firstName,
-            fatherName: m.fatherName,
-            grandfatherName: m.grandfatherName,
-            dateOfBirth: m.dateOfBirth,
-            gender: m.gender,
-            jobStatus: m.jobStatus,
-            phone: m.phone,
-            email: m.email,
-            photoUrl: url,
-          })
-          .subscribe({
-            next: (updated) => {
-              this.member.set(updated);
-              this.uploadingPhoto.set(false);
-            },
-            error: (err) => {
-              this.uploadingPhoto.set(false);
-              this.error.set(
-                problemDetail(err, 'Uploaded but could not save the photo.'),
-              );
-            },
-          });
-      })
-      .catch(() => {
+    this.churchService.uploadMemberPhoto(m.id, file).subscribe({
+      next: (updated) => {
+        this.member.set(updated);
         this.uploadingPhoto.set(false);
-        this.error.set('Could not reach the photo service.');
-      });
+      },
+      error: (err) => {
+        this.uploadingPhoto.set(false);
+        this.error.set(problemDetail(err, 'Could not upload photo.'));
+      },
+    });
   }
 
   // ---- Login credentials -------------------------------------------------

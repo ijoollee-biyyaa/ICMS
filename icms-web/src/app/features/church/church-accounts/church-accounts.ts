@@ -1,44 +1,40 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   signal,
-  ViewChild,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatSortModule, MatSort } from '@angular/material/sort';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
 import { AuthService } from '../../../services/auth.service';
 import { ChurchWorkspaceStore } from '../../../stores/church-workspace.store';
 import { AccountLockReason, UserAccount } from '../../../models/account';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 
 /** Role labels for accounts. Admin is protected (cannot be toggled here). */
 const ROLE_META: Record<string, { label: string; chip: string }> = {
   Admin: {
     label: 'Super Admin',
-    chip: 'bg-fuchsia-100 text-fuchsia-700',
+    chip: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/15 dark:text-fuchsia-300',
   },
   DistrictSubAdmin: {
     label: 'District Sub-Admin',
-    chip: 'bg-brand/10 text-brand',
+    chip: 'bg-brand/10 text-brand dark:text-brand-300',
   },
   ChurchAdmin: {
     label: 'Church Admin',
-    chip: 'bg-blue-100 text-brand-blue',
+    chip: 'bg-blue-100 text-brand-blue dark:bg-blue-500/15 dark:text-blue-300',
   },
   ChurchSubAdmin: {
     label: 'Church Sub-Admin',
-    chip: 'bg-emerald-100 text-emerald-700',
+    chip: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
   },
   Member: {
     label: 'Member',
-    chip: 'bg-neutral-100 text-neutral-600',
+    chip: 'bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-400',
   },
 };
 
@@ -73,30 +69,27 @@ const LOCK_OPTIONS: LockOption[] = [
   },
 ];
 
+import { AppTable } from '../../shared/ui/data-table/data-table';
+import { TableColumn } from '../../shared/ui/data-table/table-column';
+
 @Component({
   selector: 'app-church-accounts',
   imports: [
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
     MatIcon,
     MatIconButton,
+    StatCard,
+    DecimalPipe,
+    AppTable,
+    TableColumn,
   ],
   templateUrl: './church-accounts.html',
   styleUrl: './church-accounts.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChurchAccounts implements AfterViewInit {
+export class ChurchAccounts {
   readonly store = inject(ChurchWorkspaceStore);
   readonly auth = inject(AuthService);
 
-  readonly dataSource = new MatTableDataSource<UserAccount>();
-  readonly displayedColumns = ['name', 'email', 'position', 'status', 'actions'];
-
-  @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  readonly query = signal('');
   readonly notice = signal('');
   readonly error = signal('');
 
@@ -115,31 +108,22 @@ export class ChurchAccounts implements AfterViewInit {
   readonly LOCK_REASON_META = LOCK_REASON_META;
   readonly lockOptions = LOCK_OPTIONS;
 
-  constructor() {
-    effect(() => {
-      this.dataSource.data = this.store.accounts();
-      this.dataSource.filter = this.query().trim().toLowerCase();
-    });
-  }
+  readonly accountName = (account: UserAccount) => this.fullName(account);
+  readonly accountPosition = (account: UserAccount) => this.positionLabel(account);
+  readonly accountStatus = (account: UserAccount) =>
+    account.isAccountLocked ? 'Locked' : 'Active';
 
-  ngAfterViewInit(): void {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sortingDataAccessor = (account, id) =>
-      id === 'name'
-        ? this.fullName(account)
-        : String((account as unknown as Record<string, unknown>)[id] ?? '');
-    this.dataSource.filterPredicate = (account, filter) =>
-      [
-        this.fullName(account),
-        account.email ?? '',
-        this.positionLabel(account),
-        account.roles.join(' '),
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(filter);
-  }
+  readonly searchAccount = (account: UserAccount, filter: string): boolean => {
+    return [
+      this.fullName(account),
+      account.email ?? '',
+      this.positionLabel(account),
+      account.roles.join(' '),
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(filter);
+  };
 
   fullName(account: UserAccount): string {
     return [account.firstName, account.fatherName, account.grandfatherName]
@@ -241,9 +225,5 @@ export class ChurchAccounts implements AfterViewInit {
     this.error.set('');
     this.store.unlockAccount({ userId: account.userId });
     this.notice.set(`${this.fullName(account)}'s account is unlocked.`);
-  }
-
-  onSearch(event: Event) {
-    this.query.set((event.target as HTMLInputElement).value);
   }
 }

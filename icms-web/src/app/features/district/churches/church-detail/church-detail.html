@@ -1,0 +1,370 @@
+<div class="space-y-6">
+  <!-- Breadcrumb & Back -->
+  <div class="flex items-center justify-between">
+    <nav class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+      <a routerLink="/district/churches" class="transition hover:text-brand dark:hover:text-white">Churches</a>
+      <span>/</span>
+      <span class="text-brand dark:text-brand-300">{{ church()?.name ?? 'Loading…' }}</span>
+    </nav>
+    <a
+      routerLink="/district/churches"
+      class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+    >
+      <mat-icon class="!h-4 !w-4 !text-[16px]">arrow_back</mat-icon>
+      Back to Directory
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center rounded-3xl border border-gray-200 bg-white p-12 text-gray-400 dark:border-gray-800 dark:bg-white/[0.03]">
+      <mat-icon class="animate-spin text-3xl text-brand">progress_activity</mat-icon>
+      <span class="ml-3 text-sm font-medium">Loading church details…</span>
+    </div>
+  } @else if (error(); as err) {
+    <div class="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+      <mat-icon class="text-red-500">error_outline</mat-icon>
+      <p>{{ err }}</p>
+    </div>
+  } @else if (church(); as c) {
+    <!-- Church Hero Card -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue p-6 text-white shadow-xl sm:p-8">
+      <div class="absolute -right-12 -top-12 h-52 w-52 rounded-full bg-white/10 blur-2xl"></div>
+      <div class="absolute -bottom-20 right-32 h-44 w-44 rounded-full bg-white/10 blur-xl"></div>
+
+      <div class="relative flex flex-wrap items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 p-3 backdrop-blur ring-1 ring-white/20">
+            <mat-icon class="!h-10 !w-10 !text-[40px]">church</mat-icon>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-full bg-white/20 px-2.5 py-0.5 font-mono text-xs font-semibold tracking-wider">
+                {{ c.code }}
+              </span>
+              <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold">
+                {{ c.type === 'Local' ? 'Local Church (HQ)' : 'Daughter Church' }}
+              </span>
+            </div>
+            <h1 class="mt-2 text-2xl font-extrabold sm:text-3xl">{{ c.name }}</h1>
+            <p class="mt-1 flex items-center gap-1.5 text-xs text-white/80">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">place</mat-icon>
+              <span>{{ formatLocation(c.subcity, c.city) }}</span>
+              @if (c.parentChurchId) {
+                <span>·</span>
+                <span>Daughter of Church #{{ c.parentChurchId }}</span>
+              }
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          @if (c.websiteUrl) {
+            <a
+              [href]="c.websiteUrl.startsWith('http') ? c.websiteUrl : 'https://' + c.websiteUrl"
+              target="_blank"
+              rel="noopener"
+              class="flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold backdrop-blur transition hover:bg-white/25"
+            >
+              <mat-icon class="!h-4 !w-4 !text-[16px]">language</mat-icon>
+              Website
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Strip -->
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <app-stat-card
+        icon="people"
+        label="Total Members"
+        [value]="(c.memberCount ?? 0).toString()"
+        accentClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-300"
+      />
+      <app-stat-card
+        icon="how_to_reg"
+        label="Active Members"
+        [value]="(c.activeMemberCount ?? c.memberCount ?? 0).toString()"
+        accentClass="bg-blue-100 text-brand-blue dark:bg-blue-900/30 dark:text-blue-300"
+      />
+      <app-stat-card
+        icon="local_church"
+        label="Full-time Ministers"
+        [value]="ministers().length.toString()"
+        accentClass="bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+      />
+      <app-stat-card
+        icon="badge"
+        label="Office Personnel"
+        [value]="employees().length.toString()"
+        accentClass="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+      />
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800">
+      <button
+        type="button"
+        (click)="activeTab.set('personnel')"
+        class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition"
+        [class.border-brand]="activeTab() === 'personnel'"
+        [class.text-brand]="activeTab() === 'personnel'"
+        [class.dark:text-brand-300]="activeTab() === 'personnel'"
+        [class.border-transparent]="activeTab() !== 'personnel'"
+        [class.text-gray-500]="activeTab() !== 'personnel'"
+        [class.hover:text-gray-800]="activeTab() !== 'personnel'"
+        [class.dark:text-gray-400]="activeTab() !== 'personnel'"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[18px]">badge</mat-icon>
+        <span>Ministers & Personnel</span>
+        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+          {{ employees().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        (click)="activeTab.set('overview')"
+        class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition"
+        [class.border-brand]="activeTab() === 'overview'"
+        [class.text-brand]="activeTab() === 'overview'"
+        [class.dark:text-brand-300]="activeTab() === 'overview'"
+        [class.border-transparent]="activeTab() !== 'overview'"
+        [class.text-gray-500]="activeTab() !== 'overview'"
+        [class.hover:text-gray-800]="activeTab() !== 'overview'"
+        [class.dark:text-gray-400]="activeTab() !== 'overview'"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[18px]">info</mat-icon>
+        <span>Church Overview</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="activeTab.set('members')"
+        class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition"
+        [class.border-brand]="activeTab() === 'members'"
+        [class.text-brand]="activeTab() === 'members'"
+        [class.dark:text-brand-300]="activeTab() === 'members'"
+        [class.border-transparent]="activeTab() !== 'members'"
+        [class.text-gray-500]="activeTab() !== 'members'"
+        [class.hover:text-gray-800]="activeTab() !== 'members'"
+        [class.dark:text-gray-400]="activeTab() !== 'members'"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[18px]">group</mat-icon>
+        <span>Membership Summary</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Ministers & Personnel -->
+    @if (activeTab() === 'personnel') {
+      <div class="space-y-4">
+        <app-table
+          [data]="employees()"
+          [searchFn]="searchEmployee"
+          searchPlaceholder="Search ministers and staff by name, title or EFGBC ID…"
+          [pageSizeOptions]="[10, 25, 50]"
+        >
+          <!-- Full Name -->
+          <app-table-column key="name" header="Name" [sortable]="true" [sortValue]="employeeName">
+            <ng-template let-emp>
+              <div class="flex items-center gap-3 py-1">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white shadow-sm"
+                  [class.bg-gradient-to-br]="true"
+                  [class.from-amber-500]="emp.employmentType === 'FulltimeMinister'"
+                  [class.to-orange-600]="emp.employmentType === 'FulltimeMinister'"
+                  [class.from-indigo-500]="emp.employmentType !== 'FulltimeMinister'"
+                  [class.to-blue-600]="emp.employmentType !== 'FulltimeMinister'"
+                >
+                  {{ emp.employmentType === 'FulltimeMinister' ? 'M' : 'S' }}
+                </div>
+                <div class="min-w-0">
+                  <p class="truncate font-semibold text-gray-900 dark:text-white">
+                    {{ employeeName(emp) }}
+                  </p>
+                  @if (emp.memberEfgbcId) {
+                    <p class="font-mono text-xs text-brand dark:text-brand-300">
+                      {{ emp.memberEfgbcId }}
+                    </p>
+                  } @else {
+                    <p class="text-xs text-gray-400 dark:text-gray-500">External hire</p>
+                  }
+                </div>
+              </div>
+            </ng-template>
+          </app-table-column>
+
+          <!-- Position & Title -->
+          <app-table-column key="position" header="Position" [sortable]="true" [sortValue]="employeePosition">
+            <ng-template let-emp>
+              <div>
+                <p class="font-medium text-gray-900 dark:text-white">{{ emp.position }}</p>
+                @if (emp.ministerTitle) {
+                  <p class="text-xs text-amber-600 dark:text-amber-400">{{ emp.ministerTitle }}</p>
+                }
+              </div>
+            </ng-template>
+          </app-table-column>
+
+          <!-- Employment Type -->
+          <app-table-column key="type" header="Type" [sortable]="true" [sortValue]="employeeType" headerClass="hidden sm:table-cell" cellClass="hidden sm:table-cell">
+            <ng-template let-emp>
+              <span
+                class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                [class.bg-amber-100]="emp.employmentType === 'FulltimeMinister'"
+                [class.text-amber-800]="emp.employmentType === 'FulltimeMinister'"
+                [class.dark:bg-amber-950/40]="emp.employmentType === 'FulltimeMinister'"
+                [class.dark:text-amber-300]="emp.employmentType === 'FulltimeMinister'"
+                [class.bg-gray-100]="emp.employmentType !== 'FulltimeMinister'"
+                [class.text-gray-700]="emp.employmentType !== 'FulltimeMinister'"
+                [class.dark:bg-gray-800]="emp.employmentType !== 'FulltimeMinister'"
+                [class.dark:text-gray-300]="emp.employmentType !== 'FulltimeMinister'"
+              >
+                {{ employmentLabel(emp.employmentType) }}
+              </span>
+            </ng-template>
+          </app-table-column>
+
+          <!-- Payroll & SalaryPaidBy (Domain Rule: Dual Employment Badge) -->
+          <app-table-column key="payroll" header="Payroll" align="center">
+            <ng-template let-emp>
+              <div class="flex flex-col items-center gap-1">
+                @if (emp.salaryPaidBy === 'District') {
+                  <span class="inline-flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-semibold text-teal-800 dark:bg-teal-950/40 dark:text-teal-300" title="Paid from district office budget">
+                    <mat-icon class="!h-3 !w-3 !text-[12px]">payments</mat-icon>
+                    Paid from district
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-brand-blue dark:bg-blue-950/30 dark:text-blue-300">
+                    Paid by church
+                  </span>
+                }
+                @if (emp.salary != null) {
+                  <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    {{ emp.salary | currency: 'ETB ' : 'symbol' : '1.0-0' }}
+                  </span>
+                }
+              </div>
+            </ng-template>
+          </app-table-column>
+
+          <!-- Status -->
+          <app-table-column key="status" header="Status" align="center">
+            <ng-template let-emp>
+              <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ statusChip(emp.status) }}">
+                {{ emp.status }}
+              </span>
+            </ng-template>
+          </app-table-column>
+
+          <!-- Hired Date -->
+          <app-table-column key="hired" header="Hire Date" headerClass="hidden md:table-cell" cellClass="hidden md:table-cell">
+            <ng-template let-emp>
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ (emp.hireDate | date: 'mediumDate') ?? '—' }}
+              </span>
+            </ng-template>
+          </app-table-column>
+        </app-table>
+      </div>
+    }
+
+    <!-- TAB 2: Church Overview & Contact -->
+    @if (activeTab() === 'overview') {
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <!-- Physical Location -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-brand dark:bg-brand/20 dark:text-brand-300">
+              <mat-icon>pin_drop</mat-icon>
+            </div>
+            <h3 class="font-bold text-gray-900 dark:text-white">Physical Location</h3>
+          </div>
+
+          <dl class="mt-4 space-y-3 text-sm">
+            <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
+              <dt class="text-gray-400 dark:text-gray-500">City</dt>
+              <dd class="font-semibold text-gray-800 dark:text-white">{{ c.city || '—' }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
+              <dt class="text-gray-400 dark:text-gray-500">Subcity / Zone</dt>
+              <dd class="font-semibold text-gray-800 dark:text-white">{{ c.subcity || '—' }}</dd>
+            </div>
+            <div class="flex justify-between pb-2">
+              <dt class="text-gray-400 dark:text-gray-500">Specific Address</dt>
+              <dd class="text-right font-medium text-gray-700 dark:text-gray-300">{{ c.mapAddress || '—' }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Communications -->
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue dark:bg-blue-900/30 dark:text-blue-300">
+              <mat-icon>contacts</mat-icon>
+            </div>
+            <h3 class="font-bold text-gray-900 dark:text-white">Contact & Channels</h3>
+          </div>
+
+          <dl class="mt-4 space-y-3 text-sm">
+            <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
+              <dt class="text-gray-400 dark:text-gray-500">Mobile Phone</dt>
+              <dd class="font-semibold text-gray-800 dark:text-white">{{ c.phone || '—' }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
+              <dt class="text-gray-400 dark:text-gray-500">Telephone</dt>
+              <dd class="font-semibold text-gray-800 dark:text-white">{{ c.tel || '—' }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
+              <dt class="text-gray-400 dark:text-gray-500">Email Address</dt>
+              <dd class="font-mono text-xs font-semibold text-gray-800 dark:text-white">{{ c.email || '—' }}</dd>
+            </div>
+            <div class="flex justify-between pb-2">
+              <dt class="text-gray-400 dark:text-gray-500">Website</dt>
+              <dd>
+                @if (c.websiteUrl) {
+                  <a [href]="c.websiteUrl" target="_blank" rel="noopener" class="font-semibold text-brand hover:underline">
+                    {{ c.websiteUrl }}
+                  </a>
+                } @else {
+                  <span class="text-gray-400 dark:text-gray-500">—</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 3: Membership Summary -->
+    @if (activeTab() === 'members') {
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Active Members</p>
+            <p class="mt-2 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+              {{ c.activeMemberCount ?? c.memberCount ?? 0 }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Fully registered and in good standing</p>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Total Registered</p>
+            <p class="mt-2 text-3xl font-extrabold text-gray-800 dark:text-white">
+              {{ c.memberCount ?? 0 }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Total member records linked to this church</p>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Daughter Churches</p>
+            <p class="mt-2 text-3xl font-extrabold text-brand-blue dark:text-blue-400">
+              {{ c.daughterCount ?? 0 }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Churches under this local church branch</p>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

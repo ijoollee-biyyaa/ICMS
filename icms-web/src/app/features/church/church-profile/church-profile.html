@@ -1,54 +1,193 @@
-<div class="space-y-6">
-  <header>
-    <h2 class="text-xl font-semibold text-neutral-800">Church Profile</h2>
-    <p class="text-sm text-neutral-500">Your church's registered information.</p>
-  </header>
+@if (loading()) {
+  <div class="h-40 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-gray-800"></div>
+} @else if (error() && !church()) {
+  <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+    <mat-icon class="mt-0.5">error_outline</mat-icon>
+    <p>{{ error() }}</p>
+  </div>
+} @else if (church(); as c) {
+  <app-page-header
+    [title]="c.name"
+    subtitle="Your church's registered information and contact details."
+  />
 
-  @if (church(); as c) {
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <section class="rounded-xl border border-neutral-200 bg-white p-6">
-        <h3 class="mb-4 flex items-center gap-2 font-semibold text-neutral-800">
-          <mat-icon class="text-brand">church</mat-icon>
-          {{ c.name }}
-        </h3>
-        <dl class="space-y-3 text-sm">
-          <div class="flex justify-between gap-4">
-            <dt class="text-neutral-400">Code</dt>
-            <dd class="font-semibold text-brand-blue">{{ c.code }}</dd>
+  <div class="space-y-6">
+    <!-- Profile meta card -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+      <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+        <div class="flex w-full flex-col items-center gap-6 xl:flex-row">
+          <div
+            class="flex h-20 w-20 items-center justify-center rounded-full border border-gray-200 bg-brand-100 text-brand-700 dark:border-gray-800 dark:bg-brand-500/20 dark:text-brand-300"
+          >
+            <mat-icon class="text-3xl">church</mat-icon>
           </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-neutral-400">Type</dt>
-            <dd class="text-neutral-700">{{ c.type }}</dd>
+          <div class="order-3 xl:order-2 xl:text-left">
+            <h4 class="mb-2 text-center text-lg font-semibold text-gray-800 dark:text-white/90 xl:text-left">
+              {{ c.name }}
+            </h4>
+            <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
+              <p class="text-sm text-gray-500 capitalize dark:text-gray-400">{{ c.type }}</p>
+              <div class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
+              <p class="font-mono text-sm text-gray-500 dark:text-gray-400">{{ c.code }}</p>
+              <div class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ location(c.city, c.subcity) }}</p>
+            </div>
           </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-neutral-400">Location</dt>
-            <dd class="text-neutral-700">{{ location(c.city, c.subcity) }}</dd>
-          </div>
-        </dl>
-      </section>
+        </div>
 
-      <section class="rounded-xl border border-neutral-200 bg-white p-6">
-        <h3 class="mb-4 flex items-center gap-2 font-semibold text-neutral-800">
-          <mat-icon class="text-brand-blue">contact_mail</mat-icon>
-          Contact
-        </h3>
-        <dl class="space-y-3 text-sm">
-          <div class="flex justify-between gap-4">
-            <dt class="text-neutral-400">Email</dt>
-            <dd class="text-neutral-700">{{ c.email || '—' }}</dd>
-          </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-neutral-400">Phone</dt>
-            <dd class="text-neutral-700">{{ c.phone || '—' }}</dd>
-          </div>
-          <div class="flex justify-between gap-4">
-            <dt class="text-neutral-400">Website</dt>
-            <dd class="text-neutral-700">{{ c.websiteUrl || '—' }}</dd>
-          </div>
-        </dl>
-      </section>
+        <button
+          type="button"
+          (click)="openEdit()"
+          [attr.aria-label]="'Edit church profile'"
+          title="Edit profile"
+          class="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:h-11 lg:w-11 lg:p-0"
+        >
+          <mat-icon class="text-base">edit</mat-icon>
+          <span class="lg:hidden">Edit profile</span>
+        </button>
+      </div>
+
+      @if (notice()) {
+        <div class="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+          <mat-icon>check_circle</mat-icon>
+          <p>{{ notice() }}</p>
+        </div>
+      }
+
+      @if (editing()) {
+        <div class="mt-6 border-t border-gray-100 pt-6 dark:border-gray-800">
+          @if (error()) {
+            <div class="mb-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+              <mat-icon class="mt-0.5">error_outline</mat-icon>
+              <p>{{ error() }}</p>
+            </div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="save()" class="space-y-5">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <mat-form-field appearance="outline">
+                <mat-label>Church name</mat-label>
+                <input matInput formControlName="name" />
+                @if (form.controls.name.hasError('required')) {
+                  <mat-error>Required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Code</mat-label>
+                <input matInput formControlName="code" />
+                @if (form.controls.code.hasError('required')) {
+                  <mat-error>Required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sub-city</mat-label>
+                <input matInput formControlName="subcity" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" type="email" />
+                @if (form.controls.email.hasError('email')) {
+                  <mat-error>Enter a valid email</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone" placeholder="+251 …" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Telephone (fixed)</mat-label>
+                <input matInput formControlName="tel" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Website</mat-label>
+                <input matInput formControlName="websiteUrl" placeholder="https://…" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Map address</mat-label>
+                <input matInput formControlName="mapAddress" />
+              </mat-form-field>
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                (click)="closeEdit()"
+                class="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                [disabled]="form.invalid || busy()"
+                class="flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-strong disabled:opacity-60"
+              >
+                <mat-icon class="text-base">save</mat-icon>
+                {{ busy() ? 'Saving…' : 'Save changes' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
     </div>
-  } @else {
-    <p class="text-sm text-neutral-500">Loading church profile…</p>
-  }
-</div>
+
+    <!-- Church information -->
+    <app-section-card title="Church information" subtitle="Registered identity of this church.">
+      <div class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Name</p>
+          <p class="mt-1 font-medium text-gray-900 dark:text-white">{{ c.name }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Code</p>
+          <p class="mt-1 font-mono text-sm font-medium text-gray-900 dark:text-white">{{ c.code }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Type</p>
+          <p class="mt-1 font-medium text-gray-900 dark:text-white">{{ c.type }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">City</p>
+          <p class="mt-1 font-medium text-gray-900 dark:text-white">{{ c.city ?? '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Sub-city</p>
+          <p class="mt-1 font-medium text-gray-900 dark:text-white">{{ c.subcity ?? '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Map address</p>
+          <p class="mt-1 font-medium text-gray-900 dark:text-white">{{ c.mapAddress ?? '—' }}</p>
+        </div>
+      </div>
+    </app-section-card>
+
+    <!-- Contact -->
+    <app-section-card title="Contact" subtitle="How people reach this church.">
+      <div class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Email</p>
+          <p class="mt-1 truncate font-medium text-gray-900 dark:text-white">{{ c.email ?? '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Phone</p>
+          <p class="mt-1 font-medium text-gray-900 dark:text-white">{{ c.phone ?? '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Website</p>
+          <p class="mt-1 truncate font-medium text-gray-900 dark:text-white">{{ c.websiteUrl ?? '—' }}</p>
+        </div>
+      </div>
+    </app-section-card>
+  </div>
+}

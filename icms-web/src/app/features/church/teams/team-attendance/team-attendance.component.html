@@ -1,0 +1,227 @@
+<div class="space-y-6">
+  <!-- Toolbar -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mark Attendance</h2>
+    <div class="flex items-center gap-3">
+      <select
+        [ngModel]="teamId()"
+        (ngModelChange)="teamId.set($event)"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+      >
+        <option [ngValue]="0" disabled>Select Team</option>
+        @for (t of teams(); track t.id) {
+          <option [ngValue]="t.id">{{ t.card ? '🃏 ' : '' }}{{ t.name }}{{ t.parent ? ' (sub)' : '' }} — {{ t.rule }}</option>
+        }
+      </select>
+      <input
+        type="date"
+        [ngModel]="currentDate()"
+        (ngModelChange)="currentDate.set($event)"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+      >
+      <button
+        (click)="loadRoster()"
+        class="inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-strong"
+      >
+        Load Roster
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-800/30 dark:bg-red-900/20 dark:text-red-400">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Tabs & Content Panel -->
+  <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div class="flex items-center gap-2 border-b border-gray-200 px-4 pt-3 dark:border-gray-800">
+      <button
+        (click)="setTab('mark')"
+        class="border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors"
+        [ngClass]="activeTab() === 'mark' ? 'border-brand text-brand dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+      >
+        Mark attendance
+      </button>
+      <button
+        (click)="setTab('grid')"
+        class="border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors"
+        [ngClass]="activeTab() === 'grid' ? 'border-brand text-brand dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+      >
+        Records
+      </button>
+      <button
+        (click)="setTab('report')"
+        class="border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors"
+        [ngClass]="activeTab() === 'report' ? 'border-brand text-brand dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+      >
+        Report
+      </button>
+    </div>
+
+    <div class="p-4 sm:p-6">
+      @if (activeTab() === 'mark') {
+        @if (!currentTeam()?.card && members().length > 0) {
+          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+            <table class="w-full text-left text-sm text-gray-600 dark:text-gray-400">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Member</th>
+                  <th class="px-4 py-3 font-semibold">EFGBC ID</th>
+                  <th class="px-4 py-3 font-semibold">Role</th>
+                  <th class="px-4 py-3 font-semibold">Status</th>
+                  <th class="px-4 py-3 font-semibold">Absence Reason</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+                @for (m of members(); track m.id) {
+                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ m.name }}</td>
+                    <td class="px-4 py-3">{{ m.efgbc }}</td>
+                    <td class="px-4 py-3">
+                      <span class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                            [ngClass]="m.role === 'Leader' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'">
+                        {{ m.role }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3">
+                      <select
+                        [ngModel]="draft()[m.id]?.status"
+                        (ngModelChange)="updateDraftStatus(m.id, $event)"
+                        class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-900"
+                      >
+                        <option value="Present">Present</option>
+                        <option value="Late">Late</option>
+                        <option value="Absent">Absent</option>
+                      </select>
+                    </td>
+                    <td class="px-4 py-3">
+                      <input
+                        type="text"
+                        placeholder="sick, travel, work…"
+                        [disabled]="draft()[m.id]?.status !== 'Absent'"
+                        [ngModel]="draft()[m.id]?.reason"
+                        (ngModelChange)="updateDraftReason(m.id, $event)"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm disabled:bg-gray-50 disabled:opacity-50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand dark:border-gray-700 dark:bg-gray-900 dark:disabled:bg-gray-800"
+                      >
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="mt-4 flex items-center justify-between">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Present + Late count as "attended". Absent requires a reason. Re-saving the same date corrects previous marks.
+            </p>
+            <button
+              (click)="saveAttendance()"
+              class="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong"
+            >
+              Save attendance
+            </button>
+          </div>
+        } @else if (currentTeam()?.card) {
+          <div class="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+            🃏 {{ currentTeam().name }} is a category (card).<br>
+            Attendance belongs to its sub-teams.
+          </div>
+        } @else {
+          <div class="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+            Select a team and load roster to mark attendance.
+          </div>
+        }
+      }
+
+      @if (activeTab() === 'grid') {
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+          <table class="w-full text-left text-sm text-gray-600 dark:text-gray-400">
+            <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+              <tr>
+                <th class="px-4 py-3 font-semibold">Date</th>
+                <th class="px-4 py-3 font-semibold">Member</th>
+                <th class="px-4 py-3 font-semibold">Status</th>
+                <th class="px-4 py-3 font-semibold">Reason</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+              @for (r of existingRecords(); track r.date + r.member.id) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <td class="px-4 py-3">{{ r.date }}</td>
+                  <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ r.member.name }}</td>
+                  <td class="px-4 py-3">
+                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                          [ngClass]="{
+                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300': r.e.status === 'Present',
+                            'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300': r.e.status === 'Late',
+                            'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300': r.e.status === 'Absent'
+                          }">
+                      {{ r.e.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3">{{ r.e.reason || '—' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="px-4 py-8 text-center text-gray-500">No attendance saved yet.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (activeTab() === 'report') {
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+          <table class="w-full text-left text-sm text-gray-600 dark:text-gray-400">
+            <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+              <tr>
+                <th class="px-4 py-3 font-semibold">Member</th>
+                <th class="px-4 py-3 font-semibold">Role</th>
+                <th class="px-4 py-3 font-semibold">Attended</th>
+                <th class="px-4 py-3 font-semibold">Meetings</th>
+                <th class="px-4 py-3 font-semibold">Rate</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+              @for (s of summaryStats(); track s.m.id) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ s.m.name }}</td>
+                  <td class="px-4 py-3">
+                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                          [ngClass]="s.m.role === 'Leader' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'">
+                      {{ s.m.role }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3">{{ s.attended }}/{{ s.total }}</td>
+                  <td class="px-4 py-3">{{ s.total }} meeting(s)</td>
+                  <td class="px-4 py-3 flex items-center gap-2">
+                    <div class="h-2 w-24 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                      <div class="h-full rounded-full"
+                           [ngClass]="s.rate >= 75 ? 'bg-emerald-500' : s.rate >= 50 ? 'bg-amber-500' : 'bg-red-500'"
+                           [style.width.%]="s.rate"></div>
+                    </div>
+                    <span class="font-bold text-gray-900 dark:text-white">{{ s.rate }}%</span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="px-4 py-8 text-center text-gray-500">No report data available.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+@if (toastMessage()) {
+  <div class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white shadow-xl dark:bg-white dark:text-gray-900">
+    {{ toastMessage() }}
+  </div>
+}

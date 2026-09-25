@@ -15,7 +15,7 @@ public class MemberDashboardRepository(IcmsDbContext dbContext) : IMemberDashboa
         dbContext.TeamMembers.AsNoTracking()
             .Where(tm => tm.MemberId == memberId && !tm.IsDeleted && !tm.Team.IsDeleted)
             .OrderBy(tm => tm.Team.Name)
-            .Select(tm => new TeamMembershipRow(tm.TeamId, tm.Team.Name, tm.Role))
+            .Select(tm => new TeamMembershipRow(tm.TeamId, tm.Team.Name, tm.Role, tm.Team.ChurchId))
             .ToListAsync(ct);
 
     public Task<List<TeamMeetingRow>> GetTeamMeetingsAsync(long memberId, CancellationToken ct) =>
@@ -35,6 +35,22 @@ public class MemberDashboardRepository(IcmsDbContext dbContext) : IMemberDashboa
         dbContext.TeamPayments.AsNoTracking()
             .Where(p => p.MemberId == memberId && !p.Team.IsDeleted)
             .Select(p => new MemberPaymentRow(p.TeamId, p.Month!.Value, p.Amount))
+            .ToListAsync(ct);
+
+    public Task<List<MemberAttendanceHistoryRow>> GetAttendanceHistoryAsync(long memberId, CancellationToken ct) =>
+        dbContext.TeamAttendances.AsNoTracking()
+            .Where(a => a.MemberId == memberId && !a.Team.IsDeleted)
+            .OrderByDescending(a => a.AttendanceDate)
+            .Select(a => new MemberAttendanceHistoryRow(
+                a.TeamId, a.Team.Name, a.AttendanceDate!.Value, a.Status, a.Reason))
+            .ToListAsync(ct);
+
+    public Task<List<MemberPaymentHistoryRow>> GetPaymentHistoryAsync(long memberId, CancellationToken ct) =>
+        dbContext.TeamPayments.AsNoTracking()
+            .Where(p => p.MemberId == memberId && !p.Team.IsDeleted)
+            .OrderByDescending(p => p.Month)
+            .Select(p => new MemberPaymentHistoryRow(
+                p.Id, p.TeamId, p.Team.Name, p.Month!.Value, p.Amount, p.PaidAt))
             .ToListAsync(ct);
 
     public Task<List<EmployeeServiceRow>> GetEmployeeRowsAsync(long memberId, CancellationToken ct) =>

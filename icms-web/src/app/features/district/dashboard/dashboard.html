@@ -31,7 +31,7 @@
             Profile
           </a>
           <a routerLink="/district/settings"
-             class="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-strong transition hover:bg-pink-50">
+             class="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-strong transition hover:bg-pink-50 dark:bg-white/90 dark:hover:bg-white">
             <mat-icon class="text-base">settings</mat-icon>
             Settings
           </a>
@@ -46,26 +46,26 @@
   @if (president || vice) {
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
       @if (president) {
-        <div class="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-gradient-to-r from-brand/5 to-transparent p-4 shadow-sm">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong text-white">
+        <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong text-white shadow-sm">
             <mat-icon>star</mat-icon>
           </div>
           <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">District President</p>
-            <p class="truncate font-semibold text-neutral-800">{{ president.memberName ?? 'Office role' }}</p>
-            <p class="truncate text-xs text-neutral-500">{{ president.position }}</p>
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-400">District President</p>
+            <p class="truncate font-semibold text-gray-800 dark:text-white/90">{{ president.memberName ?? 'Office role' }}</p>
+            <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ president.position }}</p>
           </div>
         </div>
       }
       @if (vice) {
-        <div class="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-gradient-to-r from-brand-blue/5 to-transparent p-4 shadow-sm">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue to-blue-400 text-white">
+        <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue to-blue-400 text-white shadow-sm">
             <mat-icon>person</mat-icon>
           </div>
           <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">Vice President</p>
-            <p class="truncate font-semibold text-neutral-800">{{ vice.memberName ?? 'Office role' }}</p>
-            <p class="truncate text-xs text-neutral-500">{{ vice.position }}</p>
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-400">Vice President</p>
+            <p class="truncate font-semibold text-gray-800 dark:text-white/90">{{ vice.memberName ?? 'Office role' }}</p>
+            <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ vice.position }}</p>
           </div>
         </div>
       }
@@ -75,77 +75,77 @@
   <!-- Stats -->
   <section>
     <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-lg font-bold text-neutral-800">Key indicators</h2>
-      <span class="text-xs text-neutral-400">Live from the district office</span>
+      <h2 class="text-lg font-bold text-gray-800 dark:text-white/90">Key indicators</h2>
+      <span class="text-xs text-gray-400 dark:text-gray-500">Live from the district office</span>
     </div>
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
       @if (store.isLoading() && !store.district()) {
         @for (i of [0, 1, 2, 3]; track i) {
-          <div class="h-28 animate-pulse rounded-2xl bg-neutral-200/60"></div>
+          <div class="h-28 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-gray-800"></div>
         }
       } @else {
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-brand">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-brand dark:bg-brand/20 dark:text-brand-300">
             <mat-icon>church</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.churchCount() }}</p>
-          <p class="text-sm text-neutral-500">Churches</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.churchCount() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Churches</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300">
             <mat-icon>group</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.memberCount() }}</p>
-          <p class="text-sm text-neutral-500">Members</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.memberCount() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Members</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
             <mat-icon>work</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.employeeCount() }}</p>
-          <p class="text-sm text-neutral-500">Office Employees</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.employeeCount() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Office Employees</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300">
             <mat-icon>local_church</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.ministerCount() }}</p>
-          <p class="text-sm text-neutral-500">Ministers</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.ministerCount() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Ministers</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300">
             <mat-icon>account_balance</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.departmentCount() }}</p>
-          <p class="text-sm text-neutral-500">Departments</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.departmentCount() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Departments</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white shadow-sm">
             <mat-icon>payments</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.paidFromDistrict() }}</p>
-          <p class="text-sm text-neutral-500">Paid from District</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.paidFromDistrict() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Paid from District</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-300">
             <mat-icon>people</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.activeEmployees() }}</p>
-          <p class="text-sm text-neutral-500">Active Employees</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.activeEmployees() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Active Employees</p>
         </div>
-        <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
             <mat-icon>manage_accounts</mat-icon>
           </div>
-          <p class="text-3xl font-extrabold text-neutral-800">{{ store.accountCount() }}</p>
-          <p class="text-sm text-neutral-500">Accounts</p>
+          <p class="text-3xl font-extrabold text-gray-800 dark:text-white/90">{{ store.accountCount() }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Accounts</p>
         </div>
       }
     </div>
   </section>
 
   @if (store.error()) {
-    <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+    <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
       <mat-icon class="mt-0.5">error_outline</mat-icon>
       <p>{{ store.error() }}</p>
     </div>
@@ -153,20 +153,20 @@
 
   <!-- Manage the district -->
   <section>
-    <h2 class="mb-4 text-lg font-bold text-neutral-800">Manage the district</h2>
+    <h2 class="mb-4 text-lg font-bold text-gray-800 dark:text-white/90">Manage the district</h2>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       @for (module of modules(); track module.path) {
         <a
           [routerLink]="module.path"
-          class="group rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-lg"
+          class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-lg dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand dark:hover:shadow-brand/5"
         >
           <div
-            class="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500 transition group-hover:bg-gradient-to-br group-hover:from-brand group-hover:to-brand-blue group-hover:text-white"
+            class="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition group-hover:bg-gradient-to-br group-hover:from-brand group-hover:to-brand-blue group-hover:text-white dark:bg-white/5 dark:text-gray-400"
           >
             <mat-icon class="text-2xl">{{ module.icon }}</mat-icon>
           </div>
-          <p class="font-semibold text-neutral-800">{{ module.title }}</p>
-          <p class="mt-1 text-sm text-neutral-500">{{ module.description }}</p>
+          <p class="font-semibold text-gray-800 dark:text-white/90">{{ module.title }}</p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ module.description }}</p>
         </a>
       }
     </div>

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -8,6 +8,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../../services/auth.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,6 @@ import { AuthService } from '../../../services/auth.service';
     MatFormField,
     MatLabel,
     MatInput,
-    MatButton,
     MatIconButton,
     MatIcon,
     MatProgressSpinner,
@@ -29,6 +29,9 @@ export class Login {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
+
+  readonly isDark = computed(() => this.themeService.theme() === 'dark');
 
   form = this.fb.nonNullable.group({
     username: ['', Validators.required],
@@ -38,6 +41,10 @@ export class Login {
   hidePassword = signal(true);
   busy = signal(false);
   error = signal('');
+
+  toggleTheme(): void {
+    this.themeService.toggle();
+  }
 
   constructor() {
     // Session may already be restored from the refresh cookie at boot — send

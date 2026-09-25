@@ -61,6 +61,10 @@ public sealed record DistrictEmployeeError(string Code, string Message, int Stat
         new("employee_vice_president_exists",
             $"A vice president already exists (employee {employeeId}); there can only be one.", 409);
 
+    public static DistrictEmployeeError MinisterMustBeChurchMinister() =>
+        new("employee_candidate_must_be_church_minister",
+            "A full-time district minister or executive must already be serving as an active full-time minister at a local church in the district.", 409);
+
     public static DistrictEmployeeError AccountCreationFailed(string message) =>
         new("employee_account_create_failed",
             $"Account could not be created: {message}", 409);

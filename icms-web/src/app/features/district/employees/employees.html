@@ -1,0 +1,935 @@
+<div class="space-y-8">
+  <!-- Page Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue dark:text-blue-400">
+        District Governance & Operations
+      </p>
+      <h1 class="mt-1 flex items-center gap-3 text-2xl font-extrabold text-gray-900 dark:text-white">
+        <span>District Office Employees</span>
+        <span class="rounded-full bg-brand/10 px-3 py-0.5 text-xs font-bold text-brand dark:bg-brand/20 dark:text-brand-300">
+          {{ totalEmployees() }} Employees
+        </span>
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Manage the district headquarters executive officers, administrative staff, and ministers on district payroll.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        (click)="openHireModal()"
+        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-strong px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition hover:brightness-110 active:scale-95"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[18px]">person_add</mat-icon>
+        <span>Hire Office Employee</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Banner -->
+  @if (errorMessage()) {
+    <div class="flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+      <div class="flex items-center gap-2">
+        <mat-icon class="text-red-500">error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+      <button
+        type="button"
+        (click)="errorMessage.set(null)"
+        class="rounded-lg p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Executive Leadership Spotlight Banner -->
+  <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <!-- District President Card -->
+    <div class="relative overflow-hidden rounded-3xl border border-amber-400/30 bg-gradient-to-br from-neutral-900 via-neutral-900 to-amber-950/40 p-6 text-white shadow-xl">
+      <div class="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-amber-400/10 blur-2xl"></div>
+      
+      <div class="relative flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-0.5 text-xs font-black uppercase tracking-wider text-amber-300 ring-1 ring-amber-400/30">
+          <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">workspace_premium</mat-icon>
+          District President
+        </span>
+        <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-white/70">
+          Executive Leader
+        </span>
+      </div>
+
+      <div class="relative mt-4 flex items-center gap-4">
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-2xl font-black text-black shadow-lg">
+          {{ initials(president()?.memberName ?? null) }}
+        </div>
+        <div class="min-w-0 grow">
+          <h3 class="text-lg font-black text-white truncate">
+            {{ president()?.memberName ?? 'No President Appointed' }}
+          </h3>
+          <p class="text-xs font-semibold text-amber-300 truncate">
+            {{ president()?.position ?? 'Vacant Office' }}
+            @if (president()?.ministerTitle) {
+              · {{ president()?.ministerTitle }}
+            }
+          </p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            @if (president()) {
+              <span class="inline-flex items-center gap-1 rounded-md bg-teal-400/20 px-2 py-0.5 text-[10px] font-bold text-teal-300 ring-1 ring-teal-400/30">
+                <mat-icon class="!h-3 !w-3 !text-[12px]">payments</mat-icon>
+                Paid from District
+              </span>
+              <span class="rounded-md bg-white/10 px-2 py-0.5 font-mono text-[10px] text-white/80">
+                {{ president()?.memberChurchName ?? 'Local Church' }}
+              </span>
+            } @else {
+              <span class="text-xs text-white/50">Must be appointed from local church full-time ministers.</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- District Vice President Card -->
+    <div class="relative overflow-hidden rounded-3xl border border-blue-400/30 bg-gradient-to-br from-neutral-900 via-neutral-900 to-blue-950/40 p-6 text-white shadow-xl">
+      <div class="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-blue-400/10 blur-2xl"></div>
+
+      <div class="relative flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-400/20 px-3 py-0.5 text-xs font-black uppercase tracking-wider text-blue-300 ring-1 ring-blue-400/30">
+          <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">stars</mat-icon>
+          Vice President
+        </span>
+        <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-white/70">
+          Executive Deputy
+        </span>
+      </div>
+
+      <div class="relative mt-4 flex items-center gap-4">
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-brand-blue text-2xl font-black text-white shadow-lg">
+          {{ initials(vicePresident()?.memberName ?? null) }}
+        </div>
+        <div class="min-w-0 grow">
+          <h3 class="text-lg font-black text-white truncate">
+            {{ vicePresident()?.memberName ?? 'No Vice President Appointed' }}
+          </h3>
+          <p class="text-xs font-semibold text-blue-300 truncate">
+            {{ vicePresident()?.position ?? 'Vacant Office' }}
+            @if (vicePresident()?.ministerTitle) {
+              · {{ vicePresident()?.ministerTitle }}
+            }
+          </p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            @if (vicePresident()) {
+              <span class="inline-flex items-center gap-1 rounded-md bg-teal-400/20 px-2 py-0.5 text-[10px] font-bold text-teal-300 ring-1 ring-teal-400/30">
+                <mat-icon class="!h-3 !w-3 !text-[12px]">payments</mat-icon>
+                Paid from District
+              </span>
+              <span class="rounded-md bg-white/10 px-2 py-0.5 font-mono text-[10px] text-white/80">
+                {{ vicePresident()?.memberChurchName ?? 'Local Church' }}
+              </span>
+            } @else {
+              <span class="text-xs text-white/50">Must be appointed from local church full-time ministers.</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Metric Summary Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <app-stat-card
+      icon="people"
+      label="Total Office Employees"
+      [value]="totalEmployees().toString()"
+      accentClass="bg-blue-100 text-brand-blue dark:bg-blue-950/40 dark:text-blue-300"
+    />
+    <app-stat-card
+      icon="badge"
+      label="Hired Office Staff"
+      [value]="staffCount().toString()"
+      accentClass="bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300"
+    />
+    <app-stat-card
+      icon="church"
+      label="Full-Time Ministers"
+      [value]="ministerCount().toString()"
+      accentClass="bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+    />
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <!-- Category Tabs -->
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        (click)="selectedTypeFilter.set('ALL')"
+        class="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition"
+        [class.bg-brand]="selectedTypeFilter() === 'ALL'"
+        [class.text-white]="selectedTypeFilter() === 'ALL'"
+        [class.bg-gray-100]="selectedTypeFilter() !== 'ALL'"
+        [class.text-gray-700]="selectedTypeFilter() !== 'ALL'"
+        [class.dark:bg-gray-800]="selectedTypeFilter() !== 'ALL'"
+        [class.dark:text-gray-300]="selectedTypeFilter() !== 'ALL'"
+      >
+        All ({{ totalEmployees() }})
+      </button>
+
+      <button
+        type="button"
+        (click)="selectedTypeFilter.set('STAFF')"
+        class="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition"
+        [class.bg-brand]="selectedTypeFilter() === 'STAFF'"
+        [class.text-white]="selectedTypeFilter() === 'STAFF'"
+        [class.bg-gray-100]="selectedTypeFilter() !== 'STAFF'"
+        [class.text-gray-700]="selectedTypeFilter() !== 'STAFF'"
+        [class.dark:bg-gray-800]="selectedTypeFilter() !== 'STAFF'"
+        [class.dark:text-gray-300]="selectedTypeFilter() !== 'STAFF'"
+      >
+        Office Staff ({{ staffCount() }})
+      </button>
+
+      <button
+        type="button"
+        (click)="selectedTypeFilter.set('MINISTER')"
+        class="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition"
+        [class.bg-brand]="selectedTypeFilter() === 'MINISTER'"
+        [class.text-white]="selectedTypeFilter() === 'MINISTER'"
+        [class.bg-gray-100]="selectedTypeFilter() !== 'MINISTER'"
+        [class.text-gray-700]="selectedTypeFilter() !== 'MINISTER'"
+        [class.dark:bg-gray-800]="selectedTypeFilter() !== 'MINISTER'"
+        [class.dark:text-gray-300]="selectedTypeFilter() !== 'MINISTER'"
+      >
+        Ministers ({{ ministerCount() }})
+      </button>
+
+      <button
+        type="button"
+        (click)="selectedTypeFilter.set('EXECUTIVE')"
+        class="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition"
+        [class.bg-brand]="selectedTypeFilter() === 'EXECUTIVE'"
+        [class.text-white]="selectedTypeFilter() === 'EXECUTIVE'"
+        [class.bg-gray-100]="selectedTypeFilter() !== 'EXECUTIVE'"
+        [class.text-gray-700]="selectedTypeFilter() !== 'EXECUTIVE'"
+        [class.dark:bg-gray-800]="selectedTypeFilter() !== 'EXECUTIVE'"
+        [class.dark:text-gray-300]="selectedTypeFilter() !== 'EXECUTIVE'"
+      >
+        Executives
+      </button>
+    </div>
+
+    <!-- Quick Search -->
+    <div class="relative min-w-[240px]">
+      <mat-icon class="pointer-events-none absolute left-3 top-1/2 !h-4 !w-4 -translate-y-1/2 text-gray-400 !text-[16px]">
+        search
+      </mat-icon>
+      <input
+        type="text"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        placeholder="Search employees…"
+        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-4 text-xs text-gray-900 placeholder:text-gray-400 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+      />
+    </div>
+  </div>
+
+  <!-- Office Employees Data Table -->
+  <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <app-table
+      [data]="filteredEmployees()"
+      [searchFn]="searchEmployee"
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      searchPlaceholder="Filter personnel by name, position, or church…"
+    >
+      <!-- Employee Column -->
+      <app-table-column
+        key="name"
+        header="Employee / Minister"
+        [sortable]="true"
+        [sortValue]="employeeName"
+        cellClass="min-w-[240px]"
+      >
+        <ng-template let-e>
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-xs font-bold text-white shadow-sm"
+              [class.bg-gradient-to-br]="true"
+              [class.from-amber-400]="e.isDistrictPresident"
+              [class.to-amber-600]="e.isDistrictPresident"
+              [class.from-blue-400]="e.isVicePresident && !e.isDistrictPresident"
+              [class.to-brand-blue]="e.isVicePresident && !e.isDistrictPresident"
+              [class.from-brand]="!e.isDistrictPresident && !e.isVicePresident"
+              [class.to-brand-strong]="!e.isDistrictPresident && !e.isVicePresident"
+            >
+              {{ initials(e.memberName) }}
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-bold text-gray-900 dark:text-white">
+                  {{ e.memberName || 'Unnamed Employee' }}
+                </span>
+                @if (e.isDistrictPresident) {
+                  <span class="rounded-md bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-black uppercase text-amber-700 dark:bg-amber-400/30 dark:text-amber-300">
+                    President
+                  </span>
+                }
+                @if (e.isVicePresident) {
+                  <span class="rounded-md bg-blue-400/20 px-1.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-400/30 dark:text-blue-300">
+                    VP
+                  </span>
+                }
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ e.position }}
+                @if (e.ministerTitle) {
+                  · <span class="font-medium text-amber-600 dark:text-amber-400">{{ e.ministerTitle }}</span>
+                }
+              </p>
+            </div>
+          </div>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Employment Type Column -->
+      <app-table-column
+        key="type"
+        header="Employment Type"
+        [sortable]="true"
+        [sortValue]="employeeType"
+        cellClass="min-w-[150px]"
+      >
+        <ng-template let-e>
+          @if (e.employmentType === 'FulltimeMinister') {
+            <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">church</mat-icon>
+              Fulltime Minister
+            </span>
+          } @else if (e.employmentType === 'DistrictStaff') {
+            <span class="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/40 dark:text-purple-300">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">work</mat-icon>
+              District Staff
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+              {{ e.employmentType }}
+            </span>
+          }
+        </ng-template>
+      </app-table-column>
+
+      <!-- Funding / Payroll Column -->
+      <app-table-column
+        key="payroll"
+        header="Payroll Source"
+        cellClass="min-w-[140px]"
+      >
+        <ng-template let-e>
+          @if (e.salaryPaidBy === 'District') {
+            <span class="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700 ring-1 ring-teal-600/20 dark:bg-teal-950/40 dark:text-teal-300" title="Funded from District Office Budget">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">payments</mat-icon>
+              Paid from District
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-600/20 dark:bg-blue-950/40 dark:text-blue-300">
+              Paid by Church
+            </span>
+          }
+        </ng-template>
+      </app-table-column>
+
+      <!-- Home Church Column -->
+      <app-table-column
+        key="church"
+        header="Home Church / Scope"
+        [sortable]="true"
+        [sortValue]="employeeChurch"
+        cellClass="min-w-[160px]"
+      >
+        <ng-template let-e>
+          <div class="text-xs">
+            <span class="font-medium text-gray-900 dark:text-white">
+              {{ e.memberChurchName || 'District HQ' }}
+            </span>
+            @if (e.memberEfgbcId) {
+              <p class="font-mono text-[11px] text-gray-400">{{ e.memberEfgbcId }}</p>
+            }
+          </div>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Status Column -->
+      <app-table-column
+        key="status"
+        header="Status"
+        [sortable]="true"
+        [sortValue]="employeeStatus"
+        cellClass="min-w-[110px]"
+      >
+        <ng-template let-e>
+          @if (e.status === 'Active') {
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              Active
+            </span>
+          } @else if (e.status === 'OnLeave') {
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+              On Leave
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+              {{ e.status }}
+            </span>
+          }
+        </ng-template>
+      </app-table-column>
+
+      <!-- Hire Date Column -->
+      <app-table-column
+        key="hireDate"
+        header="Hire Date"
+        cellClass="min-w-[120px]"
+      >
+        <ng-template let-e>
+          <span class="text-xs text-gray-600 dark:text-gray-400">
+            {{ (e.hireDate | date: 'mediumDate') ?? '—' }}
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <!-- Actions Column -->
+      <app-table-column
+        key="actions"
+        header="Actions"
+        headerClass="text-right"
+        cellClass="text-right min-w-[100px]"
+        align="right"
+      >
+        <ng-template let-e>
+          <div class="flex items-center justify-end gap-1">
+            <button
+              type="button"
+              (click)="openEditModal(e)"
+              class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
+              title="Edit employee"
+            >
+              <mat-icon class="!h-4 !w-4 !text-[18px]">edit</mat-icon>
+            </button>
+
+            <button
+              type="button"
+              (click)="openDeleteModal(e)"
+              class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+              title="Remove employee"
+            >
+              <mat-icon class="!h-4 !w-4 !text-[18px]">delete</mat-icon>
+            </button>
+          </div>
+        </ng-template>
+      </app-table-column>
+    </app-table>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: HIRE OFFICE EMPLOYEE                                               -->
+  <!-- ========================================================================= -->
+  @if (showHireModal()) {
+    <div
+      class="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md sm:py-8"
+      role="dialog"
+      aria-modal="true"
+      (click)="closeHireModal()"
+    >
+      <div
+        class="my-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal Banner -->
+        <div class="relative overflow-hidden bg-gradient-to-r from-brand via-brand-strong to-brand-blue px-6 py-5 text-white">
+          <div class="relative flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 shadow-inner backdrop-blur-md">
+                <mat-icon>person_add</mat-icon>
+              </div>
+              <div>
+                <h2 class="text-lg font-extrabold">Hire District Office Employee</h2>
+                <p class="text-xs text-white/80">Staff appointment or full-time minister deployment</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              (click)="closeHireModal()"
+              class="rounded-full p-1.5 text-white/80 transition hover:bg-white/20 hover:text-white"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Body -->
+        <form [formGroup]="hireForm" (ngSubmit)="submitHire()" class="p-6 space-y-6">
+          <!-- Step 1: Appointment Category -->
+          <div class="rounded-2xl border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+              Employment Category
+            </label>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label
+                class="flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition"
+                [class.border-brand]="hireForm.get('employmentType')?.value === 'DistrictStaff'"
+                [class.bg-brand/5]="hireForm.get('employmentType')?.value === 'DistrictStaff'"
+                [class.border-gray-200]="hireForm.get('employmentType')?.value !== 'DistrictStaff'"
+                [class.dark:border-gray-700]="hireForm.get('employmentType')?.value !== 'DistrictStaff'"
+              >
+                <input
+                  type="radio"
+                  formControlName="employmentType"
+                  value="DistrictStaff"
+                  class="mt-1 text-brand focus:ring-brand"
+                />
+                <div>
+                  <span class="block text-sm font-bold text-gray-900 dark:text-white">Office Staff</span>
+                  <span class="block text-xs text-gray-500 dark:text-gray-400">Administrative, accounting, media, or operations staff (credentials will be provisioned)</span>
+                </div>
+              </label>
+
+              <label
+                class="flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition"
+                [class.border-brand]="hireForm.get('employmentType')?.value === 'FulltimeMinister'"
+                [class.bg-brand/5]="hireForm.get('employmentType')?.value === 'FulltimeMinister'"
+                [class.border-gray-200]="hireForm.get('employmentType')?.value !== 'FulltimeMinister'"
+                [class.dark:border-gray-700]="hireForm.get('employmentType')?.value !== 'FulltimeMinister'"
+              >
+                <input
+                  type="radio"
+                  formControlName="employmentType"
+                  value="FulltimeMinister"
+                  class="mt-1 text-brand focus:ring-brand"
+                />
+                <div>
+                  <span class="block text-sm font-bold text-gray-900 dark:text-white">Full-Time Minister</span>
+                  <span class="block text-xs text-gray-500 dark:text-gray-400">Pastor or evangelist deployed from a local church roster (paid from district)</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- If Office Staff: Name Fields -->
+          @if (hireForm.get('employmentType')?.value === 'DistrictStaff') {
+            <div class="space-y-4">
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Staff Identity
+              </p>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>First Name</mat-label>
+                  <input matInput formControlName="firstName" placeholder="e.g. Samuel" />
+                  @if (hireForm.get('firstName')?.hasError('required')) {
+                    <mat-error>First name is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Father Name</mat-label>
+                  <input matInput formControlName="fatherName" placeholder="e.g. Yonas" />
+                  @if (hireForm.get('fatherName')?.hasError('required')) {
+                    <mat-error>Father name is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Grandfather Name</mat-label>
+                  <input matInput formControlName="grandfatherName" placeholder="e.g. Bekele" />
+                </mat-form-field>
+              </div>
+            </div>
+          }
+
+          <!-- If Fulltime Minister: Minister Candidate Selector -->
+          @if (hireForm.get('employmentType')?.value === 'FulltimeMinister') {
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Candidate Selection (Active Church Full-Time Minister)
+                </p>
+                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                  {{ candidateMinisters().length }} Active Church Ministers
+                </span>
+              </div>
+
+              @if (candidateMinisters().length === 0) {
+                <div class="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                  <div class="flex items-start gap-2.5">
+                    <mat-icon class="!h-5 !w-5 !text-[18px] text-amber-600 mt-0.5 shrink-0">info</mat-icon>
+                    <div>
+                      <p class="font-bold">No active full-time ministers found in local churches.</p>
+                      <p class="mt-1 text-amber-800/90 dark:text-amber-300/80">
+                        Per ICMS governance rules, district full-time ministers and executive leaders (President & Vice President) must already be serving as active full-time ministers in a local church.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Select Full-Time Minister</mat-label>
+                  <mat-select formControlName="memberId" (selectionChange)="onCandidateSelected($event.value)">
+                    @for (m of candidateMinisters(); track m.memberId) {
+                      <mat-option [value]="m.memberId">
+                        <div class="flex items-center justify-between py-1">
+                          <span class="font-medium text-gray-900 dark:text-white">{{ m.fullName }}</span>
+                          <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                            {{ m.ministerTitle || 'Minister' }} · {{ m.homeChurchName }} · {{ m.efgbcId }}
+                          </span>
+                        </div>
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>Only ordained full-time ministers currently serving in local churches appear here</mat-hint>
+                  @if (hireForm.get('memberId')?.hasError('required') && hireForm.get('memberId')?.touched) {
+                    <mat-error>Selecting a minister candidate is required</mat-error>
+                  }
+                </mat-form-field>
+              }
+
+              <!-- Candidate Minister Card when selected -->
+              @if (selectedCandidate(); as cand) {
+                <div class="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-indigo-50/40 p-4 text-xs dark:border-blue-900/40 dark:bg-blue-950/20">
+                  <div class="flex items-start justify-between gap-2">
+                    <div>
+                      <p class="text-sm font-bold text-gray-900 dark:text-white">{{ cand.fullName }}</p>
+                      <p class="mt-0.5 text-xs font-semibold text-brand">
+                        {{ cand.ministerTitle || 'Full-time Minister' }} · {{ cand.homeChurchName }}
+                      </p>
+                      <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">EFGBC ID: {{ cand.efgbcId }}</p>
+                    </div>
+                    <span
+                      class="rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+                      [class.bg-emerald-100]="cand.isDistrictPaid"
+                      [class.text-emerald-800]="cand.isDistrictPaid"
+                      [class.bg-amber-100]="!cand.isDistrictPaid"
+                      [class.text-amber-800]="!cand.isDistrictPaid"
+                    >
+                      {{ cand.isDistrictPaid ? 'District Paid' : 'Church Paid' }}
+                    </span>
+                  </div>
+                  <div class="mt-3 border-t border-blue-200/50 pt-2 text-[11px] text-blue-800 dark:border-blue-800/40 dark:text-blue-300 flex items-center gap-1.5">
+                    <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">sync_alt</mat-icon>
+                    <span>Dual employment: Appointing to district sets payroll to District (Paid from District).</span>
+                  </div>
+                </div>
+              }
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Ministerial Title</mat-label>
+                <mat-select formControlName="ministerTitle">
+                  <mat-option value="">None</mat-option>
+                  <mat-option value="Pastor">Pastor</mat-option>
+                  <mat-option value="Evangelist">Evangelist</mat-option>
+                  <mat-option value="Teacher">Teacher</mat-option>
+                  <mat-option value="Prophet">Prophet</mat-option>
+                  <mat-option value="Apostle">Apostle</mat-option>
+                </mat-select>
+                <mat-hint>Title is auto-filled from church record; you may adjust if re-titled</mat-hint>
+              </mat-form-field>
+            </div>
+          }
+
+          <!-- Position & Terms -->
+          <div class="space-y-4">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Role & Terms
+            </p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <mat-form-field appearance="outline" class="w-full sm:col-span-2">
+                <mat-label>Job Title / Position</mat-label>
+                <input matInput formControlName="position" placeholder="e.g. District General Secretary, Accountant" />
+                @if (hireForm.get('position')?.hasError('required')) {
+                  <mat-error>Position title is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Salary (ETB)</mat-label>
+                <input matInput type="number" formControlName="salary" placeholder="e.g. 15000" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Hire Date</mat-label>
+                <input matInput type="date" formControlName="hireDate" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Executive Roles (Only if Full-time Minister) -->
+          @if (hireForm.get('employmentType')?.value === 'FulltimeMinister') {
+            <div class="rounded-2xl border border-amber-200/50 bg-amber-50/50 p-4 dark:border-amber-900/30 dark:bg-amber-950/20">
+              <p class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                Executive Leadership Appointments
+              </p>
+              <p class="mt-1 text-xs text-amber-700/80 dark:text-amber-400/70">
+                Per governance bylaws, District President and Vice President must be full-time ministers of local churches.
+              </p>
+
+              <div class="mt-3 flex flex-wrap items-center gap-6">
+                <label class="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                  <input
+                    type="checkbox"
+                    formControlName="isDistrictPresident"
+                    (change)="onPresidentToggle($any($event.target).checked)"
+                    class="rounded text-amber-600 focus:ring-amber-500"
+                  />
+                  <span>Appoint as District President</span>
+                </label>
+
+                <label class="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                  <input
+                    type="checkbox"
+                    formControlName="isVicePresident"
+                    (change)="onVicePresidentToggle($any($event.target).checked)"
+                    class="rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Appoint as Vice President</span>
+                </label>
+              </div>
+            </div>
+          }
+
+          <!-- Footer Actions -->
+          <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <button
+              type="button"
+              (click)="closeHireModal()"
+              [disabled]="saving()"
+              class="rounded-xl border border-gray-200 px-4 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              [disabled]="saving()"
+              class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-strong px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:brightness-110 disabled:opacity-50"
+            >
+              @if (saving()) {
+                <mat-icon class="animate-spin !h-4 !w-4 !text-[16px]">progress_activity</mat-icon>
+                <span>Appointing…</span>
+              } @else {
+                <mat-icon class="!h-4 !w-4 !text-[16px]">check</mat-icon>
+                <span>Confirm Hire</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EDIT EMPLOYEE                                                      -->
+  <!-- ========================================================================= -->
+  @if (showEditModal(); as emp) {
+    <div
+      class="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md sm:py-8"
+      role="dialog"
+      aria-modal="true"
+      (click)="closeEditModal()"
+    >
+      <div
+        class="my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal Banner -->
+        <div class="relative overflow-hidden bg-gradient-to-r from-brand via-brand-strong to-brand-blue px-6 py-5 text-white">
+          <div class="relative flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-extrabold">Edit Office Employee</h2>
+              <p class="text-xs text-white/80">{{ selectedEmployee()?.memberName }}</p>
+            </div>
+
+            <button
+              type="button"
+              (click)="closeEditModal()"
+              class="rounded-full p-1.5 text-white/80 transition hover:bg-white/20 hover:text-white"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="p-6 space-y-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Position Title</mat-label>
+            <input matInput formControlName="position" />
+          </mat-form-field>
+
+          @if (selectedEmployee()?.employmentType === 'FulltimeMinister') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Minister Title</mat-label>
+              <mat-select formControlName="ministerTitle">
+                <mat-option value="">None</mat-option>
+                <mat-option value="Pastor">Pastor</mat-option>
+                <mat-option value="Evangelist">Evangelist</mat-option>
+                <mat-option value="Teacher">Teacher</mat-option>
+                <mat-option value="Prophet">Prophet</mat-option>
+                <mat-option value="Apostle">Apostle</mat-option>
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Salary (ETB)</mat-label>
+              <input matInput type="number" formControlName="salary" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Employment Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="Active">Active</mat-option>
+                <mat-option value="OnLeave">On Leave</mat-option>
+                <mat-option value="Resigned">Resigned</mat-option>
+                <mat-option value="Terminated">Terminated</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Executive Checkboxes (if minister) -->
+          @if (selectedEmployee()?.employmentType === 'FulltimeMinister') {
+            <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+              <p class="text-xs font-bold text-gray-700 dark:text-gray-300">Executive Designations</p>
+              <div class="mt-2 flex items-center gap-4">
+                <label class="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200">
+                  <input type="checkbox" formControlName="isDistrictPresident" />
+                  <span>District President</span>
+                </label>
+                <label class="flex items-center gap-1.5 text-xs text-gray-800 dark:text-gray-200">
+                  <input type="checkbox" formControlName="isVicePresident" />
+                  <span>Vice President</span>
+                </label>
+              </div>
+            </div>
+          }
+
+          <!-- Footer -->
+          <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <button
+              type="button"
+              (click)="closeEditModal()"
+              [disabled]="saving()"
+              class="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              [disabled]="saving()"
+              class="rounded-xl bg-brand px-5 py-2 text-xs font-bold text-white hover:brightness-110 disabled:opacity-50"
+            >
+              {{ saving() ? 'Saving…' : 'Save Changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: NEW ACCOUNT CREDENTIALS ALERT                                      -->
+  <!-- ========================================================================= -->
+  @if (newlyCreatedCredentials(); as creds) {
+    <div
+      class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md overflow-hidden rounded-3xl border border-emerald-400/40 bg-gray-900 p-6 text-white shadow-2xl">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-400/40">
+          <mat-icon>vpn_key</mat-icon>
+        </div>
+
+        <h3 class="mt-4 text-lg font-black text-white">System Account Provisioned</h3>
+        <p class="mt-1 text-xs text-white/70 leading-relaxed">
+          An official ICMS account was created for <strong>{{ creds.name }}</strong> ({{ creds.position }}).
+          Store these credentials securely as the temporary password will not be shown again.
+        </p>
+
+        <div class="mt-5 space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4 font-mono text-xs">
+          <div class="flex justify-between">
+            <span class="text-white/50">Username/Email:</span>
+            <span class="font-bold text-amber-300 select-all">{{ creds.email }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-white/50">Temporary Password:</span>
+            <span class="font-bold text-emerald-400 select-all">{{ creds.tempPass }}</span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button
+            type="button"
+            (click)="closeCredentialsModal()"
+            class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg transition hover:brightness-110"
+          >
+            Acknowledge & Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DELETE CONFIRMATION                                                -->
+  <!-- ========================================================================= -->
+  @if (showDeleteModal()) {
+    <div
+      class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      (click)="closeDeleteModal()"
+    >
+      <div
+        class="w-full max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+          <mat-icon>warning</mat-icon>
+        </div>
+
+        <h3 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
+          Remove Office Employee?
+        </h3>
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+          Are you sure you want to remove <strong>{{ selectedEmployee()?.memberName }}</strong> from the district office?
+          @if (selectedEmployee()?.employmentType === 'FulltimeMinister') {
+            Their linked church employment records will revert to <strong>Paid by Church</strong>.
+          }
+        </p>
+
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            (click)="closeDeleteModal()"
+            [disabled]="deleting()"
+            class="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="confirmDelete()"
+            [disabled]="deleting()"
+            class="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {{ deleting() ? 'Removing…' : 'Yes, Remove' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

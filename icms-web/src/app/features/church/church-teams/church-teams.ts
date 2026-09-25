@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatIconButton } from '@angular/material/button';
@@ -21,6 +22,7 @@ import { forkJoin } from 'rxjs';
 
 import { AuthService } from '../../../services/auth.service';
 import { ChurchService } from '../../../services/church.service';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { Team, TeamDetail, MembershipRule } from '../../../models/team';
 import {
   problemDetail,
@@ -42,6 +44,8 @@ import {
     MatIconButton,
     MatIcon,
     RouterLink,
+    StatCard,
+    DecimalPipe,
   ],
   templateUrl: './church-teams.html',
   styleUrl: './church-teams.scss',

@@ -3,7 +3,7 @@ using Icms.Domain.Enums;
 namespace Icms.Application.DTOs;
 
 public record SaveAttendanceRequest(
-    DateOnly? AttendanceDate,
+    long MeetingId,
     List<AttendanceEntryRequest>? Entries);
 
 public record AttendanceEntryRequest(

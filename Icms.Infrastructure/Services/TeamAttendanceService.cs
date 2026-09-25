@@ -11,53 +11,8 @@ namespace Icms.Infrastructure.Services;
 
 public class TeamAttendanceService(
     ITeamAttendanceRepository attendanceRepository,
-    SaveAttendanceValidator saveValidator,
     ILogger<TeamAttendanceService> logger) : ITeamAttendanceService
 {
-    public async Task<Result<SaveAttendanceResult, TeamAttendanceError>> SaveAttendanceAsync(
-        long churchId, long teamId, SaveAttendanceRequest request, CancellationToken ct)
-    {
-        await saveValidator.ValidateAndThrowAsync(request, ct);
-
-        var team = await attendanceRepository.GetTeamAsync(churchId, teamId, ct);
-        if (team is null)
-            return Result<SaveAttendanceResult, TeamAttendanceError>.Failure(
-                TeamAttendanceError.TeamNotFound(teamId));
-
-        if (team.ParentTeamId is null
-            && await attendanceRepository.HasSubTeamsAsync(churchId, teamId, ct))
-            return Result<SaveAttendanceResult, TeamAttendanceError>.Failure(
-                TeamAttendanceError.TeamIsCategory(teamId));
-
-        var activeMemberIds = (await attendanceRepository.GetActiveMemberIdsAsync(churchId, teamId, ct))
-            .ToHashSet();
-
-        foreach (var entry in request.Entries!)
-        {
-            if (!activeMemberIds.Contains(entry.MemberId!.Value))
-                return Result<SaveAttendanceResult, TeamAttendanceError>.Failure(
-                    TeamAttendanceError.MemberNotInTeam(entry.MemberId.Value, teamId));
-        }
-
-        var date = request.AttendanceDate!.Value;
-
-        var entries = request.Entries
-            .Select(e => (MemberId: e.MemberId!.Value, Status: e.Status!.Value, Reason: e.Reason))
-            .ToList();
-
-        await attendanceRepository.UpsertAsync(teamId, date, entries, ct);
-
-        var present = entries.Count(e => e.Status == TeamAttendanceStatus.Present);
-        var late = entries.Count(e => e.Status == TeamAttendanceStatus.Late);
-        var absent = entries.Count(e => e.Status == TeamAttendanceStatus.Absent);
-
-        logger.LogInformation("Saved attendance for team {TeamId} on {Date}: {Present} present, {Late} late, {Absent} absent",
-            teamId, date, present, late, absent);
-
-        return Result<SaveAttendanceResult, TeamAttendanceError>.Success(
-            new SaveAttendanceResult(date, entries.Count, present, late, absent));
-    }
-
     public async Task<Result<PagedResponse<TeamAttendanceRecordDto>, TeamAttendanceError>> GetAttendanceAsync(
         long churchId, long teamId, DateOnly? from, DateOnly? to,
         PagedRequest paging, CancellationToken ct)

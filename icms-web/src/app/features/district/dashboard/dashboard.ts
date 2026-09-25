@@ -23,10 +23,6 @@ export class DistrictDashboard {
 
   readonly modules = signal<ModuleCard[]>([
     {
-      icon: 'group', title: 'Members', description: 'Every member of the district and their churches.',
-      path: '/district/members',
-    },
-    {
       icon: 'church', title: 'Churches', description: 'Churches, departments and church employees.',
       path: '/district/churches',
     },

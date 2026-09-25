@@ -17,6 +17,7 @@ public class Team
     public ICollection<Team> SubTeams { get; set; } = new List<Team>();
     public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
     public ICollection<TeamAttendance> Attendances { get; set; } = new List<TeamAttendance>();
+    public ICollection<TeamMeeting> Meetings { get; set; } = new List<TeamMeeting>();
     public ICollection<TeamPayment> Payments { get; set; } = new List<TeamPayment>();
     public ICollection<TeamActivity> Activities { get; set; } = new List<TeamActivity>();
 }

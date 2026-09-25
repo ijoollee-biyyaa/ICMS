@@ -16,12 +16,18 @@ export interface Church {
   tel: string | null;
   mapAddress: string | null;
   websiteUrl: string | null;
+  memberCount?: number;
+  employeeCount?: number;
+  ministerCount?: number;
 }
 
-/** Mirrors ChurchDetailDto (adds daughter/member counts + HATEOAS links). */
+/** Mirrors ChurchDetailDto (adds daughter/member/employee counts + HATEOAS links). */
 export interface ChurchDetail extends Church {
   daughterCount: number;
   memberCount: number;
+  activeMemberCount: number;
+  employeeCount: number;
+  ministerCount: number;
 }
 
 /** Body for POST /api/districts/{id}/churches — mirrors CreateChurchRequest. */

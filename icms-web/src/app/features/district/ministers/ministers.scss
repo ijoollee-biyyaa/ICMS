@@ -1,0 +1,64 @@
+/* =========================================================================
+   District Ministers Showcase — Minister Performance & Profile Card Styles
+   ========================================================================= */
+
+.ps5-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(30, 30, 35, 0.95) 0%, rgba(15, 15, 18, 0.98) 100%);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  backdrop-filter: blur(16px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.08) 45%,
+      rgba(255, 215, 0, 0.15) 50%,
+      rgba(255, 255, 255, 0.08) 55%,
+      transparent 60%,
+      transparent 100%
+    );
+    transform: skewX(-20deg);
+    transition: all 0.75s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-4px) scale(1.01);
+    &::before {
+      left: 100%;
+    }
+  }
+}
+
+/* 4-Stat Minister Service Matrix Tiles */
+.stat-pill {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+/* Dossier Modal Backdrop Blur */
+.dossier-backdrop {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

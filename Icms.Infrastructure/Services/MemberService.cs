@@ -36,6 +36,13 @@ public class MemberService(
 
         var efgbcId = await efgbcIdGenerator.NextAsync(church.District.Code, ct);
 
+        Transfer? clearanceTransfer = null;
+        if (request.ClearanceId.HasValue)
+        {
+            clearanceTransfer = await dbContext.Transfers
+                .FirstOrDefaultAsync(t => t.Id == request.ClearanceId.Value && t.DestinationChurchId == church.Id, ct);
+        }
+
         var member = new Member
         {
             EfgbcId = efgbcId,
@@ -45,17 +52,35 @@ public class MemberService(
             GrandfatherName = request.GrandfatherName,
             DateOfBirth = request.DateOfBirth,
             Gender = request.Gender,
+            MaritalStatus = request.MaritalStatus,
             JobStatus = request.JobStatus,
+            HealthStatus = request.HealthStatus,
             Phone = request.Phone,
             Email = request.Email,
+            City = request.City,
+            Subcity = request.Subcity,
+            LocalAddress = request.LocalAddress,
             PhotoUrl = request.PhotoUrl,
-            JoinedVia = request.JoinedVia,
-            JoinedAt = request.JoinedAt ?? DateOnly.FromDateTime(DateTime.Today)
+            JoinedVia = clearanceTransfer != null ? JoinChannel.Transfer : request.JoinedVia,
+            JoinedAt = request.JoinedAt ?? DateOnly.FromDateTime(DateTime.Today),
+            ConversionDate = request.ConversionDate,
+            BaptismPlace = request.BaptismPlace,
+            BaptismDate = request.BaptismDate,
+            SpiritualGift = request.SpiritualGift,
+            ClearanceId = clearanceTransfer?.Id
         };
 
         try
         {
             var created = await memberRepository.AddAsync(member, ct);
+
+            if (clearanceTransfer != null)
+            {
+                clearanceTransfer.MemberId = created.Id;
+                clearanceTransfer.Status = TransferStatus.Completed;
+                clearanceTransfer.CompletedAt ??= DateTimeOffset.UtcNow;
+                await dbContext.SaveChangesAsync(ct);
+            }
 
             logger.LogInformation(
                 "Registered member {MemberId} ({EfgbcId}) at church {ChurchId}",
@@ -94,14 +119,41 @@ public class MemberService(
         member.GrandfatherName = request.GrandfatherName;
         member.DateOfBirth = request.DateOfBirth;
         member.Gender = request.Gender;
+        member.MaritalStatus = request.MaritalStatus;
         member.JobStatus = request.JobStatus;
+        member.HealthStatus = request.HealthStatus;
         member.Phone = request.Phone;
         member.Email = request.Email;
-        member.PhotoUrl = request.PhotoUrl;
+        member.City = request.City;
+        member.Subcity = request.Subcity;
+        member.LocalAddress = request.LocalAddress;
+        if (request.PhotoUrl is not null)
+        {
+            member.PhotoUrl = string.IsNullOrWhiteSpace(request.PhotoUrl) ? null : request.PhotoUrl;
+        }
+        member.ConversionDate = request.ConversionDate;
+        member.BaptismPlace = request.BaptismPlace;
+        member.BaptismDate = request.BaptismDate;
+        member.SpiritualGift = request.SpiritualGift;
 
         var updated = await memberRepository.UpdateAsync(member, ct);
 
         logger.LogInformation("Updated member {MemberId} ({EfgbcId})", updated.Id, updated.EfgbcId);
+
+        return Result<MemberResponseDto, MemberError>.Success(ToDto(updated));
+    }
+
+    public async Task<Result<MemberResponseDto, MemberError>> UpdatePhotoUrlAsync(
+        long id, string photoUrl, CancellationToken ct)
+    {
+        var member = await memberRepository.GetByIdAsync(id, ct);
+        if (member is null)
+            return Result<MemberResponseDto, MemberError>.Failure(MemberError.NotFound(id));
+
+        member.PhotoUrl = string.IsNullOrWhiteSpace(photoUrl) ? null : photoUrl;
+        var updated = await memberRepository.UpdateAsync(member, ct);
+
+        logger.LogInformation("Updated photo for member {MemberId} ({EfgbcId})", updated.Id, updated.EfgbcId);
 
         return Result<MemberResponseDto, MemberError>.Success(ToDto(updated));
     }
@@ -324,6 +376,8 @@ public class MemberService(
 
     private static MemberResponseDto ToDto(Member m) => new(
         m.Id, m.EfgbcId, m.ChurchId, m.FirstName, m.FatherName, m.GrandfatherName,
-        m.DateOfBirth.Value, m.Gender, m.JobStatus, m.Phone, m.Email, m.PhotoUrl,
-        m.Status, m.JoinedVia, m.JoinedAt, m.CreatedAt);
+        m.DateOfBirth, m.Gender, m.MaritalStatus, m.JobStatus, m.HealthStatus,
+        m.Phone, m.Email, m.City, m.Subcity, m.LocalAddress, m.PhotoUrl,
+        m.Status, m.JoinedVia, m.JoinedAt, m.ConversionDate, m.BaptismPlace,
+        m.BaptismDate, m.SpiritualGift, m.ClearanceId, m.CreatedAt);
 }

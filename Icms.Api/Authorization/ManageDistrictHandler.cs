@@ -36,15 +36,14 @@ public class ManageDistrictHandler : AuthorizationHandler<ManageDistrictRequirem
             return;
         }
 
-        var isDistrictPresident = await _db.Employees
+        var isDistrictExecutive = await _db.Employees
             .AnyAsync(e =>
-                e.IsDistrictPresident
+                (e.IsDistrictPresident || e.IsVicePresident)
                 && !e.IsDeleted
                 && e.UserId == userId
-                && e.Church != null
-                && e.Church.DistrictId == resource.Id);
+                && (e.DistrictId == resource.Id || (e.Church != null && e.Church.DistrictId == resource.Id)));
 
-        if (isDistrictPresident)
+        if (isDistrictExecutive)
         {
             context.Succeed(requirement);
         }

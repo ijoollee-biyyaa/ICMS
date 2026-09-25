@@ -1,0 +1,9 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Church/cross icon for EFGBC -->
+  <rect width="32" height="32" rx="8" fill="#16a34a"/>
+  <!-- Cross -->
+  <rect x="14" y="5" width="4" height="22" rx="1" fill="white"/>
+  <rect x="8" y="10" width="16" height="4" rx="1" fill="white"/>
+  <!-- Church base -->
+  <path d="M6 28V19L16 13L26 19V28H6Z" fill="white" fill-opacity="0.25"/>
+</svg>

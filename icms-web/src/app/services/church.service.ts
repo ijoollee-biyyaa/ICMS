@@ -16,6 +16,7 @@ import {
   CreateMemberRequest,
   UpdateMemberRequest,
   MemberDashboard,
+  MemberHistory,
   MemberStats,
   MemberAccountInfo,
   IssueMemberCredentials,
@@ -38,12 +39,23 @@ import {
   TeamAttendanceRecord,
   TeamAttendanceReport,
   SaveAttendanceRequest,
-  SaveAttendanceResult,
   TeamPayment,
   TeamPaymentSummary,
   RecordPaymentRequest,
   UpdatePaymentRequest,
+  CreateMeetingRequest,
+  TeamMeetingDto,
+  TeamMeetingDetailDto,
 } from '../models/team';
+import {
+  ClearanceRequest,
+  ClearanceStats,
+  ClearanceMemberLookup,
+  ClearanceChurchLookup,
+  CreateIncomingClearanceRequest,
+  CreateOutgoingClearanceRequest,
+  AcceptTransferRequest,
+} from '../models/clearance';
 
 /**
  * Central client for the church domain: churches under a district, plus the
@@ -141,6 +153,12 @@ export class ChurchService {
     return this.http.put<Member>(`${this.memberBase}/${memberId}`, body);
   }
 
+  uploadMemberPhoto(memberId: number, file: File) {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<Member>(`${this.memberBase}/${memberId}/photo`, form);
+  }
+
   deleteMember(memberId: number) {
     return this.http.delete<void>(`${this.memberBase}/${memberId}`);
   }
@@ -148,6 +166,12 @@ export class ChurchService {
   getMemberDashboard(memberId: number) {
     return this.http.get<MemberDashboard>(
       `${this.memberBase}/${memberId}/dashboard`,
+    );
+  }
+
+  getMemberHistory(memberId: number) {
+    return this.http.get<MemberHistory>(
+      `${this.memberBase}/${memberId}/history`,
     );
   }
 
@@ -216,18 +240,51 @@ export class ChurchService {
     );
   }
 
-  // ---- Team attendance ---------------------------------------------------
-
-  saveAttendance(
-    churchId: number,
-    teamId: number,
-    body: SaveAttendanceRequest,
-  ) {
-    return this.http.post<SaveAttendanceResult>(
-      `${this.churchTeams(churchId)}/${teamId}/attendance`,
+  // ---- Team meetings ---------------------------------------------------
+  createMeeting(churchId: number, teamId: number, body: CreateMeetingRequest) {
+    return this.http.post<TeamMeetingDto>(
+      `${this.churchTeams(churchId)}/${teamId}/meetings`,
       body,
     );
   }
+
+  getMeetings(
+    churchId: number,
+    teamId: number,
+    page = 1,
+    pageSize = 50,
+  ) {
+    return this.http.get<PagedResponse<TeamMeetingDto>>(
+      `${this.churchTeams(churchId)}/${teamId}/meetings`,
+      { params: this.paging(page, pageSize) },
+    );
+  }
+
+  getMeeting(churchId: number, teamId: number, meetingId: number) {
+    return this.http.get<TeamMeetingDetailDto>(
+      `${this.churchTeams(churchId)}/${teamId}/meetings/${meetingId}`,
+    );
+  }
+
+  saveMeetingAttendance(
+    churchId: number,
+    teamId: number,
+    meetingId: number,
+    body: SaveAttendanceRequest,
+  ) {
+    return this.http.post<TeamMeetingDetailDto>(
+      `${this.churchTeams(churchId)}/${teamId}/meetings/${meetingId}/attendance`,
+      body,
+    );
+  }
+
+  deleteMeeting(churchId: number, teamId: number, meetingId: number) {
+    return this.http.delete<TeamMeetingDto>(
+      `${this.churchTeams(churchId)}/${teamId}/meetings/${meetingId}`,
+    );
+  }
+
+  // ---- Team attendance ---------------------------------------------------
 
   getAttendance(
     churchId: number,
@@ -446,5 +503,81 @@ export class ChurchService {
 
   private churchDepartments(churchId: number): string {
     return `${environment.apiUrl}/churches/${churchId}/departments`;
+  }
+
+  // ---- Clearance (Transfers) ---------------------------------------------
+
+  getClearances(
+    churchId: number | null,
+    destinationChurchId: number | null,
+    direction: string | null,
+    status: string | null,
+    search: string | null,
+    page = 1,
+    pageSize = 20,
+  ) {
+    let params = this.paging(page, pageSize);
+    if (direction) params = params.set('direction', direction);
+    if (status) params = params.set('status', status);
+    if (search) params = params.set('search', search);
+    
+    // We expect the caller to pass churchId for the current church
+    const id = churchId || destinationChurchId;
+    return this.http.get<PagedResponse<ClearanceRequest>>(`${environment.apiUrl}/v1/churches/${id}/transfers`, { params });
+  }
+
+  getClearanceStats(churchId: number) {
+    return this.http.get<ClearanceStats>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/stats`);
+  }
+
+  createIncomingClearance(churchId: number, body: CreateIncomingClearanceRequest) {
+    return this.http.post<ClearanceRequest>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/external-incoming`, body);
+  }
+
+  createOutgoingClearance(churchId: number, body: CreateOutgoingClearanceRequest) {
+    return this.http.post<ClearanceRequest>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/outgoing`, body);
+  }
+
+  acceptTransfer(churchId: number, transferId: number, body: AcceptTransferRequest) {
+    return this.http.post<ClearanceRequest>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/${transferId}/accept`, body);
+  }
+
+  voidClearance(churchId: number, transferId: number, reason: string) {
+    return this.http.post<ClearanceRequest>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/${transferId}/void`, `"${reason}"`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  getClearance(churchId: number, transferId: number) {
+    return this.http.get<ClearanceRequest>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/${transferId}`);
+  }
+
+  searchClearanceMembers(churchId: number, search: string | null) {
+    let params = new HttpParams().set('churchId', String(churchId));
+    if (search) params = params.set('search', search);
+    return this.http.get<any>(`${environment.apiUrl}/members`, { params }).pipe(
+      map(res => (res.items || res).map((m: any) => ({
+        id: m.id,
+        efgbcId: m.efgbcId || 'No EFGBC ID',
+        fullName: `${m.firstName || ''} ${m.fatherName || ''} ${m.grandfatherName || ''}`.trim()
+      } as ClearanceMemberLookup)))
+    );
+  }
+
+  searchDistrictChurches(districtId: number, search: string | null) {
+    let params = new HttpParams();
+    if (search) params = params.set('search', search);
+    return this.http.get<ClearanceChurchLookup[]>(`${environment.apiUrl}/districts/${districtId}/churches`, { params })
+      .pipe(map((res: any) => res.items || res)); // Assuming PagedResponse
+  }
+
+  searchRejoinCandidates(churchId: number, search: string) {
+    let params = new HttpParams();
+    if (search) params = params.set('search', search);
+    return this.http.get<ClearanceMemberLookup[]>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/rejoin-candidates`, { params });
+  }
+
+  createRejoinClearance(churchId: number, body: { memberId: number; recommendationNotes?: string; clearanceDocumentUrl?: string }) {
+    return this.http.post<ClearanceRequest>(`${environment.apiUrl}/v1/churches/${churchId}/transfers/rejoin`, body);
   }
 }

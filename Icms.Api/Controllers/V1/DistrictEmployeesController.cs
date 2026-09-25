@@ -5,7 +5,7 @@ using Icms.Application.Interfaces;
 
 namespace Icms.Api.Controllers.V1;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,DistrictSubAdmin")]
 [ApiController]
 [Route("api/districts/{districtId:long}/employees")]
 [Tags("District Office")]

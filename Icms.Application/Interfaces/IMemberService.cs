@@ -28,4 +28,7 @@ public interface IMemberService
 
     Task<Result<IssueMemberCredentialsDto, MemberError>> IssueCredentialsAsync(
         long memberId, CancellationToken ct);
+
+    Task<Result<MemberResponseDto, MemberError>> UpdatePhotoUrlAsync(
+        long id, string photoUrl, CancellationToken ct);
 }

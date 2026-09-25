@@ -11,10 +11,7 @@ import {
   FormBuilder,
   AbstractControl,
 } from '@angular/forms';
-import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
+import { Router, RouterLink } from '@angular/router';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
@@ -27,6 +24,9 @@ import {
   UpdateChurchRequest,
 } from '../../../models/church';
 import { downloadChurchCredentialsPdf } from '../../../utils/church-credentials-pdf';
+import { AppTable } from '../../shared/ui/data-table/data-table';
+import { TableColumn } from '../../shared/ui/data-table/table-column';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 
 const CODE_PATTERN = '^[A-Z0-9-]{2,10}$';
 const ADMIN_NAME_KEYS = [
@@ -53,19 +53,15 @@ type Copied = '' | 'email' | 'password';
   selector: 'app-district-churches',
   imports: [
     ReactiveFormsModule,
-    MatFormField,
-    MatLabel,
-    MatHint,
-    MatError,
-    MatInput,
-    MatSelect,
-    MatOption,
-    MatButton,
+    RouterLink,
     MatIconButton,
     MatIcon,
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
+    AppTable,
+    TableColumn,
+    StatCard,
   ],
   templateUrl: './churches.html',
   styleUrl: './churches.scss',
@@ -73,6 +69,7 @@ type Copied = '' | 'email' | 'password';
 export class DistrictChurches {
   readonly store = inject(ChurchStore);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   readonly showForm = signal(false);
   readonly editing = signal<Church | null>(null);
@@ -163,6 +160,35 @@ export class DistrictChurches {
       }
     });
   }
+
+  // ---- Table helpers ----
+
+  searchChurch = (church: Church, query: string): boolean => {
+    const q = query.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      church.name.toLowerCase().includes(q) ||
+      church.code.toLowerCase().includes(q) ||
+      (church.city?.toLowerCase().includes(q) ?? false) ||
+      (church.subcity?.toLowerCase().includes(q) ?? false) ||
+      (church.phone?.toLowerCase().includes(q) ?? false) ||
+      (church.email?.toLowerCase().includes(q) ?? false) ||
+      church.type.toLowerCase().includes(q)
+    );
+  };
+
+  churchName = (c: Church) => c.name;
+  churchCode = (c: Church) => c.code;
+  churchTypeVal = (c: Church) => c.type;
+  churchLocationVal = (c: Church) => [c.subcity, c.city].filter(Boolean).join(', ');
+  churchMembersVal = (c: Church) => c.memberCount ?? 0;
+  churchPersonnelVal = (c: Church) => (c.employeeCount ?? 0) + (c.ministerCount ?? 0);
+
+  viewChurch(church: Church) {
+    this.router.navigate(['/district/churches', church.id]);
+  }
+
+  // ---- Form helpers ----
 
   openForm(church: Church | null = null) {
     this.store.clearErrors();

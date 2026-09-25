@@ -1,0 +1,16 @@
+<section class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+  <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-5 sm:px-6">
+    <div>
+      @if (title(); as title) {
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ title }}</h3>
+      }
+      @if (subtitle(); as subtitle) {
+        <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ subtitle }}</p>
+      }
+    </div>
+    <ng-content select="[card-actions]" />
+  </div>
+  <div class="border-t border-gray-100 dark:border-gray-800" [class]="padded() ? 'p-5 sm:p-6' : ''">
+    <ng-content />
+  </div>
+</section>

@@ -52,25 +52,30 @@ public class DistrictEmployeeService(
             return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
                 DistrictEmployeeError.MemberNotFound(request.MemberId.Value));
 
-        if (request.IsDistrictPresident || request.IsVicePresident)
+        if (employmentType == EmploymentType.FulltimeMinister)
         {
-            if (employmentType != EmploymentType.FulltimeMinister)
-                return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
-                    request.IsDistrictPresident
-                        ? DistrictEmployeeError.PresidentMustBeMinister()
-                        : DistrictEmployeeError.VicePresidentMustBeMinister());
+            var isChurchMinister = await dbContext.Employees.AsNoTracking()
+                .AnyAsync(e => e.MemberId == member.Id
+                            && e.ChurchId != null
+                            && e.EmploymentType == EmploymentType.FulltimeMinister
+                            && !e.IsDeleted
+                            && e.Status == EmployeeStatus.Active, ct);
 
-            if (member.ChurchType != ChurchType.Local)
+            if (!isChurchMinister)
+                return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
+                    DistrictEmployeeError.MinisterMustBeChurchMinister());
+
+            if ((request.IsDistrictPresident || request.IsVicePresident) && member.ChurchType != ChurchType.Local)
                 return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
                     DistrictEmployeeError.MemberNotLocalChurch(member.Id));
         }
-    }
-    else if (request.IsDistrictPresident || request.IsVicePresident)
-    {
-        return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
-            request.IsDistrictPresident
-                ? DistrictEmployeeError.PresidentMustBeMinister()
-                : DistrictEmployeeError.VicePresidentMustBeMinister());
+        else if (request.IsDistrictPresident || request.IsVicePresident)
+        {
+            return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
+                request.IsDistrictPresident
+                    ? DistrictEmployeeError.PresidentMustBeMinister()
+                    : DistrictEmployeeError.VicePresidentMustBeMinister());
+        }
     }
 
     if (request.IsDistrictPresident
@@ -102,6 +107,7 @@ public class DistrictEmployeeService(
             {
                 UserName = accountEmail,
                 Email = accountEmail,
+                MemberId = memberId,
                 FirstName = memberEntity?.FirstName ?? string.Empty,
                 FatherName = memberEntity?.FatherName ?? string.Empty,
                 GrandfatherName = memberEntity?.GrandfatherName ?? string.Empty
@@ -121,6 +127,28 @@ public class DistrictEmployeeService(
         else
         {
             accountEmail = memberUser.Email;
+        }
+
+        if (request.IsDistrictPresident)
+        {
+            await EnsureRoleAsync("Admin");
+            if (!await userManager.IsInRoleAsync(memberUser, "Admin"))
+            {
+                await userManager.AddToRoleAsync(memberUser, "Admin");
+            }
+            await EnsureRoleAsync("DistrictSubAdmin");
+            if (!await userManager.IsInRoleAsync(memberUser, "DistrictSubAdmin"))
+            {
+                await userManager.AddToRoleAsync(memberUser, "DistrictSubAdmin");
+            }
+        }
+        else if (request.IsVicePresident)
+        {
+            await EnsureRoleAsync("DistrictSubAdmin");
+            if (!await userManager.IsInRoleAsync(memberUser, "DistrictSubAdmin"))
+            {
+                await userManager.AddToRoleAsync(memberUser, "DistrictSubAdmin");
+            }
         }
 
         userId = memberUser.Id;
@@ -186,6 +214,33 @@ public class DistrictEmployeeService(
 
     private async Task<User?> FindMemberAccountAsync(long memberId, CancellationToken ct)
     {
+        // 1. Direct match by MemberId on the User record
+        var userByMemberId = await userManager.Users
+            .FirstOrDefaultAsync(u => u.MemberId == memberId, ct);
+        if (userByMemberId is not null)
+            return userByMemberId;
+
+        // 2. Match by email on the Member entity
+        var memberEmail = await dbContext.Members.AsNoTracking()
+            .Where(m => m.Id == memberId && !m.IsDeleted)
+            .Select(m => m.Email)
+            .FirstOrDefaultAsync(ct);
+
+        if (!string.IsNullOrWhiteSpace(memberEmail))
+        {
+            var userByEmail = await userManager.FindByEmailAsync(memberEmail.Trim());
+            if (userByEmail is not null)
+            {
+                if (userByEmail.MemberId is null)
+                {
+                    userByEmail.MemberId = memberId;
+                    await userManager.UpdateAsync(userByEmail);
+                }
+                return userByEmail;
+            }
+        }
+
+        // 3. Fallback: check existing Employee records
         var linkedUserId = await dbContext.Employees.AsNoTracking()
             .Where(e => e.MemberId == memberId && e.UserId != null && !e.IsDeleted)
             .Select(e => e.UserId)
@@ -301,6 +356,17 @@ public class DistrictEmployeeService(
             if (member?.ChurchType != ChurchType.Local)
                 return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
                     DistrictEmployeeError.MemberNotLocalChurch(memberId));
+
+            var isChurchMinister = await dbContext.Employees.AsNoTracking()
+                .AnyAsync(e => e.MemberId == memberId
+                            && e.ChurchId != null
+                            && e.EmploymentType == EmploymentType.FulltimeMinister
+                            && !e.IsDeleted
+                            && e.Status == EmployeeStatus.Active, ct);
+
+            if (!isChurchMinister)
+                return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
+                    DistrictEmployeeError.PresidentMustBeMinister());
         }
 
         if (request.IsVicePresident && !employee.IsVicePresident && employee.MemberId is { } memberId2)
@@ -309,6 +375,17 @@ public class DistrictEmployeeService(
             if (member?.ChurchType != ChurchType.Local)
                 return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
                     DistrictEmployeeError.MemberNotLocalChurch(memberId2));
+
+            var isChurchMinister = await dbContext.Employees.AsNoTracking()
+                .AnyAsync(e => e.MemberId == memberId2
+                            && e.ChurchId != null
+                            && e.EmploymentType == EmploymentType.FulltimeMinister
+                            && !e.IsDeleted
+                            && e.Status == EmployeeStatus.Active, ct);
+
+            if (!isChurchMinister)
+                return Result<EmployeeResponseDto, DistrictEmployeeError>.Failure(
+                    DistrictEmployeeError.VicePresidentMustBeMinister());
         }
 
         employee.Position = request.Position!.Trim();
@@ -320,6 +397,35 @@ public class DistrictEmployeeService(
         employee.IsVicePresident = request.IsVicePresident;
 
         var updated = await employeeRepository.UpdateAsync(employee, ct);
+
+        if (updated.UserId is { } uid)
+        {
+            var u = await userManager.FindByIdAsync(uid);
+            if (u is not null)
+            {
+                if (request.IsDistrictPresident)
+                {
+                    await EnsureRoleAsync("Admin");
+                    if (!await userManager.IsInRoleAsync(u, "Admin"))
+                    {
+                        await userManager.AddToRoleAsync(u, "Admin");
+                    }
+                    await EnsureRoleAsync("DistrictSubAdmin");
+                    if (!await userManager.IsInRoleAsync(u, "DistrictSubAdmin"))
+                    {
+                        await userManager.AddToRoleAsync(u, "DistrictSubAdmin");
+                    }
+                }
+                else if (request.IsVicePresident)
+                {
+                    await EnsureRoleAsync("DistrictSubAdmin");
+                    if (!await userManager.IsInRoleAsync(u, "DistrictSubAdmin"))
+                    {
+                        await userManager.AddToRoleAsync(u, "DistrictSubAdmin");
+                    }
+                }
+            }
+        }
 
         logger.LogInformation("Updated office employee {EmployeeId} ({Position})",
             updated.Id, updated.Position);

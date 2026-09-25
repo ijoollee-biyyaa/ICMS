@@ -60,6 +60,19 @@ public class TokenService
         if (memberId is { } mid)
         {
             claims.Add(new Claim("MemberId", mid.ToString()));
+
+            if (churchId is null)
+            {
+                churchId = await _db.Members.AsNoTracking()
+                    .Where(m => m.Id == mid && !m.IsDeleted)
+                    .Select(m => (long?)m.ChurchId)
+                    .FirstOrDefaultAsync();
+
+                if (churchId is { } mCid)
+                {
+                    claims.Add(new Claim("ChurchId", mCid.ToString()));
+                }
+            }
         }
 
         foreach (var role in roles)

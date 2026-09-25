@@ -1,0 +1,86 @@
+<div class="space-y-6">
+  <app-page-header
+    title="My Attendance"
+    subtitle="Every meeting you attended, were late to, or missed across your teams."
+  />
+
+  @if (store.isLoading() && !store.historyLoaded()) {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4">
+      @for (i of [0, 1, 2, 3]; track i) {
+        <div class="h-24 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-gray-800"></div>
+      }
+    </div>
+  } @else if (store.error()) {
+    <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+      <mat-icon class="mt-0.5">error_outline</mat-icon>
+      <p>{{ store.error() }}</p>
+      <button type="button" (click)="store.loadHistory()" class="ml-auto text-sm font-semibold underline">Retry</button>
+    </div>
+  } @else {
+    <!-- Headline stats -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4">
+      <app-stat-card
+        icon="calendar_month"
+        label="Meetings"
+        [value]="total() | number"
+        [trend]="'All time'"
+        trendClass="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+      />
+      <app-stat-card
+        icon="check_circle"
+        label="Present"
+        [value]="present() | number"
+        accentClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300"
+      />
+      <app-stat-card
+        icon="schedule"
+        label="Late"
+        [value]="late() | number"
+        accentClass="bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300"
+      />
+      <app-stat-card
+        icon="cancel"
+        label="Absent"
+        [value]="absent() | number"
+        accentClass="bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-300"
+      />
+    </div>
+
+    <!-- Records -->
+    <app-table
+      title="Attendance records"
+      subtitle="Searchable history of your meetings"
+      [data]="records()"
+      [searchKeys]="['teamName', 'status']"
+      [rowKey]="rowKey"
+    >
+      <app-table-column key="attendanceDate" header="Date" [sortable]="true">
+        <ng-template let-row let-i="index">
+          <span class="whitespace-nowrap font-medium text-gray-700 dark:text-gray-200">
+            {{ formatDate(row['attendanceDate']) }}
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <app-table-column key="teamName" header="Team" [sortable]="true">
+        <ng-template let-row>
+          <span class="whitespace-nowrap text-gray-600 dark:text-gray-300">{{ row['teamName'] }}</span>
+        </ng-template>
+      </app-table-column>
+
+      <app-table-column key="status" header="Status" [sortable]="true">
+        <ng-template let-row>
+          <span class="rounded-full px-3 py-1 text-xs font-semibold {{ badgeClass(row['status']) }}">
+            {{ row['status'] }}
+          </span>
+        </ng-template>
+      </app-table-column>
+
+      <app-table-column key="reason" header="Reason">
+        <ng-template let-row>
+          <span class="text-gray-500 dark:text-gray-400">{{ row['reason'] ?? '—' }}</span>
+        </ng-template>
+      </app-table-column>
+    </app-table>
+  }
+</div>

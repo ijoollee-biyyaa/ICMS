@@ -123,6 +123,45 @@ public class MembersController(
             error => error.ToResult(Request));
     }
 
+    [HttpPost("{id:long}/photo", Name = nameof(UploadMemberPhoto))]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(MemberResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Upload member profile photo")]
+    public async Task<IActionResult> UploadMemberPhoto(
+        long id, IFormFile file, [FromServices] IWebHostEnvironment env, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new ProblemDetails { Title = "No file was uploaded.", Status = 400 });
+
+        if (file.Length > 10 * 1024 * 1024)
+            return BadRequest(new ProblemDetails { Title = "Photo file must be 10 MB or smaller.", Status = 400 });
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(ext))
+            return BadRequest(new ProblemDetails { Title = "Invalid image file extension. Allowed: jpg, png, webp, gif.", Status = 400 });
+
+        var uploadsFolder = Path.Combine(env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"), "uploads", "members");
+        Directory.CreateDirectory(uploadsFolder);
+
+        var uniqueFileName = $"member_{id}_{DateTime.UtcNow.Ticks}{ext}";
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        await using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream, ct);
+        }
+
+        var photoUrl = $"/uploads/members/{uniqueFileName}";
+        var result = await memberService.UpdatePhotoUrlAsync(id, photoUrl, ct);
+
+        return result.Match<IActionResult>(
+            member => Ok(member with { Links = BuildLinks(member.Id) }),
+            error => error.ToResult(Request));
+    }
+
     [HttpDelete("{id:long}", Name = nameof(DeleteMember))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

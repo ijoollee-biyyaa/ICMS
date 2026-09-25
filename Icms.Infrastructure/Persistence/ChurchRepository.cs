@@ -3,6 +3,7 @@ using Npgsql;
 using Icms.Application.Exceptions;
 using Icms.Application.Interfaces;
 using Icms.Domain.Entities;
+using Icms.Domain.Enums;
 
 namespace Icms.Infrastructure.Persistence;
 
@@ -71,8 +72,52 @@ public class ChurchRepository(IcmsDbContext dbContext) : IChurchRepository
     public Task<int> CountMembersAsync(long churchId, CancellationToken ct) =>
         dbContext.Members.AsNoTracking().CountAsync(m => m.ChurchId == churchId, ct);
 
+    public Task<int> CountActiveMembersAsync(long churchId, CancellationToken ct) =>
+        dbContext.Members.AsNoTracking().CountAsync(m => m.ChurchId == churchId && m.Status == MemberStatus.Active, ct);
+
+    public Task<int> CountEmployeesAsync(long churchId, CancellationToken ct) =>
+        dbContext.Employees.AsNoTracking().CountAsync(e => e.ChurchId == churchId && e.Status == EmployeeStatus.Active, ct);
+
+    public Task<int> CountMinistersAsync(long churchId, CancellationToken ct) =>
+        dbContext.Employees.AsNoTracking().CountAsync(e => e.ChurchId == churchId && e.EmploymentType == EmploymentType.FulltimeMinister && e.Status == EmployeeStatus.Active, ct);
+
     public Task<int> CountDaughterChurchesAsync(long churchId, CancellationToken ct) =>
         dbContext.Churches.AsNoTracking().CountAsync(c => c.ParentChurchId == churchId, ct);
+
+    public async Task<Dictionary<long, (int MemberCount, int EmployeeCount, int MinisterCount)>> GetChurchMetricsAsync(IEnumerable<long> churchIds, CancellationToken ct)
+    {
+        var idList = churchIds.Distinct().ToList();
+        if (idList.Count == 0) return [];
+
+        var memberCounts = await dbContext.Members.AsNoTracking()
+            .Where(m => idList.Contains(m.ChurchId) && m.Status == MemberStatus.Active)
+            .GroupBy(m => m.ChurchId)
+            .Select(g => new { ChurchId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChurchId, x => x.Count, ct);
+
+        var employeeCounts = await dbContext.Employees.AsNoTracking()
+            .Where(e => e.ChurchId.HasValue && idList.Contains(e.ChurchId.Value) && e.Status == EmployeeStatus.Active)
+            .GroupBy(e => e.ChurchId!.Value)
+            .Select(g => new { ChurchId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChurchId, x => x.Count, ct);
+
+        var ministerCounts = await dbContext.Employees.AsNoTracking()
+            .Where(e => e.ChurchId.HasValue && idList.Contains(e.ChurchId.Value) && e.EmploymentType == EmploymentType.FulltimeMinister && e.Status == EmployeeStatus.Active)
+            .GroupBy(e => e.ChurchId!.Value)
+            .Select(g => new { ChurchId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChurchId, x => x.Count, ct);
+
+        var result = new Dictionary<long, (int MemberCount, int EmployeeCount, int MinisterCount)>();
+        foreach (var id in idList)
+        {
+            memberCounts.TryGetValue(id, out var mc);
+            employeeCounts.TryGetValue(id, out var ec);
+            ministerCounts.TryGetValue(id, out var minC);
+            result[id] = (mc, ec, minC);
+        }
+
+        return result;
+    }
 
     private static bool IsUniqueViolation(DbUpdateException ex)
     {

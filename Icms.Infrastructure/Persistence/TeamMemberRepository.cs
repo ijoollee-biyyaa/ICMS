@@ -60,6 +60,7 @@ public class TeamMemberRepository(IcmsDbContext dbContext) : ITeamMemberReposito
         dbContext.TeamMembers.AsNoTracking()
             .Include(tm => tm.Member)
             .Where(tm => tm.TeamId == teamId && tm.Team.ChurchId == churchId
+                && !tm.IsDeleted
                 && (search == null
                     || EF.Functions.ILike(tm.Member.FirstName, $"%{search}%")
                     || EF.Functions.ILike(tm.Member.EfgbcId, $"%{search}%")))
@@ -71,6 +72,7 @@ public class TeamMemberRepository(IcmsDbContext dbContext) : ITeamMemberReposito
     public Task<int> CountByTeamAsync(long churchId, long teamId, string? search, CancellationToken ct) =>
         dbContext.TeamMembers.AsNoTracking()
             .CountAsync(tm => tm.TeamId == teamId && tm.Team.ChurchId == churchId
+                && !tm.IsDeleted
                 && (search == null
                     || EF.Functions.ILike(tm.Member.FirstName, $"%{search}%")
                     || EF.Functions.ILike(tm.Member.EfgbcId, $"%{search}%")), ct);

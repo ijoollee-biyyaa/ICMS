@@ -1,0 +1,155 @@
+<app-page-header
+  title="Manage Account"
+  subtitle="Your login email and password settings."
+/>
+
+@if (changed()) {
+  <app-section-card>
+    <div class="flex flex-col items-center gap-4 py-8 text-center">
+      <div class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+        <mat-icon class="text-3xl">check_circle</mat-icon>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">Password updated</h3>
+        <p class="mt-1 max-w-md text-sm text-gray-500">
+          Your password was changed. For security, you have been signed out.
+          Please sign in again with your new password.
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="goHome()"
+        class="mt-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+      >
+        Go to sign in
+      </button>
+    </div>
+  </app-section-card>
+} @else {
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="lg:col-span-2">
+      <app-section-card
+        title="Change password"
+        subtitle="Use a strong password you don't use elsewhere. Minimum 8 characters."
+      >
+        @if (error()) {
+          <div class="mb-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <mat-icon class="mt-0.5">error_outline</mat-icon>
+            <p>{{ error() }}</p>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="changePassword()" class="space-y-5">
+          <div class="grid grid-cols-1 gap-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Current password</mat-label>
+              <input
+                matInput
+                formControlName="currentPassword"
+                [type]="hideCurrent() ? 'password' : 'text'"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                mat-icon-button
+                matSuffix
+                (click)="hideCurrent.set(!hideCurrent())"
+                [attr.aria-label]="hideCurrent() ? 'Show password' : 'Hide password'"
+              >
+                <mat-icon>{{ hideCurrent() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (form.controls.currentPassword.hasError('required')) {
+                <mat-error>Enter your current password.</mat-error>
+              } @else if (form.controls.currentPassword.hasError('server')) {
+                <mat-error>{{ form.controls.currentPassword.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>New password</mat-label>
+              <input
+                matInput
+                formControlName="newPassword"
+                [type]="hideNew() ? 'password' : 'text'"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                mat-icon-button
+                matSuffix
+                (click)="hideNew.set(!hideNew())"
+                [attr.aria-label]="hideNew() ? 'Show password' : 'Hide password'"
+              >
+                <mat-icon>{{ hideNew() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (form.controls.newPassword.hasError('required')) {
+                <mat-error>Enter a new password.</mat-error>
+              } @else if (form.controls.newPassword.hasError('minlength')) {
+                <mat-error>Password must be at least 8 characters.</mat-error>
+              } @else if (form.controls.newPassword.hasError('server')) {
+                <mat-error>{{ form.controls.newPassword.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm new password</mat-label>
+              <input
+                matInput
+                formControlName="confirmPassword"
+                [type]="hideConfirm() ? 'password' : 'text'"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                mat-icon-button
+                matSuffix
+                (click)="hideConfirm.set(!hideConfirm())"
+                [attr.aria-label]="hideConfirm() ? 'Show password' : 'Hide password'"
+              >
+                <mat-icon>{{ hideConfirm() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (
+                form.controls.confirmPassword.hasError('required') ||
+                form.hasError('mismatch')
+              ) {
+                <mat-error>Passwords do not match.</mat-error>
+              } @else if (form.controls.confirmPassword.hasError('server')) {
+                <mat-error>{{ form.controls.confirmPassword.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              [disabled]="form.invalid || busy()"
+              class="flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
+            >
+              <mat-icon class="text-base">lock</mat-icon>
+              {{ busy() ? 'Updating…' : 'Update password' }}
+            </button>
+          </div>
+        </form>
+      </app-section-card>
+    </div>
+
+    <div>
+      <app-section-card title="Account" subtitle="The email you sign in with.">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+            <mat-icon>mail</mat-icon>
+          </div>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium text-gray-900">
+              {{ currentUser()?.email ?? '—' }}
+            </p>
+            <p class="text-xs text-gray-500">Sign-in email</p>
+          </div>
+        </div>
+        @if (notice()) {
+          <p class="mt-4 text-sm text-emerald-600">{{ notice() }}</p>
+        }
+      </app-section-card>
+    </div>
+  </div>
+}

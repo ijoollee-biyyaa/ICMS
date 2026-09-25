@@ -1,0 +1,411 @@
+@if (open && member) {
+  <div
+    class="fixed inset-0 z-[1000] flex items-center justify-center overflow-y-auto bg-gray-900/60 p-4 backdrop-blur-sm sm:p-6"
+    role="dialog"
+    aria-modal="true"
+    (click)="close()"
+  >
+    <div
+      class="relative my-auto flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="relative overflow-hidden bg-gradient-to-r from-brand via-brand-strong to-brand-blue px-6 py-5 text-white">
+        <div class="absolute -right-8 -top-10 h-36 w-36 rounded-full bg-white/10 blur-xl"></div>
+        <div class="relative flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-base font-bold text-white shadow-inner backdrop-blur-sm">
+              <mat-icon class="!h-6 !w-6 !text-[24px]">edit</mat-icon>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold tracking-tight">Edit Member Profile</h2>
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white/90">
+                  {{ member.efgbcId }}
+                </span>
+              </div>
+              <p class="mt-0.5 text-xs text-white/80">
+                Updating records for <span class="font-semibold text-white">{{ getMemberFullName() }}</span>
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="close()"
+            [disabled]="saving()"
+            class="rounded-xl p-1 text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+            aria-label="Close"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Section Navigation Tabs -->
+        <div class="relative -mb-1 mt-5 flex gap-2 overflow-x-auto pb-1 text-xs">
+          <button
+            type="button"
+            (click)="activeTab.set('personal')"
+            class="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 font-medium transition"
+            [ngClass]="activeTab() === 'personal' ? 'bg-white text-gray-900 shadow-sm font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white'"
+          >
+            <mat-icon class="!h-4 !w-4 !text-[16px]">person</mat-icon>
+            Personal
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('contact')"
+            class="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 font-medium transition"
+            [ngClass]="activeTab() === 'contact' ? 'bg-white text-gray-900 shadow-sm font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white'"
+          >
+            <mat-icon class="!h-4 !w-4 !text-[16px]">home_pin</mat-icon>
+            Contact & Address
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('work_health')"
+            class="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 font-medium transition"
+            [ngClass]="activeTab() === 'work_health' ? 'bg-white text-gray-900 shadow-sm font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white'"
+          >
+            <mat-icon class="!h-4 !w-4 !text-[16px]">medical_services</mat-icon>
+            Job & Health
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('spiritual')"
+            class="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 font-medium transition"
+            [ngClass]="activeTab() === 'spiritual' ? 'bg-white text-gray-900 shadow-sm font-semibold' : 'text-white/80 hover:bg-white/10 hover:text-white'"
+          >
+            <mat-icon class="!h-4 !w-4 !text-[16px]">church</mat-icon>
+            Spiritual Journey
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      @if (error()) {
+        <div class="mx-6 mt-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+          <mat-icon class="!h-5 !w-5 !text-[18px] shrink-0 text-red-500">error_outline</mat-icon>
+          <p class="mt-0.5 leading-relaxed">{{ error() }}</p>
+        </div>
+      }
+
+      <!-- Form Content -->
+      <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-1 flex-col overflow-hidden">
+        <div class="flex-1 overflow-y-auto p-6">
+          <!-- TAB 1: PERSONAL -->
+          @if (activeTab() === 'personal') {
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    First Name <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="firstName"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.firstName.touched && form.controls.firstName.hasError('required')) {
+                    <p class="mt-1 text-[11px] font-medium text-red-600">First name is required.</p>
+                  }
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Father's Name <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="fatherName"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.fatherName.touched && form.controls.fatherName.hasError('required')) {
+                    <p class="mt-1 text-[11px] font-medium text-red-600">Father's name is required.</p>
+                  }
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Grandfather's Name <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="grandfatherName"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.grandfatherName.touched && form.controls.grandfatherName.hasError('required')) {
+                    <p class="mt-1 text-[11px] font-medium text-red-600">Grandfather's name is required.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Gender <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    formControlName="gender"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Date of Birth <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    formControlName="dateOfBirth"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.dateOfBirth.touched && form.controls.dateOfBirth.hasError('required')) {
+                    <p class="mt-1 text-[11px] font-medium text-red-600">Date of birth is required.</p>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Marital Status <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  @for (opt of MARITAL_OPTIONS; track opt.value) {
+                    <button
+                      type="button"
+                      (click)="form.patchValue({ maritalStatus: opt.value })"
+                      class="rounded-xl border px-3 py-2 text-xs font-semibold transition text-center"
+                      [ngClass]="form.controls.maritalStatus.value === opt.value
+                        ? 'border-brand bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- TAB 2: CONTACT & ADDRESS -->
+          @if (activeTab() === 'contact') {
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    formControlName="phone"
+                    placeholder="+251 911 000 000"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    formControlName="email"
+                    placeholder="member@example.com"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+                    <p class="mt-1 text-[11px] font-medium text-red-600">Please enter a valid email address.</p>
+                  }
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="city"
+                    placeholder="e.g. Addis Ababa"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Subcity / Zone
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="subcity"
+                    placeholder="e.g. Bole, Kirkos, Yeka"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Local Address / Residential Home
+                </label>
+                <input
+                  type="text"
+                  formControlName="localAddress"
+                  placeholder="e.g. Woreda 03, House No. 450, Near St. Gabriel"
+                  class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+            </div>
+          }
+
+          <!-- TAB 3: WORK & HEALTH -->
+          @if (activeTab() === 'work_health') {
+            <div class="space-y-5">
+              <div>
+                <label class="mb-2 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Employment Status <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  @for (job of JOB_OPTIONS; track job.value) {
+                    <button
+                      type="button"
+                      (click)="form.patchValue({ jobStatus: job.value })"
+                      class="rounded-xl border p-2.5 text-left transition"
+                      [ngClass]="form.controls.jobStatus.value === job.value
+                        ? 'border-brand bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'"
+                    >
+                      <span class="block text-xs font-semibold">{{ job.label }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-2 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Health Status <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  @for (h of HEALTH_OPTIONS; track h.value) {
+                    <button
+                      type="button"
+                      (click)="form.patchValue({ healthStatus: h.value })"
+                      class="flex items-center justify-between rounded-xl border p-2.5 text-left transition"
+                      [ngClass]="form.controls.healthStatus.value === h.value
+                        ? 'border-brand bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300 ring-1 ring-brand'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'"
+                    >
+                      <span class="text-xs font-semibold">{{ h.label }}</span>
+                      @if (form.controls.healthStatus.value === h.value) {
+                        <mat-icon class="!h-4 !w-4 !text-[16px] text-brand">check_circle</mat-icon>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- TAB 4: SPIRITUAL JOURNEY -->
+          @if (activeTab() === 'spiritual') {
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Conversion Date
+                  </label>
+                  <input
+                    type="date"
+                    formControlName="conversionDate"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  <span class="mt-1 block text-[11px] text-gray-400">Date member accepted Jesus Christ.</span>
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Baptism Date
+                  </label>
+                  <input
+                    type="date"
+                    formControlName="baptismDate"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Baptism Place / Church
+                </label>
+                <input
+                  type="text"
+                  formControlName="baptismPlace"
+                  placeholder="e.g. EFGBC Bethel, Lake Bishoftu, etc."
+                  class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Spiritual Gift(s)
+                </label>
+                <input
+                  type="text"
+                  formControlName="spiritualGift"
+                  placeholder="e.g. Teaching, Worship, Intercession"
+                  class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  @for (gift of SPIRITUAL_GIFTS; track gift) {
+                    <button
+                      type="button"
+                      (click)="setSpiritualGift(gift)"
+                      class="rounded-lg border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-600 transition hover:border-brand/40 hover:bg-brand/5 hover:text-brand dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-brand/10 dark:hover:text-brand-300"
+                    >
+                      + {{ gift }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-between border-t border-gray-100 bg-gray-50/80 px-6 py-4 dark:border-gray-800 dark:bg-gray-900/80">
+          <span class="text-xs text-gray-400 dark:text-gray-500">
+            Registered: <span class="font-medium text-gray-600 dark:text-gray-300">{{ member.joinedVia }}</span>
+          </span>
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              (click)="close()"
+              [disabled]="saving()"
+              class="rounded-full border border-gray-300 bg-white px-5 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              [disabled]="saving() || form.invalid"
+              class="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-2 text-xs font-semibold text-white shadow-md transition hover:bg-brand-strong disabled:opacity-60"
+            >
+              @if (saving()) {
+                <mat-icon class="!h-4 !w-4 !text-[16px] animate-spin">sync</mat-icon>
+                Saving...
+              } @else {
+                <mat-icon class="!h-4 !w-4 !text-[16px]">save</mat-icon>
+                Save Changes
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}

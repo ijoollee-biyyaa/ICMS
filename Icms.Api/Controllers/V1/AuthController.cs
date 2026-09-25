@@ -300,7 +300,7 @@ public class AuthController : ControllerBase
     [EndpointSummary("Current user")]
     [EndpointDescription(
         "Builds the profile from the claims of the presented Bearer access token.")]
-    public IActionResult GetCurrentUser()
+    public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
@@ -316,10 +316,15 @@ public class AuthController : ControllerBase
         var displayName = $"{firstName} {fatherName} {grandfatherName}".Trim();
 
         long? churchId = null;
+        string? churchName = null;
         var churchClaim = User.FindFirst("ChurchId")?.Value;
         if (long.TryParse(churchClaim, out var cid))
         {
             churchId = cid;
+            churchName = await _context.Churches
+                .Where(c => c.Id == cid && !c.IsDeleted)
+                .Select(c => c.Name)
+                .FirstOrDefaultAsync();
         }
 
         long? memberId = null;
@@ -327,9 +332,21 @@ public class AuthController : ControllerBase
         if (long.TryParse(memberClaim, out var mid))
         {
             memberId = mid;
+            if (churchName == null)
+            {
+                var memberChurch = await _context.Members
+                    .Where(m => m.Id == mid && !m.IsDeleted)
+                    .Select(m => new { m.ChurchId, ChurchName = m.Church.Name })
+                    .FirstOrDefaultAsync();
+                if (memberChurch != null)
+                {
+                    churchId ??= memberChurch.ChurchId;
+                    churchName = memberChurch.ChurchName;
+                }
+            }
         }
 
-        return Ok(new UserProfileDto(userId, email, displayName, role, churchId, memberId));
+        return Ok(new UserProfileDto(userId, email, displayName, role, churchId, memberId, churchName));
     }
 
     [HttpPost("change-password")]

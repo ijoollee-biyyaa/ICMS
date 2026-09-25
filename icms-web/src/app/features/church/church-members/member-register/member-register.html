@@ -1,0 +1,627 @@
+<div class="mx-auto max-w-4xl space-y-6 pb-12">
+  <!-- Back link and Title -->
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <a
+        routerLink="/church/members"
+        class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brand dark:text-gray-400 dark:hover:text-brand-300 transition"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">arrow_back</mat-icon>
+        Back to Members
+      </a>
+      <h1 class="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+        Register Member
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {{ clearanceId() ? 'Complete membership onboarding from approved transfer clearance.' : 'Onboard a direct joiner into church records through the sequential registration wizard.' }}
+      </p>
+    </div>
+
+    @if (clearanceId()) {
+      <div class="inline-flex items-center gap-2 rounded-2xl border border-brand/20 bg-brand/5 px-4 py-2 text-xs font-semibold text-brand dark:bg-brand/10 dark:text-brand-300">
+        <mat-icon class="!h-4 !w-4 !text-[16px]">verified</mat-icon>
+        Completing Incoming Transfer #{{ clearanceData()?.clearanceCode || clearanceId() }}
+      </div>
+    }
+  </div>
+
+  <!-- Clearance Banner if linked -->
+  @if (clearanceId() && clearanceData(); as cl) {
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-blue-200 bg-blue-50/80 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-blue text-white shadow-sm">
+          <mat-icon class="!h-5 !w-5 !text-[20px]">transfer_within_a_station</mat-icon>
+        </div>
+        <div>
+          <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+            Incoming Transfer: {{ cl.memberName || 'Incoming Member' }}
+          </h2>
+          <p class="text-xs text-gray-600 dark:text-gray-300">
+            Source: <span class="font-semibold">{{ cl.sourceChurchName || 'External Church' }}</span> · Clearance Code: <span class="font-mono font-bold text-brand-blue dark:text-blue-300">{{ cl.clearanceCode }}</span>
+          </p>
+        </div>
+      </div>
+      <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-brand-blue dark:bg-blue-900/40 dark:text-blue-200">
+        Auto-linked upon save
+      </span>
+    </div>
+  }
+
+  <!-- Error alert if any -->
+  @if (error()) {
+    <div class="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/40">
+      <div class="flex items-center gap-3">
+        <mat-icon class="text-red-500 dark:text-red-300">error_outline</mat-icon>
+        <p class="text-sm font-medium text-red-700 dark:text-red-300">{{ error() }}</p>
+      </div>
+      <button mat-icon-button (click)="error.set('')" class="!text-red-500">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Stepper Header -->
+  <div class="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4">
+      @for (st of steps; track st.id; let i = $index) {
+        <button
+          type="button"
+          (click)="goToStep(st.id)"
+          class="flex items-center gap-3 rounded-2xl p-2.5 text-left transition"
+          [ngClass]="{
+            'bg-brand/10 ring-2 ring-brand/30 dark:bg-brand/20': currentStep() === st.id,
+            'hover:bg-gray-50 dark:hover:bg-white/[0.03]': currentStep() !== st.id
+          }"
+        >
+          <div
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition"
+            [ngClass]="{
+              'bg-brand text-white shadow-sm': currentStep() === st.id,
+              'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300': currentStepIndex() > i,
+              'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400': currentStepIndex() < i
+            }"
+          >
+            @if (currentStepIndex() > i) {
+              <mat-icon class="!h-4 !w-4 !text-[16px]">check</mat-icon>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+          <div class="min-w-0">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+              Step {{ i + 1 }}
+            </span>
+            <span class="block truncate text-xs font-semibold sm:text-sm" [ngClass]="currentStep() === st.id ? 'text-brand dark:text-brand-300' : 'text-gray-700 dark:text-gray-300'">
+              {{ st.label }}
+            </span>
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Form Wizard Body -->
+  <form [formGroup]="form" class="space-y-6">
+    <!-- ============================================================= -->
+    <!-- STEP 1: PERSONAL INFO                                         -->
+    <!-- ============================================================= -->
+    @if (currentStep() === 'personal') {
+      <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+        <div class="border-b border-gray-100 pb-5 dark:border-gray-800">
+          <h2 class="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+            <mat-icon class="text-brand">person</mat-icon>
+            Personal Information
+          </h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Full name according to official identity, gender, date of birth and marital status.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-6">
+          <!-- Full Name Trio -->
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                First Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="firstName"
+                placeholder="e.g. Abebe"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Father's Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="fatherName"
+                placeholder="e.g. Kebede"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Grandfather's Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="grandfatherName"
+                placeholder="e.g. Tadesse"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+              />
+            </div>
+          </div>
+
+          <!-- Gender & Date of Birth -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <!-- Gender Radio Cards -->
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Gender <span class="text-red-500">*</span>
+              </label>
+              <div class="mt-2 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  (click)="form.patchValue({ gender: 'Male' })"
+                  class="flex items-center justify-center gap-2 rounded-2xl border p-3.5 text-sm font-semibold transition"
+                  [ngClass]="form.controls.gender.value === 'Male' ? 'border-brand bg-brand/10 text-brand ring-2 ring-brand/20 dark:text-brand-300' : 'border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]'"
+                >
+                  <mat-icon class="!h-5 !w-5 !text-[20px]">male</mat-icon>
+                  Male
+                </button>
+                <button
+                  type="button"
+                  (click)="form.patchValue({ gender: 'Female' })"
+                  class="flex items-center justify-center gap-2 rounded-2xl border p-3.5 text-sm font-semibold transition"
+                  [ngClass]="form.controls.gender.value === 'Female' ? 'border-brand bg-brand/10 text-brand ring-2 ring-brand/20 dark:text-brand-300' : 'border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]'"
+                >
+                  <mat-icon class="!h-5 !w-5 !text-[20px]">female</mat-icon>
+                  Female
+                </button>
+              </div>
+            </div>
+
+            <!-- Date of Birth -->
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Date of Birth <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                formControlName="dateOfBirth"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white"
+              />
+            </div>
+          </div>
+
+          <!-- Marital Status -->
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Marital Status <span class="text-red-500">*</span>
+            </label>
+            <div class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              @for (opt of MARITAL_OPTIONS; track opt.value) {
+                <button
+                  type="button"
+                  (click)="form.patchValue({ maritalStatus: opt.value })"
+                  class="flex flex-col items-center justify-center gap-1.5 rounded-2xl border p-4 text-center transition"
+                  [ngClass]="form.controls.maritalStatus.value === opt.value ? 'border-brand bg-brand/10 text-brand ring-2 ring-brand/20 dark:text-brand-300' : 'border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]'"
+                >
+                  <mat-icon class="!h-5 !w-5 !text-[20px]">{{ opt.icon }}</mat-icon>
+                  <span class="text-xs font-bold">{{ opt.label }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Photo URL (optional) -->
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Photo URL <span class="text-gray-400 font-normal">(Optional)</span>
+            </label>
+            <input
+              type="url"
+              formControlName="photoUrl"
+              placeholder="https://..."
+              class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+            />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================= -->
+    <!-- STEP 2: CONTACT & LOCATION                                    -->
+    <!-- ============================================================= -->
+    @if (currentStep() === 'contact') {
+      <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+        <div class="border-b border-gray-100 pb-5 dark:border-gray-800">
+          <h2 class="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+            <mat-icon class="text-brand">location_on</mat-icon>
+            Contact & Residence Location
+          </h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Member's phone number, email address, city, subcity, and residential home address.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-6">
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Phone Number
+              </label>
+              <div class="relative mt-1.5">
+                <mat-icon class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">phone</mat-icon>
+                <input
+                  type="tel"
+                  formControlName="phone"
+                  placeholder="+251 91 234 5678"
+                  class="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Email Address
+              </label>
+              <div class="relative mt-1.5">
+                <mat-icon class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">email</mat-icon>
+                <input
+                  type="email"
+                  formControlName="email"
+                  placeholder="member@example.com"
+                  class="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                City / Town
+              </label>
+              <input
+                type="text"
+                formControlName="city"
+                placeholder="e.g. Addis Ababa"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Subcity / Zone
+              </label>
+              <input
+                type="text"
+                formControlName="subcity"
+                placeholder="e.g. Bole / Kirkos / Yeka"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Local Address of Home (Woreda / Kebele / House No.)
+            </label>
+            <input
+              type="text"
+              formControlName="localAddress"
+              placeholder="e.g. Woreda 03, Kebele 12, House #412"
+              class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+            />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================= -->
+    <!-- STEP 3: JOB & HEALTH STATUS                                   -->
+    <!-- ============================================================= -->
+    @if (currentStep() === 'work_health') {
+      <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+        <div class="border-b border-gray-100 pb-5 dark:border-gray-800">
+          <h2 class="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+            <mat-icon class="text-brand">health_and_safety</mat-icon>
+            Employment & Health Status
+          </h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Specify their occupational situation and health condition for pastoral care and ministry.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-8">
+          <!-- Job Status -->
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Employment Status <span class="text-red-500">*</span>
+            </label>
+            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              @for (job of JOB_OPTIONS; track job.value) {
+                <button
+                  type="button"
+                  (click)="form.patchValue({ jobStatus: job.value })"
+                  class="flex items-start gap-3 rounded-2xl border p-4 text-left transition"
+                  [ngClass]="form.controls.jobStatus.value === job.value ? 'border-brand bg-brand/10 ring-2 ring-brand/20 dark:bg-brand/20' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/[0.03]'"
+                >
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    [ngClass]="form.controls.jobStatus.value === job.value ? 'bg-brand text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
+                  >
+                    <mat-icon class="!h-5 !w-5 !text-[20px]">{{ job.icon }}</mat-icon>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="block text-sm font-bold text-gray-900 dark:text-white">{{ job.label }}</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ job.desc }}</span>
+                  </div>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Health Status -->
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Health Status <span class="text-red-500">*</span>
+            </label>
+            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              @for (h of HEALTH_OPTIONS; track h.value) {
+                <button
+                  type="button"
+                  (click)="form.patchValue({ healthStatus: h.value })"
+                  class="flex items-start gap-3 rounded-2xl border p-4 text-left transition"
+                  [ngClass]="form.controls.healthStatus.value === h.value ? 'border-brand bg-brand/10 ring-2 ring-brand/20 dark:bg-brand/20' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/[0.03]'"
+                >
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    [ngClass]="form.controls.healthStatus.value === h.value ? 'bg-brand text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
+                  >
+                    <mat-icon class="!h-5 !w-5 !text-[20px]">{{ h.icon }}</mat-icon>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="block text-sm font-bold text-gray-900 dark:text-white">{{ h.label }}</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ h.desc }}</span>
+                  </div>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================= -->
+    <!-- STEP 4: SPIRITUAL JOURNEY & REVIEW                            -->
+    <!-- ============================================================= -->
+    @if (currentStep() === 'spiritual') {
+      <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+        <div class="border-b border-gray-100 pb-5 dark:border-gray-800">
+          <h2 class="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+            <mat-icon class="text-brand">church</mat-icon>
+            Spiritual Journey & Joining Channel
+          </h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Faith background, baptism details, spiritual gifts, and joining channel verification.
+          </p>
+        </div>
+
+        <div class="mt-6 space-y-6">
+          <!-- Joining Channel -->
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Registration Channel <span class="text-red-500">*</span>
+            </label>
+
+            @if (clearanceId()) {
+              <!-- Clearance Mode Locked -->
+              <div class="mt-2 flex items-center justify-between rounded-2xl border border-brand/30 bg-brand/5 p-4 dark:bg-brand/10">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-sm">
+                    <mat-icon class="!h-5 !w-5 !text-[20px]">transfer_within_a_station</mat-icon>
+                  </div>
+                  <div>
+                    <span class="block text-sm font-bold text-brand dark:text-brand-300">Joined by Clearance Transfer</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">Linked to Transfer Record #{{ clearanceId() }}</span>
+                  </div>
+                </div>
+                <span class="rounded-full bg-brand/10 px-3 py-1 text-xs font-bold text-brand dark:bg-brand/20 dark:text-brand-300">
+                  Transfer Verified
+                </span>
+              </div>
+            } @else {
+              <!-- Direct Joiner Selection -->
+              <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  (click)="form.patchValue({ joinedVia: 'Baptism' })"
+                  class="flex items-start gap-3 rounded-2xl border p-4 text-left transition"
+                  [ngClass]="form.controls.joinedVia.value === 'Baptism' ? 'border-brand bg-brand/10 ring-2 ring-brand/20 dark:bg-brand/20' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/[0.03]'"
+                >
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    [ngClass]="form.controls.joinedVia.value === 'Baptism' ? 'bg-brand text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
+                  >
+                    <mat-icon class="!h-5 !w-5 !text-[20px]">water_drop</mat-icon>
+                  </div>
+                  <div>
+                    <span class="block text-sm font-bold text-gray-900 dark:text-white">Water Baptism</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">Joined through baptism at this church</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  (click)="form.patchValue({ joinedVia: 'Salvation' })"
+                  class="flex items-start gap-3 rounded-2xl border p-4 text-left transition"
+                  [ngClass]="form.controls.joinedVia.value === 'Salvation' ? 'border-brand bg-brand/10 ring-2 ring-brand/20 dark:bg-brand/20' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/[0.03]'"
+                >
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    [ngClass]="form.controls.joinedVia.value === 'Salvation' ? 'bg-brand text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
+                  >
+                    <mat-icon class="!h-5 !w-5 !text-[20px]">volunteer_activism</mat-icon>
+                  </div>
+                  <div>
+                    <span class="block text-sm font-bold text-gray-900 dark:text-white">Direct Salvation</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">Accepted Christ & joined congregation</span>
+                  </div>
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Baptism & Conversion details -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Conversion Date <span class="text-gray-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="date"
+                formControlName="conversionDate"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+                Baptism Date <span class="text-gray-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="date"
+                formControlName="baptismDate"
+                class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Where Baptised <span class="text-gray-400 font-normal">(Optional church or place)</span>
+            </label>
+            <input
+              type="text"
+              formControlName="baptismPlace"
+              placeholder="e.g. EFGBC Bethel Church / Lake / etc."
+              class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+            />
+          </div>
+
+          <!-- Spiritual Gifts -->
+          <div>
+            <label class="block text-xs font-semibold uppercase text-gray-600 dark:text-gray-300">
+              Spiritual Gift(s) <span class="text-gray-400 font-normal">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              formControlName="spiritualGift"
+              placeholder="e.g. Teaching, Worship, Intercession"
+              class="mt-1.5 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500"
+            />
+            <div class="mt-2.5 flex flex-wrap gap-1.5">
+              <span class="text-xs text-gray-400 self-center mr-1">Suggested:</span>
+              @for (g of SPIRITUAL_GIFTS; track g) {
+                <button
+                  type="button"
+                  (click)="setSpiritualGift(g)"
+                  class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600 hover:border-brand hover:text-brand dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 transition"
+                >
+                  + {{ g }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Review Summary Box -->
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-white/[0.02]">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Summary Review
+            </h3>
+            <div class="mt-3 grid grid-cols-2 gap-4 text-xs sm:grid-cols-4">
+              <div>
+                <span class="text-gray-400">Full Name</span>
+                <p class="font-bold text-gray-900 dark:text-white truncate">{{ fullName() }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Gender & Marital</span>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ form.controls.gender.value }} · {{ form.controls.maritalStatus.value }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Employment</span>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ form.controls.jobStatus.value }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Health</span>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ form.controls.healthStatus.value }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Location</span>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ form.controls.city.value || '—' }}{{ form.controls.subcity.value ? ', ' + form.controls.subcity.value : '' }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Contact</span>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ form.controls.phone.value || 'No phone' }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Joining Channel</span>
+                <p class="font-bold text-brand dark:text-brand-300">{{ clearanceId() ? 'Transfer' : form.controls.joinedVia.value }}</p>
+              </div>
+              <div>
+                <span class="text-gray-400">Spiritual Gift</span>
+                <p class="font-semibold text-gray-900 dark:text-white truncate">{{ form.controls.spiritualGift.value || '—' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Bottom Actions Stepper Controls -->
+    <div class="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <button
+        type="button"
+        (click)="prev()"
+        [disabled]="isFirstStep() || saving()"
+        class="flex items-center gap-1.5 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_left</mat-icon>
+        Previous
+      </button>
+
+      <div class="flex items-center gap-3">
+        @if (!isLastStep()) {
+          <button
+            type="button"
+            (click)="next()"
+            class="flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-strong"
+          >
+            Next Step
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="submit()"
+            [disabled]="saving()"
+            class="flex items-center gap-2 rounded-full bg-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 disabled:opacity-50"
+          >
+            @if (saving()) {
+              <mat-icon class="!h-4 !w-4 !text-[16px] animate-spin">sync</mat-icon>
+              Registering...
+            } @else {
+              <mat-icon class="!h-4 !w-4 !text-[16px]">check</mat-icon>
+              Complete Registration
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </form>
+</div>

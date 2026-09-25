@@ -135,7 +135,7 @@ export const ChurchWorkspaceStore = signalStore(
     const autoLoad = rxMethod<number | null>(
       pipe(
         distinctUntilChanged(),
-        filter((id): id is number => id !== null),
+        filter((id): id is number => id !== null && (store.auth.canManageChurch() || store.auth.hasRole('Admin'))),
         tap(() => load()),
       ),
     );

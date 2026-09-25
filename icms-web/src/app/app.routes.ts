@@ -63,13 +63,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'churches/:id',
+        title: 'Church Details',
+        loadComponent: () =>
+          import('./features/district/churches/church-detail/church-detail').then(
+            (m) => m.DistrictChurchDetail,
+          ),
+      },
+      {
         path: 'employees',
         title: 'Office Employees',
         loadComponent: () =>
-          import('./features/shared/module-placeholder/module-placeholder').then(
-            (m) => m.ModulePlaceholder,
+          import('./features/district/employees/employees').then(
+            (m) => m.DistrictEmployees,
           ),
-        data: { title: 'Office Employees', icon: 'badge', description: 'The district office team, executive positions and paid-from-district badges.' },
       },
       {
         path: 'departments',
@@ -82,12 +89,11 @@ export const routes: Routes = [
       },
       {
         path: 'ministers',
-        title: 'Ministers',
+        title: 'Ministers Showcase',
         loadComponent: () =>
-          import('./features/shared/module-placeholder/module-placeholder').then(
-            (m) => m.ModulePlaceholder,
+          import('./features/district/ministers/ministers').then(
+            (m) => m.DistrictMinisters,
           ),
-        data: { title: 'Ministers', icon: 'local_church', description: 'Full-time ministers across the district, one row per person.' },
       },
       {
         path: 'accounts',
@@ -156,10 +162,57 @@ export const routes: Routes = [
         path: 'dashboard',
         title: 'Member Dashboard',
         loadComponent: () =>
-          import('./features/shared/module-placeholder/module-placeholder').then(
-            (m) => m.ModulePlaceholder,
+          import('./features/member/dashboard/dashboard').then(
+            (m) => m.MemberDashboard,
           ),
-        data: { title: 'Member Dashboard', icon: 'person', description: 'Your membership home — teams, attendance and giving.', backLink: '' },
+      },
+      {
+        path: 'profile',
+        title: 'My Profile',
+        loadComponent: () =>
+          import('./features/member/member-profile/member-profile').then(
+            (m) => m.MemberProfilePage,
+          ),
+      },
+      {
+        path: 'account',
+        title: 'Manage Account',
+        loadComponent: () =>
+          import('./features/member/member-account/member-account').then(
+            (m) => m.MemberAccountPage,
+          ),
+      },
+      {
+        path: 'attendance',
+        title: 'My Attendance',
+        loadComponent: () =>
+          import('./features/member/my-attendance/my-attendance').then(
+            (m) => m.MyAttendance,
+          ),
+      },
+      {
+        path: 'payments',
+        title: 'My Payments',
+        loadComponent: () =>
+          import('./features/member/my-payments/my-payments').then(
+            (m) => m.MyPayments,
+          ),
+      },
+      {
+        path: 'teams',
+        title: 'My Teams',
+        loadComponent: () =>
+          import('./features/member/member-teams/member-teams').then(
+            (m) => m.MemberTeams,
+          ),
+      },
+      {
+        path: 'teams/:id',
+        title: 'Team Meetings',
+        loadComponent: () =>
+          import(
+            './features/member/member-team-meetings/member-team-meetings'
+          ).then((m) => m.MemberTeamMeetings),
       },
     ],
   },
@@ -197,6 +250,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'members/register',
+        title: 'Register Member',
+        loadComponent: () =>
+          import(
+            './features/church/church-members/member-register/member-register'
+          ).then((m) => m.MemberRegister),
+      },
+      {
         path: 'members/:id',
         title: 'Member',
         loadComponent: () =>
@@ -205,11 +266,35 @@ export const routes: Routes = [
           ).then((m) => m.MemberDetailPage),
       },
       {
+        path: 'clearance',
+        title: 'Register by Clearance',
+        loadComponent: () =>
+          import('./features/church/clearance/clearance').then(
+            (m) => m.ClearancePage,
+          ),
+      },
+      {
         path: 'teams',
         title: 'Teams',
         loadComponent: () =>
           import('./features/church/church-teams/church-teams').then(
             (m) => m.ChurchTeams,
+          ),
+      },
+      {
+        path: 'teams/create',
+        title: 'Create Team',
+        loadComponent: () =>
+          import('./features/church/teams/team-create/team-create.component').then(
+            (m) => m.TeamCreateComponent,
+          ),
+      },
+      {
+        path: 'teams/attendance',
+        title: 'Team Attendance',
+        loadComponent: () =>
+          import('./features/church/teams/team-attendance/team-attendance.component').then(
+            (m) => m.TeamAttendanceComponent,
           ),
       },
       {

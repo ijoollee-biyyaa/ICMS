@@ -19,10 +19,11 @@ public class IcmsDbContext(DbContextOptions<IcmsDbContext> options) : IdentityDb
     public DbSet<DeathRecord> DeathRecords => Set<DeathRecord>();
     public DbSet<PrayerRequest> PrayerRequests => Set<PrayerRequest>();
     public DbSet<Transfer> Transfers => Set<Transfer>();
-    public DbSet<ClearanceCertificate> ClearanceCertificates => Set<ClearanceCertificate>();
+    public DbSet<TransferSnapshot> TransferSnapshots => Set<TransferSnapshot>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<TeamAttendance> TeamAttendances => Set<TeamAttendance>();
+    public DbSet<TeamMeeting> TeamMeetings => Set<TeamMeeting>();
     public DbSet<TeamPayment> TeamPayments => Set<TeamPayment>();
     public DbSet<TeamActivity> TeamActivities => Set<TeamActivity>();
     public DbSet<Budget> Budgets => Set<Budget>();

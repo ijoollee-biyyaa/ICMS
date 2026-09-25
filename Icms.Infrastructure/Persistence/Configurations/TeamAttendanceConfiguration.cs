@@ -15,13 +15,18 @@ public class TeamAttendanceConfiguration : IEntityTypeConfiguration<TeamAttendan
 
         builder.HasIndex(a => new { a.TeamId, a.AttendanceDate });
 
-        builder.HasIndex(a => new { a.TeamId, a.MemberId, a.AttendanceDate })
+        builder.HasIndex(a => new { a.MeetingId, a.MemberId })
             .IsUnique();
 
         builder.HasOne(a => a.Team)
             .WithMany(t => t.Attendances)
             .HasForeignKey(a => a.TeamId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(a => a.Meeting)
+            .WithMany(m => m.Attendances)
+            .HasForeignKey(a => a.MeetingId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(a => a.Member)
             .WithMany()

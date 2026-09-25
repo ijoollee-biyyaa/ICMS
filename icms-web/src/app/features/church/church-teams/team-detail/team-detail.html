@@ -4,7 +4,7 @@
     <header>
       <a
         routerLink="/church/teams"
-        class="inline-flex items-center gap-1 text-sm font-semibold text-neutral-500 transition hover:text-brand"
+        class="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 transition hover:text-brand dark:text-gray-400"
       >
         <mat-icon class="!h-4 !w-4 !text-[16px]">arrow_back</mat-icon>
         All teams
@@ -12,12 +12,12 @@
       <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div class="flex flex-wrap items-center gap-3">
-            <h1 class="text-2xl font-extrabold text-neutral-800">{{ team.name }}</h1>
-            <span class="rounded-full bg-brand/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand">
+            <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ team.name }}</h1>
+            <span class="rounded-full bg-brand/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand dark:text-brand-300">
               {{ ruleLabel(team.membershipRule) }}
             </span>
           </div>
-          <div class="mt-2 flex flex-wrap items-center gap-4 text-sm text-neutral-500">
+          <div class="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
             <span class="flex items-center gap-1">
               <mat-icon class="!h-4 !w-4 !text-[16px]">group</mat-icon>
               {{ team.memberCount }} members
@@ -37,16 +37,16 @@
       </div>
     </header>
   } @else if (loading()) {
-    <div class="h-24 animate-pulse rounded-2xl bg-neutral-200/60"></div>
+    <div class="h-24 animate-pulse rounded-2xl bg-gray-200/60 dark:bg-gray-800"></div>
   }
 
   @if (error()) {
-    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 dark:border-red-800 dark:bg-red-950/40">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300">
           <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
         </div>
-        <p class="text-sm text-red-700">{{ error() }}</p>
+        <p class="text-sm text-red-700 dark:text-red-300">{{ error() }}</p>
       </div>
       <button mat-icon-button (click)="error.set('')" aria-label="Dismiss error">
         <mat-icon>close</mat-icon>
@@ -55,12 +55,12 @@
   }
 
   @if (notice()) {
-    <div class="flex items-start justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+    <div class="flex items-start justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 dark:border-emerald-800 dark:bg-emerald-950/40">
       <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
           <mat-icon class="!h-5 !w-5 !text-[20px]">check_circle</mat-icon>
         </div>
-        <p class="text-sm text-emerald-700">{{ notice() }}</p>
+        <p class="text-sm text-emerald-700 dark:text-emerald-300">{{ notice() }}</p>
       </div>
       <button mat-icon-button (click)="notice.set('')" aria-label="Dismiss message">
         <mat-icon>close</mat-icon>
@@ -70,18 +70,18 @@
 
   @if (team() !== null) {
     <!-- Tabs -->
-    <nav class="flex gap-2 rounded-2xl border border-neutral-200 bg-white p-1.5 shadow-sm">
+    <nav class="flex gap-2 rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       @for (tab of Tabs; track tab.id) {
         <button
           type="button"
           (click)="setActive(tab.id)"
           class="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition"
-          [class.bg-gradient-to-r]="active() === tab.id"
-          [class.from-brand]="active() === tab.id"
-          [class.to-brand-strong]="active() === tab.id"
+          [class.bg-brand]="active() === tab.id"
           [class.text-white]="active() === tab.id"
-          [class.text-neutral-500]="active() !== tab.id"
-          [class.hover:bg-neutral-100]="active() !== tab.id"
+          [class.text-gray-500]="active() !== tab.id"
+          [class.hover:bg-gray-100]="active() !== tab.id"
+          [class.dark:text-gray-400]="active() !== tab.id"
+          [class.dark:hover:bg-white/5]="active() !== tab.id"
         >
           <mat-icon class="!h-4 !w-4 !text-[18px]">{{ tab.icon }}</mat-icon>
           {{ tab.label }}
@@ -92,7 +92,7 @@
     @switch (active()) {
       @case ('members') {
         @if (isCategory()) {
-          <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+          <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
             <mat-icon class="mt-0.5">info</mat-icon>
             <p>
               <strong class="font-semibold">Main teams that host sub-teams cannot hold members.</strong>
@@ -101,9 +101,9 @@
           </div>
         } @else {
           <!-- Add member -->
-          <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-neutral-800">Add a member</h3>
-            <p class="mt-0.5 text-sm text-neutral-500">
+          <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <h3 class="font-semibold text-gray-900 dark:text-white">Add a member</h3>
+            <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
               Only members of this church can join the team.
             </p>
             <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start" [formGroup]="addMemberForm">
@@ -133,29 +133,29 @@
           </section>
 
           <!-- Member list -->
-          <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-neutral-800">
+          <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <h3 class="font-semibold text-gray-900 dark:text-white">
               Team members
-              <span class="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand">
+              <span class="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand dark:text-brand-300">
                 {{ members().length }}
               </span>
             </h3>
             @if (members().length === 0) {
-              <p class="mt-4 text-sm text-neutral-500">
+              <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                 No members yet — add the first one above.
               </p>
             } @else {
-              <div class="mt-4 divide-y divide-neutral-100">
+              <div class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
                 @for (member of members(); track member.memberId) {
                   <div class="flex items-center gap-4 py-3">
                     <div
-                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-xs font-bold text-white"
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-xs font-bold text-white shadow-md"
                     >
                       {{ initials(member.memberName) }}
                     </div>
                     <div class="min-w-0 flex-1">
-                      <p class="truncate font-semibold text-neutral-800">{{ member.memberName }}</p>
-                      <p class="text-xs text-neutral-500">{{ member.memberEfgbcId }}</p>
+                      <p class="truncate font-semibold text-gray-900 dark:text-white">{{ member.memberName }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ member.memberEfgbcId }}</p>
                     </div>
                     <button
                       type="button"
@@ -168,6 +168,9 @@
                       [class.bg-amber-100]="member.role === 'Leader'"
                       [class.text-amber-700]="member.role === 'Leader'"
                       [class.ring-amber-300]="member.role === 'Leader'"
+                      [class.dark:bg-amber-500/15]="member.role === 'Leader'"
+                      [class.dark:text-amber-300]="member.role === 'Leader'"
+                      [class.dark:ring-amber-500/30]="member.role === 'Leader'"
                     >
                       {{
                         member.role === 'Leader' ? 'Leader ★' : 'Member (promote)'
@@ -177,7 +180,7 @@
                       mat-icon-button
                       (click)="removeMember(member)"
                       [disabled]="busy()"
-                      class="text-neutral-400 hover:text-red-600"
+                      class="text-gray-400 hover:text-red-600 dark:text-gray-500"
                       aria-label="Remove member"
                     >
                       <mat-icon>close</mat-icon>
@@ -192,161 +195,29 @@
 
       @case ('attendance') {
         @if (isCategory()) {
-          <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+          <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
             <mat-icon class="mt-0.5">info</mat-icon>
-            <p>Attendance is tracked per sub-team. Open a sub-team to mark and report meetings.</p>
+            <p>Attendance is tracked per sub-team. Open a sub-team to record and manage meetings.</p>
           </div>
         } @else {
-          <!-- Mark attendance -->
-          <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <div class="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-neutral-800">Mark attendance</h3>
-                <p class="mt-0.5 text-sm text-neutral-500">
-                  Re-saving the same date corrects previous marks.
-                </p>
-              </div>
-              <label class="block">
-                <span class="mb-1 block text-xs font-semibold uppercase tracking-wider text-neutral-400">Meeting date</span>
-                <input
-                  type="date"
-                  [value]="attendanceDate() || todayText()"
-                  (input)="onDate($event)"
-                  class="rounded-xl border border-neutral-200 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-                />
-              </label>
-            </div>
-
-            @if (attendable().length === 0) {
-              <p class="mt-6 text-sm text-neutral-500">
-                Add members to the team before marking attendance.
-              </p>
-            } @else {
-              <div class="mt-5 space-y-2">
-                @for (member of attendable(); track member.memberId) {
-                  <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-3">
-                    <div class="min-w-0 flex-1">
-                      <p class="truncate text-sm font-semibold text-neutral-800">{{ member.memberName }}</p>
-                      <p class="text-xs text-neutral-500">{{ member.memberEfgbcId }}</p>
-                    </div>
-                    <div class="flex gap-1">
-                      @for (option of StatusOptions; track option.id) {
-                        <button
-                          type="button"
-                          (click)="mark(member.memberId, option.id)"
-                          class="flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-bold transition"
-                          [class.bg-emerald-500]="statusOf(member.memberId) === 'Present' && option.id === 'Present'"
-                          [class.text-white]="statusOf(member.memberId) === option.id"
-                          [class.bg-amber-500]="statusOf(member.memberId) === 'Late' && option.id === 'Late'"
-                          [class.bg-red-500]="statusOf(member.memberId) === 'Absent' && option.id === 'Absent'"
-                          [class.bg-white]="statusOf(member.memberId) !== option.id"
-                          [class.text-neutral-400]="statusOf(member.memberId) !== option.id"
-                          [class.ring-1]="statusOf(member.memberId) !== option.id"
-                          [class.ring-neutral-200]="statusOf(member.memberId) !== option.id"
-                          title="{{ option.code }} — {{ option.id }}"
-                        >
-                          {{ option.code }}
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-              <div class="mt-5 flex justify-end">
-                <button
-                  type="button"
-                  (click)="saveAttendance()"
-                  [disabled]="!attendanceDate() || busy()"
-                  class="flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
-                >
-                  <mat-icon class="!h-4 !w-4 !text-[16px]">save</mat-icon>
-                  {{ busy() ? 'Saving…' : 'Save attendance' }}
-                </button>
-              </div>
-            }
-          </section>
-
-          <!-- Report -->
-          <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-neutral-800">Attendance report</h3>
-            @if (report(); as report) {
-              <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                <div class="rounded-xl bg-neutral-50 p-3 text-center">
-                  <p class="text-xl font-extrabold text-neutral-800">{{ report.totalMeetings }}</p>
-                  <p class="text-xs text-neutral-500">Meetings</p>
-                </div>
-                <div class="rounded-xl bg-emerald-50 p-3 text-center">
-                  <p class="text-xl font-extrabold text-emerald-600">{{ report.totalPresent }}</p>
-                  <p class="text-xs text-neutral-500">Present</p>
-                </div>
-                <div class="rounded-xl bg-amber-50 p-3 text-center">
-                  <p class="text-xl font-extrabold text-amber-600">{{ report.totalLate }}</p>
-                  <p class="text-xs text-neutral-500">Late</p>
-                </div>
-                <div class="rounded-xl bg-red-50 p-3 text-center">
-                  <p class="text-xl font-extrabold text-red-600">{{ report.totalAbsent }}</p>
-                  <p class="text-xs text-neutral-500">Absent</p>
-                </div>
-                <div class="rounded-xl bg-gradient-to-br from-brand to-brand-blue p-3 text-white">
-                  <p class="text-xl font-extrabold">{{ rateText(report.overallRate) }}</p>
-                  <p class="text-xs text-white/70">Overall rate</p>
-                </div>
-              </div>
-
-              @if (report.members.length > 0) {
-                <div class="mt-5 overflow-x-auto">
-                  <table class="w-full text-sm">
-                    <thead>
-                      <tr class="border-b border-neutral-100 text-left text-xs uppercase tracking-wider text-neutral-400">
-                        <th class="py-2 pr-4 font-semibold">Member</th>
-                        <th class="py-2 pr-4 font-semibold">Meetings</th>
-                        <th class="py-2 pr-4 font-semibold">Present</th>
-                        <th class="py-2 pr-4 font-semibold">Late</th>
-                        <th class="py-2 pr-4 font-semibold">Absent</th>
-                        <th class="py-2 font-semibold">Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-neutral-50">
-                      @for (row of report.members; track row.memberId) {
-                        <tr>
-                          <td class="py-2.5 pr-4">
-                            <p class="font-semibold text-neutral-800">{{ row.memberName }}</p>
-                            <p class="text-xs text-neutral-500">{{ row.memberEfgbcId }}</p>
-                          </td>
-                          <td class="py-2.5 pr-4 text-neutral-700">{{ row.totalMeetings }}</td>
-                          <td class="py-2.5 pr-4 text-emerald-600">{{ row.present }}</td>
-                          <td class="py-2.5 pr-4 text-amber-600">{{ row.late }}</td>
-                          <td class="py-2.5 pr-4 text-red-600">{{ row.absent }}</td>
-                          <td class="py-2.5 font-semibold text-brand">{{ rateText(row.attendanceRate) }}</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-                <p class="mt-3 text-[11px] uppercase tracking-widest text-neutral-300">
-                  Member rate = (present + late) of meetings
-                </p>
-              }
-            } @else {
-              <p class="mt-4 text-sm text-neutral-500">
-                No meetings recorded yet — save your first attendance above.
-              </p>
-            }
-          </section>
+          <app-team-meetings-manager
+            [churchId]="churchId()!"
+            [teamId]="teamId"
+          />
         }
       }
 
       @case ('payments') {
         @if (isCategory()) {
-          <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+          <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
             <mat-icon class="mt-0.5">info</mat-icon>
             <p>Giving is recorded per sub-team. Open a sub-team to track payments.</p>
           </div>
         } @else {
           <!-- Record payment -->
-          <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-neutral-800">Record a payment</h3>
-            <p class="mt-0.5 text-sm text-neutral-500">
+          <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <h3 class="font-semibold text-gray-900 dark:text-white">Record a payment</h3>
+            <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
               One payment per member per month; the member must belong to the team.
             </p>
             <form [formGroup]="paymentForm" (ngSubmit)="recordPayment()" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -393,38 +264,38 @@
           </section>
 
           <!-- Payment report -->
-          <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <h3 class="font-semibold text-neutral-800">Giving report</h3>
-              <span class="rounded-full bg-gradient-to-r from-brand to-brand-blue px-3 py-1 text-xs font-bold text-white">
+              <h3 class="font-semibold text-gray-900 dark:text-white">Giving report</h3>
+              <span class="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">
                 Total {{ amountText(paymentTotal()) }}
               </span>
             </div>
             @if (paymentSummary().length === 0) {
-              <p class="mt-4 text-sm text-neutral-500">
+              <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                 No payments recorded yet for this team.
               </p>
             } @else {
               <div class="mt-4 overflow-x-auto">
                 <table class="w-full text-sm">
                   <thead>
-                    <tr class="border-b border-neutral-100 text-left text-xs uppercase tracking-wider text-neutral-400">
+                    <tr class="border-b border-gray-200 text-left text-xs uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400">
                       <th class="py-2 pr-4 font-semibold">Member</th>
                       <th class="py-2 pr-4 font-semibold">Payments</th>
                       <th class="py-2 pr-4 font-semibold">Total given</th>
                       <th class="py-2 font-semibold">Last paid</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-neutral-50">
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @for (row of paymentSummary(); track row.memberId) {
                       <tr>
                         <td class="py-2.5 pr-4">
-                          <p class="font-semibold text-neutral-800">{{ row.memberName }}</p>
-                          <p class="text-xs text-neutral-500">{{ row.memberEfgbcId }}</p>
+                          <p class="font-semibold text-gray-900 dark:text-white">{{ row.memberName }}</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">{{ row.memberEfgbcId }}</p>
                         </td>
-                        <td class="py-2.5 pr-4 text-neutral-700">{{ row.paymentCount }}</td>
-                        <td class="py-2.5 pr-4 font-semibold text-brand">{{ amountText(row.totalAmount) }}</td>
-                        <td class="py-2.5 text-neutral-600">
+                        <td class="py-2.5 pr-4 text-gray-700 dark:text-gray-300">{{ row.paymentCount }}</td>
+                        <td class="py-2.5 pr-4 font-semibold text-brand dark:text-brand-300">{{ amountText(row.totalAmount) }}</td>
+                        <td class="py-2.5 text-gray-600 dark:text-gray-400">
                           {{ row.lastPaidMonth ? monthLabel(row.lastPaidMonth) : '—' }}
                         </td>
                       </tr>
@@ -437,14 +308,14 @@
 
           <!-- Recent payments -->
           @if (payments().length > 0) {
-            <section class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-              <h3 class="font-semibold text-neutral-800">Recent payments</h3>
+            <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <h3 class="font-semibold text-gray-900 dark:text-white">Recent payments</h3>
               <div class="mt-4 space-y-2">
                 @for (payment of payments(); track payment.id) {
-                  <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-3">
+                  <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-white/[0.02]">
                     <div class="min-w-0 flex-1">
-                      <p class="truncate text-sm font-semibold text-neutral-800">{{ payment.memberName }}</p>
-                      <p class="text-xs text-neutral-500">{{ monthLabel(payment.month) }}</p>
+                      <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ payment.memberName }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ monthLabel(payment.month) }}</p>
                     </div>
                     @if (editingPayment() === payment.id) {
                       <div class="flex items-center gap-2">
@@ -454,7 +325,7 @@
                           step="0.01"
                           [value]="editingAmount()"
                           (input)="onEditAmount($event)"
-                          class="w-28 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm outline-none focus:border-brand"
+                          class="w-28 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                         />
                         <button
                           type="button"
@@ -466,18 +337,18 @@
                         <button
                           type="button"
                           (click)="cancelEdit()"
-                          class="rounded-full border border-neutral-200 px-4 py-1.5 text-xs font-semibold text-neutral-600"
+                          class="rounded-full border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300"
                         >
                           Cancel
                         </button>
                       </div>
                     } @else {
                       <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-brand">{{ amountText(payment.amount) }}</span>
+                        <span class="text-sm font-bold text-brand dark:text-brand-300">{{ amountText(payment.amount) }}</span>
                         <button
                           mat-icon-button
                           (click)="startEdit(payment)"
-                          class="text-neutral-500 hover:text-brand"
+                          class="text-gray-500 hover:text-brand dark:text-gray-400"
                           aria-label="Edit payment amount"
                         >
                           <mat-icon>edit</mat-icon>

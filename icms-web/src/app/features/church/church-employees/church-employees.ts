@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
@@ -20,6 +21,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { AuthService } from '../../../services/auth.service';
 import { ChurchService } from '../../../services/church.service';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { Member } from '../../../models/member';
 import {
   EmployeeRow,
@@ -47,6 +49,8 @@ import {
     MatOption,
     MatIconButton,
     MatIcon,
+    StatCard,
+    DecimalPipe,
   ],
   templateUrl: './church-employees.html',
   styleUrl: './church-employees.scss',
@@ -371,11 +375,11 @@ export class ChurchEmployees {
   statusChip(status: EmployeeStatus): string {
     switch (status) {
       case 'Active':
-        return 'bg-emerald-100 text-emerald-700';
+        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300';
       case 'OnLeave':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300';
       default:
-        return 'bg-neutral-100 text-neutral-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-gray-500/15 dark:text-gray-300';
     }
   }
 

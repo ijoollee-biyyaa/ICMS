@@ -1,376 +1,287 @@
 <div class="space-y-6">
   <!-- Header -->
-  <header class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue">
-        My Church · Office
-      </p>
-      <h2 class="text-xl font-semibold text-neutral-800">
-        Accounts
-        <span
-          class="ml-2 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-bold text-brand"
-        >
-          {{ total() }}
-        </span>
-      </h2>
-      <p class="mt-1 text-sm text-neutral-500">
-        Accounts that serve at this church — staff and members with login credentials. Grant or revoke Church Admin / Sub-Admin access and lock accounts.
-      </p>
-    </div>
+  <header>
+    <h2 class="flex items-center gap-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+      Accounts
+      <span class="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-bold text-brand dark:text-brand-300">
+        {{ total() }}
+      </span>
+    </h2>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Accounts that serve at this church — staff and members with login credentials. Grant or revoke Church Admin /
+      Sub-Admin access and lock accounts.
+    </p>
   </header>
 
   @if (store.error()) {
-    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-      <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
-          <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
-        </div>
-        <p class="text-sm text-red-700">{{ store.error() }}</p>
+  <div
+    class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 dark:border-red-800 dark:bg-red-950/40">
+    <div class="flex items-center gap-3">
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300">
+        <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
       </div>
-      <button mat-icon-button (click)="store.clearError()" aria-label="Dismiss error">
-        <mat-icon>close</mat-icon>
-      </button>
+      <p class="text-sm text-red-700 dark:text-red-300">{{ store.error() }}</p>
     </div>
+    <button mat-icon-button (click)="store.clearError()" aria-label="Dismiss error">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   }
 
   @if (error()) {
-    <div class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-      <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
-          <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
-        </div>
-        <p class="text-sm text-red-700">{{ error() }}</p>
+  <div
+    class="flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 dark:border-red-800 dark:bg-red-950/40">
+    <div class="flex items-center gap-3">
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300">
+        <mat-icon class="!h-5 !w-5 !text-[20px]">error_outline</mat-icon>
       </div>
-      <button mat-icon-button (click)="error.set('')" aria-label="Dismiss error">
-        <mat-icon>close</mat-icon>
-      </button>
+      <p class="text-sm text-red-700 dark:text-red-300">{{ error() }}</p>
     </div>
+    <button mat-icon-button (click)="error.set('')" aria-label="Dismiss error">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   }
 
   @if (notice()) {
-    <div class="flex items-start justify-between gap-4 rounded-2xl border border-teal-200 bg-teal-50 px-5 py-4">
-      <div class="flex items-center gap-3">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
-          <mat-icon class="!h-5 !w-5 !text-[20px]">check_circle</mat-icon>
-        </div>
-        <p class="text-sm text-teal-700">{{ notice() }}</p>
+  <div
+    class="flex items-start justify-between gap-4 rounded-2xl border border-teal-200 bg-teal-50 px-5 py-4 dark:border-teal-800 dark:bg-teal-950/40">
+    <div class="flex items-center gap-3">
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300">
+        <mat-icon class="!h-5 !w-5 !text-[20px]">check_circle</mat-icon>
       </div>
-      <button mat-icon-button (click)="notice.set('')" aria-label="Dismiss notice">
-        <mat-icon>close</mat-icon>
-      </button>
+      <p class="text-sm text-teal-700 dark:text-teal-300">{{ notice() }}</p>
     </div>
+    <button mat-icon-button (click)="notice.set('')" aria-label="Dismiss notice">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   }
 
   <!-- Stats -->
-  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
-          <mat-icon>person</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Accounts</p>
-          <p class="text-2xl font-bold text-neutral-800">{{ total() }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue">
-          <mat-icon>admin_panel_settings</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Church admins</p>
-          <p class="text-2xl font-bold text-brand-blue">{{ churchAdmins() }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-          <mat-icon>supervisor_account</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Sub-admins</p>
-          <p class="text-2xl font-bold text-emerald-700">{{ subAdmins() }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
-          <mat-icon>badge</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Employees</p>
-          <p class="text-2xl font-bold text-teal-600">{{ employees() }}</p>
-        </div>
-      </div>
-    </div>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4">
+    <app-stat-card icon="person" label="Accounts" [value]="total() | number" />
+    <app-stat-card icon="admin_panel_settings" label="Church admins" [value]="churchAdmins() | number"
+      accentClass="bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" />
+    <app-stat-card icon="supervisor_account" label="Sub-admins" [value]="subAdmins() | number"
+      accentClass="bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300" />
+    <app-stat-card icon="badge" label="Employees" [value]="employees() | number"
+      accentClass="bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300" />
   </div>
 
-  <!-- Search -->
-  <div class="relative">
-    <mat-icon class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">search</mat-icon>
-    <input
-      type="search"
-      [value]="query()"
-      (input)="onSearch($event)"
-      placeholder="Search by name, email, position or role…"
-      class="w-full rounded-2xl border border-neutral-200 bg-white py-3 pl-12 pr-4 text-sm shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-    />
-  </div>
-
-  <!-- Data table -->
-  <div class="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
-    <mat-table [dataSource]="dataSource" matSort class="w-full">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-        <td mat-cell *matCellDef="let account">
-          <div class="flex items-center gap-3">
-            <div
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue text-xs font-bold text-white"
-            >
-              {{ initials(account) }}
-            </div>
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="truncate font-semibold text-neutral-800">
-                  {{ fullName(account) }}
+  <!-- Ready-made Data Table with sorting, searching, and pagination -->
+  <app-table
+    [data]="store.accounts()"
+    [searchFn]="searchAccount"
+    searchPlaceholder="Search by name, email, position or role…"
+    emptyMessage="Accounts appear here when church employees get system access or members are issued login credentials."
+  >
+    <app-table-column key="name" header="Name" [sortable]="true" [sortValue]="accountName">
+      <ng-template let-account>
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue text-xs font-bold text-white shadow-sm ring-2 ring-white/60 dark:ring-gray-700/60"
+          >
+            {{ initials(account) }}
+          </div>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="truncate font-semibold text-gray-900 dark:text-white">
+                {{ fullName(account) }}
+              </span>
+              @if (isCurrentUser(account)) {
+                <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
+                  you
                 </span>
-                @if (isCurrentUser(account)) {
-                  <span
-                    class="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500"
-                  >
-                    you
-                  </span>
-                }
-              </div>
-              <div class="mt-0.5 flex flex-wrap gap-1">
-                @for (role of account.roles; track role) {
-                  <span class="rounded-full px-2 py-0.5 text-[11px] font-bold" [class]="roleChip(role)">
-                    {{ roleLabel(role) }}
-                  </span>
-                }
-                @if (account.roles.length === 0) {
-                  <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
-                    No roles
-                  </span>
-                }
-              </div>
+              }
+            </div>
+            <div class="mt-0.5 flex flex-wrap gap-1">
+              @for (role of account.roles; track role) {
+                <span class="rounded-full px-2 py-0.5 text-[11px] font-bold" [class]="roleChip(role)">
+                  {{ roleLabel(role) }}
+                </span>
+              }
+              @if (account.roles.length === 0) {
+                <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
+                  No roles
+                </span>
+              }
             </div>
           </div>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="email">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-        <td mat-cell *matCellDef="let account">
-          <span class="text-sm text-neutral-600">{{ account.email }}</span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="position">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Position</th>
-        <td mat-cell *matCellDef="let account">
-          <span class="text-sm text-neutral-600">{{ positionLabel(account) }}</span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-        <td mat-cell *matCellDef="let account">
-          @if (isLocked(account)) {
-            <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-bold text-red-700">
-              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">lock</mat-icon>
-              Locked · {{ lockReasonLabel(account.lockReason) }}
-            </span>
-          } @else {
-            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-              <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">lock_open</mat-icon>
-              Active
-            </span>
-          }
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let account">
-          <div class="flex items-center justify-end gap-2">
-            @if (isLocked(account)) {
-              <button
-                mat-icon-button
-                class="!text-emerald-600"
-                [attr.aria-label]="'Unlock ' + fullName(account)"
-                [title]="'Unlock ' + fullName(account)"
-                (click)="unlock(account)"
-              >
-                <mat-icon>lock_open</mat-icon>
-              </button>
-            } @else {
-              <button
-                mat-icon-button
-                class="!text-red-600"
-                [disabled]="isProtected(account) || isCurrentUser(account)"
-                [attr.aria-label]="'Lock ' + fullName(account)"
-                [title]="
-                  isProtected(account)
-                    ? 'Protected account'
-                    : isCurrentUser(account)
-                      ? 'You cannot lock your own account'
-                      : 'Lock ' + fullName(account)
-                "
-                (click)="openLockDialog(account)"
-              >
-                <mat-icon>lock</mat-icon>
-              </button>
-            }
-
-            @if (!isMember(account)) {
-              <label
-                class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5 transition hover:border-emerald-300"
-                [attr.title]="account.roles.includes('ChurchSubAdmin') ? 'Revoke Church Sub-Admin access' : 'Grant Church Sub-Admin access'"
-              >
-                <span class="text-xs font-bold" [class]="account.roles.includes('ChurchSubAdmin') ? 'text-emerald-700' : 'text-neutral-600'">
-                  {{ account.roles.includes('ChurchSubAdmin') ? 'Sub-admin' : 'Standard' }}
-                </span>
-                <input
-                  type="checkbox"
-                  class="h-4 w-4 accent-emerald-600"
-                  [checked]="account.roles.includes('ChurchSubAdmin')"
-                  (change)="toggleChurchSubAdmin(account)"
-                />
-              </label>
-
-              <button
-                (click)="toggleChurchAdmin(account)"
-                [disabled]="isProtected(account) || isCurrentUser(account)"
-                class="rounded-full px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
-                [class]="
-                  account.roles.includes('ChurchAdmin')
-                    ? 'bg-blue-100 text-brand-blue hover:bg-blue-200'
-                    : 'border border-neutral-200 text-neutral-600 hover:border-brand/40 hover:text-brand'
-                "
-              >
-                {{
-                  account.roles.includes('ChurchAdmin')
-                    ? 'Revoke Church Admin'
-                    : isProtected(account)
-                      ? 'Protected'
-                      : 'Grant Church Admin'
-                }}
-              </button>
-            } @else {
-              <span class="text-xs font-medium text-neutral-400">Member account</span>
-            }
-          </div>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-      <ng-template matNoDataRow>
-        <tr>
-          <td class="px-6 py-14 text-center text-sm text-neutral-500" colspan="5">
-            <mat-icon class="!h-10 !w-10 !text-[40px] text-neutral-300">manage_accounts</mat-icon>
-            <p class="mt-3 font-semibold text-neutral-700">
-              {{ query() ? 'No accounts match ' + query() : 'No accounts yet' }}
-            </p>
-            <p class="mt-1 text-neutral-500">
-              Accounts appear here when church employees get system access or members are issued login credentials.
-            </p>
-          </td>
-        </tr>
+        </div>
       </ng-template>
-    </mat-table>
+    </app-table-column>
 
-    <mat-paginator
-      #paginator
-      class="!border-t !border-neutral-100"
-      [pageSizeOptions]="[10, 25, 50]"
-      showFirstLastButtons
-      [pageSize]="10"
-      aria-label="Account pages"
-    ></mat-paginator>
-  </div>
+    <app-table-column key="email" header="Email" [sortable]="true" headerClass="hidden sm:table-cell" cellClass="hidden sm:table-cell">
+      <ng-template let-account>
+        <span class="text-sm text-gray-600 dark:text-gray-300">{{ account.email }}</span>
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="position" header="Position" [sortable]="true" [sortValue]="accountPosition" headerClass="hidden md:table-cell" cellClass="hidden md:table-cell">
+      <ng-template let-account>
+        <span class="text-sm text-gray-600 dark:text-gray-300">{{ positionLabel(account) }}</span>
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="status" header="Status" [sortable]="true" [sortValue]="accountStatus">
+      <ng-template let-account>
+        @if (isLocked(account)) {
+          <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-bold text-red-700 dark:bg-red-500/15 dark:text-red-300">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">lock</mat-icon>
+            Locked · {{ lockReasonLabel(account.lockReason) }}
+          </span>
+        } @else {
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">lock_open</mat-icon>
+            Active
+          </span>
+        }
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="actions" header="Actions" align="right">
+      <ng-template let-account>
+        <div class="flex items-center justify-end gap-2">
+          @if (isLocked(account)) {
+            <button
+              mat-icon-button
+              class="!text-emerald-600 dark:!text-emerald-400"
+              [attr.aria-label]="'Unlock ' + fullName(account)"
+              [title]="'Unlock ' + fullName(account)"
+              (click)="unlock(account)"
+            >
+              <mat-icon>lock_open</mat-icon>
+            </button>
+          } @else {
+            <button
+              mat-icon-button
+              class="!text-red-600 dark:!text-red-400"
+              [disabled]="isProtected(account) || isCurrentUser(account)"
+              [attr.aria-label]="'Lock ' + fullName(account)"
+              [title]="
+                isProtected(account)
+                  ? 'Protected account'
+                  : isCurrentUser(account)
+                    ? 'You cannot lock your own account'
+                    : 'Lock ' + fullName(account)
+              "
+              (click)="openLockDialog(account)"
+            >
+              <mat-icon>lock</mat-icon>
+            </button>
+          }
+
+          @if (!isMember(account)) {
+            <label
+              class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-300 px-2.5 py-1 text-[11px] transition hover:border-emerald-300 dark:border-gray-700"
+              [attr.title]="account.roles.includes('ChurchSubAdmin') ? 'Revoke Church Sub-Admin access' : 'Grant Church Sub-Admin access'"
+            >
+              <span
+                class="font-bold"
+                [class]="account.roles.includes('ChurchSubAdmin') ? 'text-emerald-700 dark:text-emerald-300' : 'text-gray-600 dark:text-gray-400'"
+              >
+                {{ account.roles.includes('ChurchSubAdmin') ? 'Sub-Admin' : 'Standard' }}
+              </span>
+              <input
+                type="checkbox"
+                class="h-3.5 w-3.5 accent-emerald-600"
+                [checked]="account.roles.includes('ChurchSubAdmin')"
+                (change)="toggleChurchSubAdmin(account)"
+              />
+            </label>
+
+            <button
+              (click)="toggleChurchAdmin(account)"
+              [disabled]="isProtected(account) || isCurrentUser(account)"
+              class="rounded-full px-2.5 py-1 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+              [class]="
+                account.roles.includes('ChurchAdmin')
+                  ? 'bg-blue-100 text-brand-blue hover:bg-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25'
+                  : 'border border-gray-300 text-gray-600 hover:border-brand/40 hover:text-brand dark:border-gray-700 dark:text-gray-400 dark:hover:text-brand-300'
+              "
+              [attr.title]="
+                account.roles.includes('ChurchAdmin')
+                  ? 'Revoke Church Admin'
+                  : isProtected(account)
+                    ? 'Protected'
+                    : 'Grant Church Admin'
+              "
+            >
+              {{ account.roles.includes('ChurchAdmin') ? 'Revoke Admin' : isProtected(account) ? 'Protected' : 'Grant Admin' }}
+            </button>
+          } @else {
+            <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Member account</span>
+          }
+        </div>
+      </ng-template>
+    </app-table-column>
+  </app-table>
 </div>
 
 <!-- Lock account dialog -->
 @if (lockTarget(); as account) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm"
+  (click)="cancelLock()">
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/50 p-4 backdrop-blur-sm"
-    (click)="cancelLock()"
-  >
+    class="w-full max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+    (click)="$event.stopPropagation()">
     <div
-      class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5"
-      (click)="$event.stopPropagation()"
-    >
-      <div class="relative overflow-hidden bg-gradient-to-br from-brand via-brand-strong to-brand-blue px-6 py-5 text-white">
-        <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-xl"></div>
-        <div class="relative">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur ring-1 ring-white/20">
-            <mat-icon class="text-xl">lock</mat-icon>
-          </div>
-          <h2 class="mt-3 text-lg font-bold">Lock account</h2>
-          <p class="mt-0.5 text-sm text-white/80">
-            Prevent {{ fullName(account) }} from signing in.
-          </p>
+      class="relative overflow-hidden bg-gradient-to-br from-brand via-brand-strong to-brand-blue px-6 py-5 text-white">
+      <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-xl"></div>
+      <div class="relative">
+        <div
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur ring-1 ring-white/20">
+          <mat-icon class="text-xl">lock</mat-icon>
         </div>
+        <h2 class="mt-3 text-lg font-bold">Lock account</h2>
+        <p class="mt-0.5 text-sm text-white/80">
+          Prevent {{ fullName(account) }} from signing in.
+        </p>
       </div>
-      <div class="p-6">
-        <p class="mb-3 text-sm font-semibold text-neutral-700">Reason for locking</p>
-        <div class="space-y-2">
-          @for (option of lockOptions; track option.value) {
-            <button
-              type="button"
-              (click)="lockReason.set(option.value)"
-              class="flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition"
-              [class]="
+    </div>
+    <div class="p-6">
+      <p class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Reason for locking</p>
+      <div class="space-y-2">
+        @for (option of lockOptions; track option.value) {
+        <button type="button" (click)="lockReason.set(option.value)"
+          class="flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition" [class]="
                 lockReason() === option.value
-                  ? 'border-brand bg-brand/5 ring-2 ring-brand/20'
-                  : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
-              "
-            >
-              <span
-                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
-                [class]="
+                  ? 'border-brand bg-brand/5 ring-2 ring-brand/20 dark:bg-brand/10'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/[0.03]'
+              ">
+          <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2" [class]="
                   lockReason() === option.value
                     ? 'border-brand'
-                    : 'border-neutral-300'
-                "
-              >
-                @if (lockReason() === option.value) {
-                  <span class="h-2.5 w-2.5 rounded-full bg-brand"></span>
-                }
-              </span>
-              <span>
-                <span class="block font-semibold text-neutral-800">{{ option.label }}</span>
-                <span class="block text-xs text-neutral-500">{{ option.hint }}</span>
-              </span>
-            </button>
-          }
-        </div>
-        <div class="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            class="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-50"
-            (click)="cancelLock()"
-            [disabled]="pendingLock()"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            class="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-            (click)="confirmLock()"
-            [disabled]="pendingLock() || lockReason() === 'None'"
-          >
-            {{ pendingLock() ? 'Locking…' : 'Lock account' }}
-          </button>
-        </div>
+                    : 'border-gray-300 dark:border-gray-600'
+                ">
+            @if (lockReason() === option.value) {
+            <span class="h-2.5 w-2.5 rounded-full bg-brand"></span>
+            }
+          </span>
+          <span>
+            <span class="block font-semibold text-gray-900 dark:text-white">{{ option.label }}</span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">{{ option.hint }}</span>
+          </span>
+        </button>
+        }
+      </div>
+      <div class="mt-6 flex justify-end gap-3">
+        <button type="button"
+          class="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+          (click)="cancelLock()" [disabled]="pendingLock()">
+          Cancel
+        </button>
+        <button type="button"
+          class="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          (click)="confirmLock()" [disabled]="pendingLock() || lockReason() === 'None'">
+          {{ pendingLock() ? 'Locking…' : 'Lock account' }}
+        </button>
       </div>
     </div>
   </div>
+</div>
 }

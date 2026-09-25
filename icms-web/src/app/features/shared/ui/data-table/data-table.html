@@ -1,0 +1,195 @@
+<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+  <!-- Toolbar: title, search, actions -->
+  @if (showToolbar() && (title() || subtitle() || showSearch())) {
+    <div class="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+      <div>
+        @if (title()) {
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ title() }}</h3>
+        }
+        @if (subtitle()) {
+          <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ subtitle() }}</p>
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <ng-content select="[table-actions]" />
+
+        @if (showSearch()) {
+          <div class="relative">
+            <mat-icon class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 !h-4 !w-4 !text-[18px] text-gray-400 dark:text-gray-500">search</mat-icon>
+            <input
+              type="text"
+              [placeholder]="searchPlaceholder()"
+              [ngModel]="query()"
+              (ngModelChange)="query.set($event); onQuery()"
+              class="h-10 w-48 rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-8 text-sm text-gray-800 placeholder:text-gray-400 shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 sm:w-64 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
+            />
+            @if (query()) {
+              <button
+                type="button"
+                (click)="clearSearch()"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                title="Clear search"
+              >
+                <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">close</mat-icon>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Table container -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+      <thead class="border-y border-gray-200 bg-gray-50/80 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-800/80 dark:text-gray-400">
+        <tr>
+          @for (col of columns(); track col.key()) {
+            <th
+              scope="col"
+              [class]="'px-5 py-3.5 ' + col.headerClass() + (col.align() === 'right' ? ' text-right' : col.align() === 'center' ? ' text-center' : ' text-left')"
+              [class.cursor-pointer]="col.sortable()"
+              [class.select-none]="col.sortable()"
+              [class.hover:bg-gray-100/70]="col.sortable()"
+              [class.dark:hover:bg-gray-800/70]="col.sortable()"
+              (click)="col.sortable() ? toggleSort(col.key()) : null"
+              [attr.title]="col.sortable() ? 'Click to sort by ' + col.header() : null"
+            >
+              @if (col.sortable()) {
+                <div
+                  class="group flex items-center gap-1.5 font-semibold text-gray-700 hover:text-brand dark:text-gray-300 dark:hover:text-white"
+                  [class.justify-end]="col.align() === 'right'"
+                  [class.justify-center]="col.align() === 'center'"
+                >
+                  <span>{{ col.header() }}</span>
+                  <mat-icon
+                    class="!h-4 !w-4 !text-[16px] transition-colors"
+                    [class.text-brand]="sortClass(col.key()) !== ''"
+                    [class.text-gray-400]="sortClass(col.key()) === ''"
+                  >
+                    {{ sortClass(col.key()) === 'asc' ? 'arrow_upward' : sortClass(col.key()) === 'desc' ? 'arrow_downward' : 'unfold_more' }}
+                  </mat-icon>
+                </div>
+              } @else {
+                <span class="font-semibold">{{ col.header() }}</span>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+        @for (row of pagedRows(); track trackRow($index, row); let rIndex = $index) {
+          <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-gray-800/50">
+            @for (col of columns(); track col.key()) {
+              <td
+                [class]="'px-5 py-3.5 ' + col.cellClass() + (col.align() === 'right' ? ' text-right' : col.align() === 'center' ? ' text-center' : ' text-left')"
+              >
+                <ng-container
+                  [ngTemplateOutlet]="col.cellTpl"
+                  [ngTemplateOutletContext]="{ $implicit: $any(row), index: rIndex, row: $any(row) }"
+                />
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="columns().length || 1" class="px-5 py-12 text-center text-gray-400 dark:text-gray-500">
+              <mat-icon class="!h-10 !w-10 !text-[40px] text-gray-300 dark:text-gray-600">inbox</mat-icon>
+              <p class="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                {{ query() ? 'No results match "' + query() + '"' : 'No records found' }}
+              </p>
+              <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+                Try adjusting your search terms or clearing filters.
+              </p>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginator Footer -->
+  <div class="flex flex-col gap-3 border-t border-gray-200 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
+    <div class="flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+      <div class="flex items-center gap-2">
+        <span>Rows per page:</span>
+        <select
+          [ngModel]="pageSize()"
+          (ngModelChange)="setPageSize($event)"
+          class="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+        >
+          @for (option of pageSizeOptions(); track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <p>
+        Showing
+        <span class="font-semibold text-gray-900 dark:text-white">{{ startItem() }}</span>
+        to
+        <span class="font-semibold text-gray-900 dark:text-white">{{ endItem() }}</span>
+        of
+        <span class="font-semibold text-gray-900 dark:text-white">{{ totalFiltered() }}</span>
+        entries
+      </p>
+    </div>
+
+    <!-- Pager Buttons: First, Prev, Page Numbers, Next, Last -->
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        (click)="firstPage()"
+        [disabled]="currentPage() === 0"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        title="First page"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">first_page</mat-icon>
+      </button>
+
+      <button
+        type="button"
+        (click)="prev()"
+        [disabled]="currentPage() === 0"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        title="Previous page"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_left</mat-icon>
+      </button>
+
+      @for (pageIdx of visiblePages(); track pageIdx) {
+        <button
+          type="button"
+          (click)="setPage(pageIdx)"
+          class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition"
+          [ngClass]="pageIdx === currentPage()
+            ? 'bg-brand text-white shadow-sm'
+            : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-brand dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
+        >
+          {{ pageIdx + 1 }}
+        </button>
+      }
+
+      <button
+        type="button"
+        (click)="next()"
+        [disabled]="currentPage() >= pageCount() - 1"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        title="Next page"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">chevron_right</mat-icon>
+      </button>
+
+      <button
+        type="button"
+        (click)="lastPage()"
+        [disabled]="currentPage() >= pageCount() - 1"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        title="Last page"
+      >
+        <mat-icon class="!h-4 !w-4 !text-[16px]">last_page</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

@@ -188,6 +188,7 @@ export class AuthService {
       role: roles.includes('Admin') ? 'Admin' : (roles[0] ?? ''),
       churchId: str('ChurchId') ? Number(str('ChurchId')) : null,
       memberId: str('MemberId') ? Number(str('MemberId')) : null,
+      churchName: null, // Only available from /me, not from JWT
     };
   }
 }

@@ -88,6 +88,8 @@ public class DistrictEmployeeRepository(IcmsDbContext dbContext) : IDistrictEmpl
         long districtId, string? search, CancellationToken ct) =>
         dbContext.Employees.AsNoTracking()
             .Where(e => e.EmploymentType == EmploymentType.FulltimeMinister
+                && !e.IsDeleted
+                && e.Status == EmployeeStatus.Active
                 && e.MemberId != null
                 && (e.ChurchId == null || e.Church.DistrictId == districtId)
                 && (search == null || EF.Functions.ILike(

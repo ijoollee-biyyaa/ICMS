@@ -1,0 +1,114 @@
+<div class="relative">
+  <!-- Dropdown toggle button with avatar and name -->
+  <button
+    (click)="toggleDropdown()"
+    class="flex items-center gap-3 text-gray-700 dropdown-toggle dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+  >
+    <div
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue text-xs font-bold text-white shadow-sm ring-2 ring-white/60 dark:ring-gray-700/60"
+    >
+      {{ initials() }}
+    </div>
+    <div class="hidden text-left sm:block">
+      <span class="block text-sm font-semibold text-gray-900 dark:text-white leading-tight">
+        {{ displayName() }}
+      </span>
+      <span class="block text-[11px] font-medium text-gray-500 dark:text-gray-400">
+        {{ role() || 'User' }}
+      </span>
+    </div>
+    <svg
+      [ngClass]="{
+        'stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200': true,
+        'rotate-180': isOpen
+      }"
+      width="18"
+      height="20"
+      viewBox="0 0 18 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4.3125 8.65625L9 13.3437L13.6875 8.65625"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <app-dropdown
+    [isOpen]="isOpen"
+    (close)="closeDropdown()"
+    className="absolute right-0 mt-[17px] flex w-[280px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900"
+  >
+    <!-- User Info Header -->
+    <div class="border-b border-gray-100 pb-3 px-2 dark:border-gray-800">
+      <div class="flex items-center gap-2">
+        <span class="block truncate font-semibold text-gray-900 text-sm dark:text-white">
+          {{ displayName() }}
+        </span>
+        @if (role()) {
+          <span class="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand dark:bg-brand/20 dark:text-brand-300">
+            {{ role() }}
+          </span>
+        }
+      </div>
+      <span class="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400">
+        {{ email() }}
+      </span>
+    </div>
+
+    <!-- Navigation Options -->
+    <ul class="flex flex-col gap-1 py-2 border-b border-gray-100 dark:border-gray-800">
+      <li>
+        <a
+          [routerLink]="profileLink()"
+          (click)="closeDropdown()"
+          class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-xl transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.05] dark:hover:text-white"
+        >
+          <mat-icon class="!h-5 !w-5 !text-[20px] text-gray-400 dark:text-gray-500">person</mat-icon>
+          <span>My Profile</span>
+        </a>
+      </li>
+
+      <li>
+        <a
+          [routerLink]="settingsLink()"
+          (click)="closeDropdown()"
+          class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-xl transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.05] dark:hover:text-white"
+        >
+          <mat-icon class="!h-5 !w-5 !text-[20px] text-gray-400 dark:text-gray-500">settings</mat-icon>
+          <span>Account Settings</span>
+        </a>
+      </li>
+
+      @if (canSwitchArea()) {
+        <li>
+          <a
+            routerLink="/areas"
+            (click)="closeDropdown()"
+            class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-xl transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.05] dark:hover:text-white"
+          >
+            <mat-icon class="!h-5 !w-5 !text-[20px] text-gray-400 dark:text-gray-500">swap_horiz</mat-icon>
+            <span>Switch Workspace</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <!-- Sign out button -->
+    <div class="pt-2">
+      <button
+        type="button"
+        (click)="signOut()"
+        class="flex w-full items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 rounded-xl transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+      >
+        <mat-icon class="!h-5 !w-5 !text-[20px]">logout</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </div>
+  </app-dropdown>
+</div>

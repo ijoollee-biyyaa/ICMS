@@ -1,10 +1,10 @@
 @if (store.isLoading()) {
-  <div class="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white p-5 text-neutral-400">
+  <div class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-5 text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
     <mat-icon class="animate-spin">progress_activity</mat-icon>
     Loading district profile…
   </div>
 } @else if (store.error()) {
-  <div class="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600">
+  <div class="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
     {{ store.error() }}
   </div>
 } @else if (store.district(); as d) {
@@ -40,47 +40,47 @@
   </div>
 
   <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-    <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-brand">
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-brand dark:bg-brand/20 dark:text-brand-300">
         <mat-icon>location_on</mat-icon>
       </div>
-      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Address</p>
-      <p class="mt-2 text-sm text-neutral-700">{{ d.address ?? 'Not provided' }}</p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-400">Address</p>
+      <p class="mt-2 text-sm text-gray-700 dark:text-white/90">{{ d.address ?? 'Not provided' }}</p>
     </div>
 
-    <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue">
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300">
         <mat-icon>calendar_today</mat-icon>
       </div>
-      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Created</p>
-      <p class="mt-2 text-sm text-neutral-700">{{ d.createdAt | date: 'longDate' }}</p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-400">Created</p>
+      <p class="mt-2 text-sm text-gray-700 dark:text-white/90">{{ d.createdAt | date: 'longDate' }}</p>
     </div>
 
-    <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white">
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+      <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-blue text-white shadow-sm">
         <mat-icon>apps</mat-icon>
       </div>
-      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Record ID</p>
-      <p class="mt-2 text-sm text-neutral-700">#{{ d.id }}</p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-400">Record ID</p>
+      <p class="mt-2 text-sm text-gray-700 dark:text-white/90">#{{ d.id }}</p>
     </div>
   </div>
 
-  <div class="mt-6 grid grid-cols-2 gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm md:grid-cols-4">
+  <div class="mt-6 grid grid-cols-2 gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] md:grid-cols-4">
     <div>
-      <p class="text-3xl font-extrabold text-brand">{{ store.churchCount() }}</p>
-      <p class="text-sm text-neutral-500">Churches</p>
+      <p class="text-3xl font-extrabold text-brand dark:text-brand-400">{{ store.churchCount() }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Churches</p>
     </div>
     <div>
-      <p class="text-3xl font-extrabold text-brand-blue">{{ store.memberCount() }}</p>
-      <p class="text-sm text-neutral-500">Members</p>
+      <p class="text-3xl font-extrabold text-brand-blue dark:text-blue-400">{{ store.memberCount() }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Members</p>
     </div>
     <div>
-      <p class="text-3xl font-extrabold text-brand">{{ store.employeeCount() }}</p>
-      <p class="text-sm text-neutral-500">Employees</p>
+      <p class="text-3xl font-extrabold text-brand dark:text-brand-400">{{ store.employeeCount() }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Employees</p>
     </div>
     <div>
-      <p class="text-3xl font-extrabold text-brand-blue">{{ store.ministerCount() }}</p>
-      <p class="text-sm text-neutral-500">Ministers</p>
+      <p class="text-3xl font-extrabold text-brand-blue dark:text-blue-400">{{ store.ministerCount() }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Ministers</p>
     </div>
   </div>
 }

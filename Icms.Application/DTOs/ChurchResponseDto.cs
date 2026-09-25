@@ -14,4 +14,7 @@ public record ChurchResponseDto(
     string? Phone,
     string? Tel,
     string? MapAddress,
-    string? WebsiteUrl);
+    string? WebsiteUrl,
+    int MemberCount = 0,
+    int EmployeeCount = 0,
+    int MinisterCount = 0);

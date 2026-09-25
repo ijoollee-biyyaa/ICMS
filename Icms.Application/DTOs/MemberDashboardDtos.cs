@@ -9,6 +9,26 @@ public record MemberDashboardDto(
     List<MemberTeamCardDto> Teams,
     MemberServiceSummaryDto Service);
 
+public record MemberHistoryDto(
+    long MemberId,
+    List<MemberAttendanceHistoryDto> Attendance,
+    List<MemberPaymentHistoryDto> Payments);
+
+public record MemberAttendanceHistoryDto(
+    long TeamId,
+    string TeamName,
+    DateOnly AttendanceDate,
+    string Status,
+    string? Reason);
+
+public record MemberPaymentHistoryDto(
+    long Id,
+    long TeamId,
+    string TeamName,
+    DateOnly Month,
+    decimal Amount,
+    DateTimeOffset PaidAt);
+
 public record MemberProfileDto(
     string FullName,
     string EfgbcId,
@@ -25,6 +45,7 @@ public record MemberTeamCardDto(
     long TeamId,
     string TeamName,
     string Role,
+    long ChurchId,
     MemberAttendanceSummaryDto Attendance,
     MemberPaymentSummaryDto Payments);
 

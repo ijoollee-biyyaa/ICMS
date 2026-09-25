@@ -2,53 +2,37 @@ import {
   Component,
   ChangeDetectionStrategy,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconButton } from '@angular/material/button';
-import {
-  MatError,
-  MatFormField,
-  MatHint,
-  MatLabel,
-} from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatOption, MatSelect } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 
 import { AuthService } from '../../../services/auth.service';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { ChurchService } from '../../../services/church.service';
 import {
   Member,
   MemberStats,
-  CreateMemberRequest,
   JobStatus,
   Gender,
   JoinChannel,
 } from '../../../models/member';
 import { fullName, initials } from '../../../common/member-names';
-import {
-  problemDetail,
-  applyFieldErrors,
-  clearFieldErrors,
-  dateOrNull,
-} from '../../../common/http-errors';
+import { problemDetail } from '../../../common/http-errors';
+import { MemberEditModal } from './member-edit-modal/member-edit-modal';
 
 @Component({
   selector: 'app-church-members',
   imports: [
-    ReactiveFormsModule,
-    MatFormField,
-    MatLabel,
-    MatHint,
-    MatError,
-    MatInput,
-    MatSelect,
-    MatOption,
     MatIconButton,
     MatIcon,
+    StatCard,
+    DecimalPipe,
+    MemberEditModal,
   ],
   templateUrl: './church-members.html',
   styleUrl: './church-members.scss',
@@ -56,7 +40,6 @@ import {
 })
 export class ChurchMembers {
   private auth = inject(AuthService);
-  private fb = inject(FormBuilder);
   private churchService = inject(ChurchService);
   private router = inject(Router);
 
@@ -65,10 +48,9 @@ export class ChurchMembers {
   readonly members = signal<Member[]>([]);
   readonly stats = signal<MemberStats | null>(null);
   readonly loading = signal(false);
-  readonly saving = signal(false);
   readonly deleting = signal(false);
   readonly error = signal('');
-  readonly showForm = signal(false);
+  readonly showEditModal = signal(false);
   readonly editing = signal<Member | null>(null);
   readonly toDelete = signal<Member | null>(null);
 
@@ -94,18 +76,6 @@ export class ChurchMembers {
     'Return',
   ];
   readonly PAGE_SIZES = [10, 25, 50, 100];
-
-  form = this.fb.nonNullable.group({
-    firstName: ['', Validators.required],
-    fatherName: ['', Validators.required],
-    grandfatherName: ['', Validators.required],
-    gender: ['Male' as Gender, Validators.required],
-    jobStatus: ['Employed' as JobStatus, Validators.required],
-    joinedVia: ['Baptism' as JoinChannel, Validators.required],
-    dateOfBirth: [''],
-    phone: [''],
-    email: [''],
-  });
 
   readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize())),
@@ -133,8 +103,13 @@ export class ChurchMembers {
   readonly inactiveCount = computed(() => this.stats()?.inactive ?? 0);
 
   constructor() {
-    this.loadStats();
-    this.load();
+    effect(() => {
+      const id = this.churchId();
+      if (id) {
+        this.loadStats();
+        this.load();
+      }
+    });
   }
 
   load() {
@@ -175,6 +150,46 @@ export class ChurchMembers {
     }, 300);
   }
 
+  /** Downloads the currently loaded members as a CSV file. */
+  exportCsv() {
+    const rows = this.members().map((m) => ({
+      'EFGBC ID': m.efgbcId,
+      'Full name': this.nameOf(m),
+      Gender: m.gender,
+      Status: m.status,
+      Occupation: m.jobStatus,
+      Phone: m.phone ?? '',
+      Email: m.email ?? '',
+      Joined: this.joinedLabel(m),
+    }));
+    this.downloadCsv(rows.map(Object.keys), rows.map((r) => Object.values(r)));
+  }
+
+  private downloadCsv(
+    headers: string[][],
+    body: (string | number)[][],
+  ) {
+    const esc = (v: string | number) => {
+      const s = String(v ?? '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines =
+      headers[0].map((h, i) => esc(h)).join(',') +
+      '\n' +
+      body.map((r) => r.map(esc).join(',')).join('\n');
+    const blob = new Blob([`\uFEFF${lines}`], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `church-members-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   goToPage(p: number) {
     if (p < 1 || p > this.totalPages() || p === this.page()) return;
     this.page.set(p);
@@ -195,136 +210,30 @@ export class ChurchMembers {
   }
 
   openCreate() {
-    this.error.set('');
-    this.editing.set(null);
-    this.showForm.set(true);
-    this.form.reset({
-      firstName: '',
-      fatherName: '',
-      grandfatherName: '',
-      gender: 'Male',
-      jobStatus: 'Employed',
-      joinedVia: 'Baptism',
-      dateOfBirth: '',
-      phone: '',
-      email: '',
-    });
-    clearFieldErrors(this.form);
+    this.router.navigate(['/church/members/register']);
+  }
+
+  openClearance() {
+    const id = this.churchId();
+    if (!id) return;
+    this.router.navigate(['/church/clearance']);
   }
 
   openEdit(member: Member) {
-    this.error.set('');
     this.editing.set(member);
-    this.showForm.set(true);
-    this.form.reset({
-      firstName: member.firstName,
-      fatherName: member.fatherName,
-      grandfatherName: member.grandfatherName,
-      gender: member.gender,
-      jobStatus: member.jobStatus,
-      joinedVia: member.joinedVia,
-      dateOfBirth: member.dateOfBirth ?? '',
-      phone: member.phone ?? '',
-      email: member.email ?? '',
-    });
-    clearFieldErrors(this.form);
+    this.showEditModal.set(true);
   }
 
-  closeForm() {
-    if (this.saving()) return;
-    this.showForm.set(false);
+  closeEdit() {
+    this.showEditModal.set(false);
     this.editing.set(null);
   }
 
-  submit() {
-    const churchId = this.churchId();
-    if (!churchId || this.form.invalid || this.saving()) return;
-
-    clearFieldErrors(this.form);
-    this.saving.set(true);
-    this.error.set('');
-
-    const v = this.form.getRawValue();
-    const editing = this.editing();
-    const common = {
-      firstName: v.firstName,
-      fatherName: v.fatherName,
-      grandfatherName: v.grandfatherName,
-      gender: v.gender,
-      jobStatus: v.jobStatus,
-      dateOfBirth: dateOrNull(v.dateOfBirth),
-      phone: v.phone || null,
-      email: v.email || null,
-      photoUrl: editing?.photoUrl ?? null,
-    };
-
-    if (editing) {
-      this.churchService.updateMember(editing.id, common).subscribe({
-        next: (updated) => this.handleSaved(updated, true),
-        error: (err) => {
-          this.saving.set(false);
-          if (!this.applyServerErrors(err)) {
-            this.error.set(
-              problemDetail(err, 'Could not update the member.'),
-            );
-          }
-        },
-      });
-      return;
-    }
-
-    const body: CreateMemberRequest = {
-      ...common,
-      churchId,
-      joinedVia: v.joinedVia,
-      joinedAt: null,
-    };
-    this.churchService.createMember(body).subscribe({
-      next: (created) => this.handleSaved(created, false),
-      error: (err) => {
-        this.saving.set(false);
-        if (!this.applyServerErrors(err)) {
-          this.error.set(problemDetail(err, 'Could not register the member.'));
-        }
-      },
-    });
-  }
-
-  private handleSaved(member: Member, editing: boolean) {
-    this.saving.set(false);
-    this.showForm.set(false);
-    this.editing.set(null);
-    if (editing) {
-      this.members.set(
-        this.members().map((m) => (m.id === member.id ? member : m)),
-      );
-    } else if (
-      this.members().length < this.pageSize() ||
-      this.page() === this.totalPages()
-    ) {
-      this.members.set([...this.members(), member]);
-      this.totalCount.set(this.totalCount() + 1);
-    } else {
-      this.load();
-    }
-    this.loadStats();
-  }
-
-  private applyServerErrors(err: unknown): boolean {
-    const response = err as {
-      status?: number;
-      error?: { errors?: Record<string, string[]> };
-    };
-    if (
-      response?.status !== 400 ||
-      !response.error?.errors
-    ) {
-      return false;
-    }
-    return applyFieldErrors(
-      this.form,
-      err as Parameters<typeof applyFieldErrors>[1],
+  onMemberSaved(updated: Member) {
+    this.members.update((list) =>
+      list.map((m) => (m.id === updated.id ? updated : m)),
     );
+    this.loadStats();
   }
 
   askDelete(member: Member) {

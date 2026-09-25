@@ -16,4 +16,5 @@ public record UserProfileDto(
     string DisplayName,
     string Role,
     long? ChurchId,
-    long? MemberId);
+    long? MemberId,
+    string? ChurchName);

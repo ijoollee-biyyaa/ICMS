@@ -7,4 +7,7 @@ public interface IMemberDashboardService
 {
     Task<Result<MemberDashboardDto, MemberDashboardError>> GetDashboardAsync(
         long memberId, CancellationToken ct);
+
+    Task<Result<MemberHistoryDto, MemberDashboardError>> GetHistoryAsync(
+        long memberId, CancellationToken ct);
 }

@@ -55,7 +55,7 @@ public class TeamRepository(IcmsDbContext dbContext) : ITeamRepository
 
     public Task<bool> HasMembersAsync(long churchId, long teamId, CancellationToken ct) =>
         dbContext.TeamMembers.AsNoTracking()
-            .AnyAsync(tm => tm.TeamId == teamId && tm.Team.ChurchId == churchId, ct);
+            .AnyAsync(tm => tm.TeamId == teamId && tm.Team.ChurchId == churchId && !tm.IsDeleted && !tm.Member.IsDeleted, ct);
 
     public Task<bool> HasSubTeamsAsync(long churchId, long teamId, CancellationToken ct) =>
         dbContext.Teams.AsNoTracking()
@@ -63,7 +63,7 @@ public class TeamRepository(IcmsDbContext dbContext) : ITeamRepository
 
     public Task<int> CountMembersAsync(long churchId, long teamId, CancellationToken ct) =>
         dbContext.TeamMembers.AsNoTracking()
-            .CountAsync(tm => tm.TeamId == teamId && tm.Team.ChurchId == churchId, ct);
+            .CountAsync(tm => tm.TeamId == teamId && tm.Team.ChurchId == churchId && !tm.IsDeleted && !tm.Member.IsDeleted, ct);
 
     public Task<int> CountSubTeamsAsync(long churchId, long teamId, CancellationToken ct) =>
         dbContext.Teams.AsNoTracking()

@@ -124,9 +124,12 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("CanManageDistrict", policy =>
         policy.Requirements.Add(new ManageDistrictRequirement()))
     .AddPolicy("CanManageChurch", policy =>
-        policy.Requirements.Add(new ManageChurchRequirement()));
+        policy.Requirements.Add(new ManageChurchRequirement()))
+    .AddPolicy("CanManageTeam", policy =>
+        policy.Requirements.Add(new ManageTeamRequirement()));
 builder.Services.AddScoped<IAuthorizationHandler, ManageDistrictHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, ManageChurchHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ManageTeamHandler>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(CreateChurchValidator).Assembly);
 
@@ -145,6 +148,9 @@ builder.Services.AddScoped<ITeamMemberService, TeamMemberService>();
 
 builder.Services.AddScoped<ITeamAttendanceRepository, TeamAttendanceRepository>();
 builder.Services.AddScoped<ITeamAttendanceService, TeamAttendanceService>();
+
+builder.Services.AddScoped<ITeamMeetingRepository, TeamMeetingRepository>();
+builder.Services.AddScoped<ITeamMeetingService, TeamMeetingService>();
 
 builder.Services.AddScoped<ITeamPaymentRepository, TeamPaymentRepository>();
 builder.Services.AddScoped<ITeamPaymentService, TeamPaymentService>();
@@ -166,11 +172,15 @@ builder.Services.AddScoped<IChurchEmployeeService, ChurchEmployeeService>();
 builder.Services.AddScoped<IChurchDepartmentRepository, ChurchDepartmentRepository>();
 builder.Services.AddScoped<IChurchDepartmentService, ChurchDepartmentService>();
 
+builder.Services.AddScoped<ITransferRepository, TransferRepository>();
+builder.Services.AddScoped<ITransferService, TransferService>();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseCors("IcmsClient");
+app.UseStaticFiles();
 
 app.Use(async (context, next) =>
 {
@@ -181,7 +191,7 @@ app.Use(async (context, next) =>
     if (!context.Request.Path.StartsWithSegments("/scalar")
         && !context.Request.Path.StartsWithSegments("/openapi"))
     {
-        context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
+        context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; connect-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline';");
     }
 
     await next();

@@ -314,11 +314,15 @@ public class ChurchService(
 
         var daughterCount = await churchRepository.CountDaughterChurchesAsync(id, ct);
         var memberCount = await churchRepository.CountMembersAsync(id, ct);
+        var activeMemberCount = await churchRepository.CountActiveMembersAsync(id, ct);
+        var employeeCount = await churchRepository.CountEmployeesAsync(id, ct);
+        var ministerCount = await churchRepository.CountMinistersAsync(id, ct);
 
         var dto = new ChurchDetailDto(
             church.Id, church.Name, church.Type, church.Code, church.ParentChurchId,
             church.City, church.Subcity, church.Email, church.Phone, church.Tel,
-            church.MapAddress, church.WebsiteUrl, daughterCount, memberCount);
+            church.MapAddress, church.WebsiteUrl, daughterCount, memberCount,
+            activeMemberCount, employeeCount, ministerCount);
 
         return Result<ChurchDetailDto, ChurchError>.Success(dto);
     }
@@ -402,19 +406,26 @@ public class ChurchService(
 
         var churches = await churchRepository.GetByDistrictPagedAsync(districtId, paging.Search, page, pageSize, ct);
         var totalCount = await churchRepository.CountByDistrictAsync(districtId, paging.Search, ct);
+        var metrics = await churchRepository.GetChurchMetricsAsync(churches.Select(c => c.Id), ct);
+
+        var dtos = churches.Select(c =>
+        {
+            metrics.TryGetValue(c.Id, out var m);
+            return ToDto(c, m.MemberCount, m.EmployeeCount, m.MinisterCount);
+        }).ToList();
 
         return Result<PagedResponse<ChurchResponseDto>, ChurchError>.Success(
             new PagedResponse<ChurchResponseDto>
             {
-                Items = churches.Select(ToDto).ToList(),
+                Items = dtos,
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
             });
     }
 
-    private static ChurchResponseDto ToDto(Church church) =>
+    private static ChurchResponseDto ToDto(Church church, int memberCount = 0, int employeeCount = 0, int ministerCount = 0) =>
         new(church.Id, church.Name, church.Type, church.Code, church.ParentChurchId,
             church.City, church.Subcity, church.Email, church.Phone, church.Tel,
-            church.MapAddress, church.WebsiteUrl);
+            church.MapAddress, church.WebsiteUrl, memberCount, employeeCount, ministerCount);
 }

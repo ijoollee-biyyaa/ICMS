@@ -32,6 +32,11 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.Property(m => m.Phone).HasMaxLength(20);
         builder.Property(m => m.Email).HasMaxLength(150);
         builder.Property(m => m.PhotoUrl).HasMaxLength(255);
+        builder.Property(m => m.City).HasMaxLength(100);
+        builder.Property(m => m.Subcity).HasMaxLength(100);
+        builder.Property(m => m.LocalAddress).HasMaxLength(200);
+        builder.Property(m => m.BaptismPlace).HasMaxLength(200);
+        builder.Property(m => m.SpiritualGift).HasMaxLength(150);
 
         builder.HasIndex(m => new { m.ChurchId, m.Status });
         builder.HasIndex(m => m.Phone);

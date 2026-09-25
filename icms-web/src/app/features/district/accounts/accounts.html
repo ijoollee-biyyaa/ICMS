@@ -1,159 +1,121 @@
 <div class="mb-8">
-  <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue">People & Access</p>
-  <h1 class="mt-1 text-2xl font-extrabold text-neutral-800">Accounts</h1>
-  <p class="mt-1 text-sm text-neutral-500">
+  <p class="text-xs font-semibold uppercase tracking-widest text-brand-blue dark:text-blue-400">People & Access</p>
+  <h1 class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">Accounts</h1>
+  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
     Accounts for everyone serving in the district and its churches, with the roles that grant them access.
   </p>
 </div>
 
-<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
-        <mat-icon>person</mat-icon>
-      </div>
-      <div>
-        <p class="text-2xl font-extrabold text-neutral-800">{{ total() }}</p>
-        <p class="text-sm text-neutral-500">Total accounts</p>
-      </div>
-    </div>
-  </div>
-  <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-brand-blue">
-        <mat-icon>admin_panel_settings</mat-icon>
-      </div>
-      <div>
-        <p class="text-2xl font-extrabold text-neutral-800">{{ subAdmins() }}</p>
-        <p class="text-sm text-neutral-500">District sub-admins</p>
-      </div>
-    </div>
-  </div>
-  <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-700">
-        <mat-icon>shield</mat-icon>
-      </div>
-      <div>
-        <p class="text-2xl font-extrabold text-neutral-800">{{ admins() }}</p>
-        <p class="text-sm text-neutral-500">Super admins</p>
-      </div>
-    </div>
-  </div>
+<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <app-stat-card icon="group" label="Total accounts" [value]="total().toString()"
+    accentClass="bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300" />
+  <app-stat-card icon="admin_panel_settings" label="District sub-admins" [value]="subAdmins().toString()"
+    accentClass="bg-blue-100 text-brand-blue dark:bg-blue-900/30 dark:text-blue-300" />
+  <app-stat-card icon="shield" label="Super admins" [value]="admins().toString()"
+    accentClass="bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300" />
 </div>
 
 <section>
   @if (store.error()) {
-    <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-      {{ store.error() }}
-      <button mat-icon-button class="float-right !m-0" (click)="store.clearError()" aria-label="Dismiss">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  }
-
-  <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div class="relative max-w-sm grow">
-      <mat-icon class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">search</mat-icon>
-      <input
-        [ngModel]="query()"
-        (ngModelChange)="query.set($event)"
-        placeholder="Search by name, email or position…"
-        class="w-full rounded-xl border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-      />
-    </div>
-    <button
-      type="button"
-      (click)="printAccountDetails()"
-      class="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-600 shadow-sm transition hover:border-brand hover:text-brand"
-    >
-      <mat-icon class="text-base">print</mat-icon>
-      Print details
+  <div
+    class="mb-4 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+    <span>{{ store.error() }}</span>
+    <button mat-icon-button class="!m-0" (click)="store.clearError()" aria-label="Dismiss">
+      <mat-icon>close</mat-icon>
     </button>
   </div>
+  }
 
-  <div class="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead>
-          <tr class="border-b border-neutral-100 bg-neutral-50/60 text-xs uppercase tracking-wider text-neutral-400">
-            <th class="px-5 py-3 font-semibold">Account</th>
-            <th class="hidden px-5 py-3 font-semibold md:table-cell">Position</th>
-            <th class="hidden px-5 py-3 font-semibold lg:table-cell">Serves</th>
-            <th class="px-5 py-3 font-semibold">Roles</th>
-            <th class="px-5 py-3 text-right font-semibold">District access</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (account of accounts(); track account.userId) {
-            <tr class="border-b border-neutral-50 transition hover:bg-neutral-50/60">
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-blue text-xs font-bold text-white">
-                    {{ initials(account) }}
-                  </div>
-                  <div>
-                    <p class="font-semibold text-neutral-800">{{ fullName(account) }}</p>
-                    <p class="text-xs text-neutral-400">{{ account.email }}</p>
-                  </div>
-                </div>
-              </td>
-              <td class="hidden px-5 py-3 text-neutral-600 md:table-cell">
-                {{ account.position ?? '—' }}
-              </td>
-              <td class="hidden px-5 py-3 lg:table-cell">
-                @if (account.districtId != null) {
-                  <span class="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-xs font-semibold text-brand">
-                    <mat-icon class="text-sm">domain</mat-icon>
-                    District Office
-                  </span>
-                } @else {
-                  <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-brand-blue">
-                    <mat-icon class="text-sm">church</mat-icon>
-                    A church
-                  </span>
-                }
-              </td>
-              <td class="px-5 py-3">
-                <div class="flex flex-wrap gap-1.5">
-                  @for (role of account.roles; track role) {
-                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ roleChip(role) }}">
-                      {{ roleLabel(role) }}
-                    </span>
-                  } @empty {
-                    <span class="text-xs text-neutral-400">No roles</span>
-                  }
-                </div>
-              </td>
-              <td class="px-5 py-3 text-right">
-                @if (isCurrentUser(account)) {
-                  <span class="text-xs text-neutral-400">You</span>
-                } @else if (isProtected(account)) {
-                  <span class="text-xs text-neutral-400" title="Admin role is protected">Protected</span>
-                } @else {
-                  <label class="inline-flex cursor-pointer items-center gap-2">
-                    <span class="text-xs font-medium text-neutral-500">
-                      {{ account.roles.includes('DistrictSubAdmin') ? 'Sub-admin' : 'Standard' }}
-                    </span>
-                    <input
-                      type="checkbox"
-                      class="h-4 w-4 accent-brand"
-                      [checked]="account.roles.includes('DistrictSubAdmin')"
-                      (change)="toggleSubAdmin(account)"
-                    />
-                  </label>
-                }
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="5" class="px-5 py-10 text-center text-neutral-400">
-                No accounts found.
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <app-table
+    [data]="store.accounts()"
+    [searchFn]="searchAccount"
+    searchPlaceholder="Search by name, email, position, role…"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+  >
+    <div table-actions>
+      <button
+        type="button"
+        (click)="printAccountDetails()"
+        class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-brand hover:text-brand dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-brand dark:hover:text-white"
+      >
+        <mat-icon class="text-base">print</mat-icon>
+        Print details
+      </button>
     </div>
-  </div>
+
+    <app-table-column key="name" header="Account" [sortable]="true" [sortValue]="accountName">
+      <ng-template let-account>
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand via-brand-strong to-brand-blue text-xs font-bold text-white shadow-sm ring-2 ring-white/60 dark:ring-gray-700/60"
+            [title]="fullName(account)"
+          >
+            {{ initials(account) }}
+          </div>
+          <div class="min-w-0">
+            <p class="truncate font-semibold text-gray-900 dark:text-white">{{ fullName(account) }}</p>
+            <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ account.email ?? '—' }}</p>
+          </div>
+        </div>
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="position" header="Position" [sortable]="true" headerClass="hidden md:table-cell" cellClass="hidden md:table-cell">
+      <ng-template let-account>
+        <span class="text-gray-600 dark:text-gray-300">{{ account.position ?? '—' }}</span>
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="serves" header="Serves" [sortable]="true" [sortValue]="servesLabel" headerClass="hidden lg:table-cell" cellClass="hidden lg:table-cell">
+      <ng-template let-account>
+        @if (account.districtId != null) {
+          <span class="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-xs font-semibold text-brand dark:bg-brand/20 dark:text-brand-300">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">domain</mat-icon>
+            District Office
+          </span>
+        } @else {
+          <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-brand-blue dark:bg-blue-900/30 dark:text-blue-300">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">church</mat-icon>
+            A church
+          </span>
+        }
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="roles" header="Roles" [sortable]="true" [sortValue]="rolesLabel">
+      <ng-template let-account>
+        <div class="flex flex-wrap gap-1.5">
+          @for (role of account.roles; track role) {
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ roleChip(role) }}">
+              {{ roleLabel(role) }}
+            </span>
+          } @empty {
+            <span class="text-xs text-gray-400 dark:text-gray-500">No roles</span>
+          }
+        </div>
+      </ng-template>
+    </app-table-column>
+
+    <app-table-column key="access" header="District access" [sortable]="true" [sortValue]="accessLabel" align="right">
+      <ng-template let-account>
+        @if (isCurrentUser(account)) {
+          <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">You</span>
+        } @else if (isProtected(account)) {
+          <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-300" title="Admin role is protected">Protected</span>
+        } @else {
+          <label class="inline-flex cursor-pointer items-center gap-2">
+            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
+              {{ account.roles.includes('DistrictSubAdmin') ? 'Sub-admin' : 'Standard' }}
+            </span>
+            <input
+              type="checkbox"
+              class="h-4 w-4 rounded border-gray-300 text-brand accent-brand focus:ring-brand dark:border-gray-700 dark:bg-gray-800"
+              [checked]="account.roles.includes('DistrictSubAdmin')"
+              (change)="toggleSubAdmin(account)"
+            />
+          </label>
+        }
+      </ng-template>
+    </app-table-column>
+  </app-table>
 </section>

@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
 import {
@@ -19,6 +20,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { AuthService } from '../../../services/auth.service';
 import { ChurchService } from '../../../services/church.service';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { EmployeeRow } from '../../../models/district';
 import {
   Department,
@@ -45,6 +47,8 @@ import {
     MatOption,
     MatIconButton,
     MatIcon,
+    StatCard,
+    DecimalPipe,
   ],
   templateUrl: './church-departments.html',
   styleUrl: './church-departments.scss',
@@ -154,24 +158,24 @@ export class ChurchDepartments {
   typeChip(type: DepartmentType): string {
     switch (type) {
       case 'Spiritual':
-        return 'bg-indigo-100 text-indigo-700';
+        return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300';
       case 'Charity':
-        return 'bg-rose-100 text-rose-700';
+        return 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300';
       case 'Development':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300';
       default:
-        return 'bg-slate-100 text-slate-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-gray-500/15 dark:text-gray-300';
     }
   }
 
   roleChip(role: DepartmentEmployeeRole): string {
     switch (role) {
       case 'Head':
-        return 'bg-brand/10 text-brand';
+        return 'bg-brand/10 text-brand dark:text-brand-300';
       case 'Secretary':
-        return 'bg-neutral-100 text-neutral-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-400';
       default:
-        return 'bg-slate-100 text-slate-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-400';
     }
   }
 

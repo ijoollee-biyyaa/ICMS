@@ -12,14 +12,24 @@ public class Member
     public required string GrandfatherName { get; set; }
     public DateOnly? DateOfBirth { get; set; }
     public Gender Gender { get; set; }
+    public MaritalStatus MaritalStatus { get; set; } = MaritalStatus.Single;
     public JobStatus JobStatus { get; set; } = JobStatus.Other;
+    public HealthStatus HealthStatus { get; set; } = HealthStatus.Healthy;
     public string? Phone { get; set; }
     public string? Email { get; set; }
+    public string? City { get; set; }
+    public string? Subcity { get; set; }
+    public string? LocalAddress { get; set; }
     public string? PhotoUrl { get; set; }
     public MemberStatus Status { get; set; } = MemberStatus.Active;
     public DeactivationReason DeactivationReason { get; set; } = DeactivationReason.None;
     public JoinChannel JoinedVia { get; set; } = JoinChannel.Salvation;
     public DateOnly? JoinedAt { get; set; }
+    public DateOnly? ConversionDate { get; set; }
+    public string? BaptismPlace { get; set; }
+    public DateOnly? BaptismDate { get; set; }
+    public string? SpiritualGift { get; set; }
+    public long? ClearanceId { get; set; }
     public bool IsDeleted { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 

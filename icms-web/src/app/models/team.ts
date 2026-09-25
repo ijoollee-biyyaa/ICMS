@@ -62,7 +62,7 @@ export interface SetRoleRequest {
 
 /** Body for POST teams/{id}/attendance. */
 export interface SaveAttendanceRequest {
-  attendanceDate?: string | null;
+  meetingId: number;
   entries?: AttendanceEntryRequest[] | null;
 }
 
@@ -70,6 +70,52 @@ export interface AttendanceEntryRequest {
   memberId?: number | null;
   status?: TeamAttendanceStatus | null;
   reason?: string | null;
+}
+
+/** Body for POST teams/{id}/meetings. */
+export interface CreateMeetingRequest {
+  meetingDate?: string | null;
+  title?: string | null;
+  notes?: string | null;
+}
+
+/** Mirrors TeamMeetingDto from GET teams/{id}/meetings. */
+export interface TeamMeetingDto {
+  id: number;
+  teamId: number;
+  meetingDate: string;
+  title: string | null;
+  notes: string | null;
+  createdById: number | null;
+  createdByName: string | null;
+  createdAt: string;
+  totalMembers: number;
+  present: number;
+  late: number;
+  absent: number;
+  marked: number;
+}
+
+/** Mirrors TeamMeetingAttendanceDto (row inside TeamMeetingDetailDto). */
+export interface TeamMeetingAttendanceDto {
+  memberId: number;
+  memberName: string;
+  memberEfgbcId: string;
+  status: TeamAttendanceStatus | null;
+  reason: string | null;
+}
+
+/** Mirrors TeamMeetingDetailDto from GET teams/{id}/meetings/{meetingId}. */
+export interface TeamMeetingDetailDto {
+  id: number;
+  teamId: number;
+  meetingDate: string;
+  title: string | null;
+  notes: string | null;
+  createdById: number | null;
+  createdByName: string | null;
+  createdAt: string;
+  attendance: TeamMeetingAttendanceDto[];
 }
 
 /** Mirrors TeamAttendanceRecordDto. */

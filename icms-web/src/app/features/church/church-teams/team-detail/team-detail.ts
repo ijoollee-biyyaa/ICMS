@@ -24,20 +24,16 @@ import {
   TeamDetail as TeamDetailDto,
   TeamMember,
   TeamMemberRole,
-  TeamAttendanceStatus,
-  TeamAttendanceReport,
-  TeamAttendanceSummary,
   TeamPayment,
   TeamPaymentSummary,
-  SaveAttendanceResult,
 } from '../../../../models/team';
 import { Member } from '../../../../models/member';
 import {
   problemDetail,
   clearFieldErrors,
-  dateOrNull,
   firstFieldError,
 } from '../../../../common/http-errors';
+import { TeamMeetingsManager } from '../../../shared/team-meetings-manager/team-meetings-manager';
 
 type Tab = 'members' | 'attendance' | 'payments';
 
@@ -54,6 +50,7 @@ type Tab = 'members' | 'attendance' | 'payments';
     MatIconButton,
     MatIcon,
     RouterLink,
+    TeamMeetingsManager,
   ],
   templateUrl: './team-detail.html',
   styleUrl: './team-detail.scss',
@@ -79,7 +76,6 @@ export class TeamDetailPage {
   readonly team = signal<TeamDetailDto | null>(null);
   readonly members = signal<TeamMember[]>([]);
   readonly roster = signal<Member[]>([]);
-  readonly report = signal<TeamAttendanceReport | null>(null);
   readonly payments = signal<TeamPayment[]>([]);
   readonly paymentSummary = signal<TeamPaymentSummary[]>([]);
 
@@ -87,9 +83,6 @@ export class TeamDetailPage {
   readonly busy = signal(false);
   readonly error = signal('');
   readonly notice = signal('');
-
-  readonly attendanceDate = signal('');
-  readonly markings = signal<Record<number, TeamAttendanceStatus>>({});
 
   readonly editingPayment = signal<number | null>(null);
   readonly editingAmount = signal('');
@@ -112,25 +105,6 @@ export class TeamDetailPage {
     const inTeam = new Set(this.members().map((m) => m.memberId));
     return this.roster().filter((m) => !inTeam.has(m.id));
   });
-
-  readonly attendable = computed(() => {
-    if (this.isCategory()) return [];
-    return this.members();
-  });
-
-  get today(): string {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-
-  readonly StatusOptions: { id: TeamAttendanceStatus; code: string }[] = [
-    { id: 'Present', code: 'P' },
-    { id: 'Late', code: 'L' },
-    { id: 'Absent', code: 'A' },
-  ];
 
   readonly paymentTotal = computed(() =>
     this.paymentSummary().reduce((sum, p) => sum + p.totalAmount, 0),
@@ -165,7 +139,6 @@ export class TeamDetailPage {
     this.churchService.getTeamMembers(churchId, this.teamId, 1, 100).subscribe({
       next: (page) => {
         this.members.set(page.items);
-        this.resetMarkings(page.items);
       },
       error: (err) => {
         this.error.set(problemDetail(err, 'Could not load team members.'));
@@ -175,14 +148,6 @@ export class TeamDetailPage {
     this.churchService.getMembers(churchId, 1, 100).subscribe({
       next: (page) => this.roster.set(page.items),
     });
-
-    this.churchService
-      .getAttendanceSummary(churchId, this.teamId, null, null)
-      .subscribe({
-        next: (report) =>
-          this.report.set(this.isCategory() ? null : report),
-        error: () => this.report.set(null),
-      });
 
     this.churchService.getPaymentSummary(churchId, this.teamId).subscribe({
       next: (summary) => this.paymentSummary.set(summary),
@@ -197,18 +162,8 @@ export class TeamDetailPage {
     this.loading.set(false);
   }
 
-  private resetMarkings(members: TeamMember[]) {
-    const map: Record<number, TeamAttendanceStatus> = {};
-    for (const m of members) map[m.memberId] = 'Present';
-    this.markings.set(map);
-  }
-
   setActive(tab: Tab) {
     this.active.set(tab);
-  }
-
-  onDate(event: Event) {
-    this.attendanceDate.set((event.target as HTMLInputElement).value);
   }
 
   onEditAmount(event: Event) {
@@ -230,14 +185,6 @@ export class TeamDetailPage {
       .toUpperCase();
   }
 
-  mark(memberId: number, status: TeamAttendanceStatus) {
-    this.markings.update((map) => ({ ...map, [memberId]: status }));
-  }
-
-  statusOf(memberId: number): TeamAttendanceStatus {
-    return this.markings()[memberId] ?? 'Present';
-  }
-
   // ---- members -----------------------------------------------------------
 
   addMember() {
@@ -251,7 +198,6 @@ export class TeamDetailPage {
       next: (membership) => {
         this.busy.set(false);
         this.members.update((list) => [...list, membership]);
-        this.markings.update((map) => ({ ...map, [membership.memberId]: 'Present' }));
         this.addMemberForm.reset({ memberId: '' });
         this.notice.set(`${membership.memberName} joined the team.`);
       },
@@ -300,57 +246,11 @@ export class TeamDetailPage {
           this.members.set(
             this.members().filter((m) => m.memberId !== member.memberId),
           );
-          this.markings.update((map) => {
-            const next = { ...map };
-            delete next[member.memberId];
-            return next;
-          });
           this.notice.set(`${member.memberName} was removed from the team.`);
         },
         error: (err) => {
           this.busy.set(false);
           this.error.set(problemDetail(err, 'Could not remove the member.'));
-        },
-      });
-  }
-
-  // ---- attendance --------------------------------------------------------
-
-  saveAttendance() {
-    const churchId = this.churchId();
-    const date = dateOrNull(this.attendanceDate());
-    if (!churchId || !date || this.busy()) return;
-
-    this.busy.set(true);
-    this.error.set('');
-    this.notice.set('');
-    const entries = this.attendable().map((m) => ({
-      memberId: m.memberId,
-      status: this.statusOf(m.memberId),
-      reason: null,
-    }));
-    this.churchService
-      .saveAttendance(churchId, this.teamId, { attendanceDate: date, entries })
-      .subscribe({
-        next: (saved: SaveAttendanceResult) => {
-          this.busy.set(false);
-          this.notice.set(
-            `Marked ${saved.totalMarked} on ${saved.attendanceDate}: ` +
-              `${saved.presentCount} present, ${saved.lateCount} late, ${saved.absentCount} absent.`,
-          );
-          this.attendanceDate.set('');
-          this.churchService
-            .getAttendanceSummary(churchId, this.teamId, null, null)
-            .subscribe({
-              next: (report) => this.report.set(report),
-            });
-        },
-        error: (err: HttpErrorResponse) => {
-          this.busy.set(false);
-          const message = firstFieldError(err);
-          this.error.set(
-            message ?? problemDetail(err, 'Could not save attendance.'),
-          );
         },
       });
   }
@@ -450,13 +350,5 @@ export class TeamDetailPage {
       month: 'long',
       year: 'numeric',
     });
-  }
-
-  rateText(rate: number): string {
-    return `${rate.toFixed(1)}%`;
-  }
-
-  todayText(): string {
-    return this.today;
   }
 }

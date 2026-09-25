@@ -7,37 +7,49 @@
 
 html {
   height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$magenta-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$magenta-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
 
   // Exact brand colors from the EFGBC logo (pink + blue).
   --mat-sys-primary: #f048a8;
   --mat-sys-tertiary: #1878c0;
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
-  height: 100%;
+html.dark {
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$magenta-palette,
+      tertiary: mat.$blue-palette,
+    )
+  ));
 }
-/* You can add global styles to this file, and also import other style files */
+
+/* Let Tailwind control the body background, text color, and fonts (defined in index.html) */
+/* Angular Material components will still use the theme variables defined above */
+
+/* =========================================================================
+   Global Modal & Form Layering Rule
+   Ensures any opened modal/form dialog overlay stays above sticky navbars (z-30)
+   and sidebars (z-40) across all dashboards.
+   ========================================================================= */
+[role="dialog"],
+.modal,
+.cdk-overlay-container,
+.cdk-global-overlay-wrapper {
+  z-index: 1000 !important;
+}
+
+/* Modals that use fixed inset-0 positioning */
+div[class*="fixed"][class*="inset-0"][class*="z-"] {
+  &:not(aside):not(app-backdrop):not([class*="lg:hidden"]) {
+    z-index: 1000 !important;
+  }
+}

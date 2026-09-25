@@ -7,11 +7,9 @@ public class SaveAttendanceValidator : AbstractValidator<SaveAttendanceRequest>
 {
     public SaveAttendanceValidator()
     {
-        RuleFor(x => x.AttendanceDate)
-            .NotNull()
-            .WithMessage("An attendance date is required.")
-            .Must(date => date <= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)))
-            .WithMessage("Attendance cannot be marked for a future date.");
+        RuleFor(x => x.MeetingId)
+            .GreaterThan(0)
+            .WithMessage("A meeting id is required.");
 
         RuleFor(x => x.Entries)
             .NotNull()
